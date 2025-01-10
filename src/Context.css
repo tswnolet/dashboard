@@ -16,14 +16,14 @@
     width: 35%;
     height: 100vh;
     z-index: 1;
-    background-color: white;
+    background-color: var(--secondary-color);
 
     input {
         width: 55%;
         max-width: 350px;
         min-width: 200px;
         height: 40px;
-        border: 1px solid #d3d3d3;
+        border: 1px solid var(--border-color);
         border-radius: 4px;
         margin: 5px 0;
         padding: 0 10px;
@@ -36,8 +36,8 @@
         min-width: 125px;
         height: 30px;
         margin: 5px 0;
-        background-color: black;
-        color: white;
+        background-color: var(--text-color);
+        color: var(--secondary-color);
         border: 0;
         border-radius: 4px;
         text-transform: capitalize;
@@ -46,7 +46,7 @@
 
     .action-btn:hover {
         cursor: pointer;
-        background-color: rgb(221, 221, 221);
+        background-color: var(--hover-color);
         color: black;
     }
 }
@@ -54,23 +54,23 @@
 .change-context {
     width: 55%;
     height: 30px;
-    background-color: white;
-    border: 1px solid black;
-    color: black;
+    background-color: var(--secondary-color);
+    border: 1px solid var(--text-color);
+    color: var(--text-color);
     border-radius: 4px;
     transition: all 0.4s;
 }
 
 .change-context:hover {
     cursor: pointer;
-    background-color: rgb(221, 221, 221);
+    background-color: var(--background-color);
     border: 1px solid transparent;
 }
 
 #context-bg {
     position: relative;
-    background-color: rgb(209, 209, 209);
-    color: rgb(26, 26, 26);
+    background-color: var(--background-color);
+    color: var(--text-color);
 }
 
 h2 {

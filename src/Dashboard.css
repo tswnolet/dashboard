@@ -1,67 +1,68 @@
+/* Dashboard container */
 #dashboard {
     display: flex;
-    justify-content: center;
+    justify-content: start;
     align-items: center;
     flex-direction: column;
-    font-family: Arial, sans-serif;
+    font-family: 'Poppins', Arial, sans-serif;
     padding: 20px;
-    background-color: #f4f4f4;
-    border-radius: 8px;
+    background-color: var(--background-color);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    min-height: 100vh;
+    transition: background-color 0.3s, border 0.3s, color 0.3s;
 }
 
-#dashboard h1 {
-    color: #333;
-    margin-bottom: 20px;
-}
-
-#dashboard table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-}
-
-#dashboard table, #dashboard th, #dashboard td {
-    border: 1px solid #ddd;
-}
-
-#dashboard th, #dashboard td {
-    padding: 12px;
-    text-align: left;
-}
-
-#dashboard th {
-    background-color: white;
-}
-
-#dashboard tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-#dashboard tr:hover {
-    background-color: #f1f1f1;
-}
-
+/* Navigation bar */
 nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    background-color: #333;
-    color: white;
+    height: 65px;
+    background-color: var(--secondary-color);
+    color: var(--text-color);
     padding: 10px 20px;
-    border-radius: 2px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s, border 0.3s, color 0.3s;
 }
 
-.logout {
-    background-color: #ff4b5c;
-    color: white;
+/* Page title */
+#page-title {
+    line-height: 1;
+    margin: 0;
+    transition: color 0.3s;
+}
+
+#nav-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+/* Logout button */
+button {
+    background-color: var(--text-color);
+    color: var(--background-color);
     border: none;
-    padding: 10px 20px;
+    height: 100%;
+    padding: 0 20px;
     border-radius: 5px;
     cursor: pointer;
+    transition: background-color 0.3s, border 0.3s, color 0.3s;
 }
 
+.theme-toggle {
+    margin-right: 10px;
+
+    &:hover {
+        background-color: var(--hover-color);
+    }
+}
+
+/* Logout button hover effect */
 .logout:hover {
     background-color: #ff1f3a;
 }

@@ -13,7 +13,7 @@
 .loading div {
     width: 10px;
     height: 10px;
-    background-color: black;
+    background-color: var(--text-color);
     border-radius: 50%;
     animation: fadeStagger 1.5s infinite ease-in-out;
 }

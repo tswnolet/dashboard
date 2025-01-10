@@ -14,6 +14,7 @@ const Context = ({ setLoggedIn }) => {
   const navigate = useNavigate();
   const isLogin = location.pathname === '/login';
 
+  // Function to handle form submission
   const fetchData = (e) => {
     e.preventDefault();
     fetch(`https://tylernolet.com/api/${isLogin ? 'user' : 'signup'}.php`, {
@@ -25,6 +26,7 @@ const Context = ({ setLoggedIn }) => {
       .then((data) => {
         if (data.success) {
           if (isLogin) {
+            localStorage.setItem('token', data.token);
             setClose(true);
             setTimeout(() => {
               setLoggedIn(true);
@@ -43,6 +45,7 @@ const Context = ({ setLoggedIn }) => {
       });
   };
 
+  // Function to handle form input changes
   const formUpdate = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
