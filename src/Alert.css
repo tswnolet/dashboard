@@ -1,0 +1,36 @@
+.alert {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 15px;
+  border-radius: 5px;
+  color: white;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  z-index: 1001;
+  user-select: none;
+}
+
+.alert.fade-in {
+  opacity: 1;
+}
+
+.alert.fade-out {
+  opacity: 0;
+}
+
+.alert.success {
+  background-color: #4caf50;
+}
+
+.alert.error {
+  background-color: #f44336;
+}
+
+.alert.info {
+  background-color: #2196f3;
+}
+
+.alert.warning {
+  background-color: #ff9800;
+}

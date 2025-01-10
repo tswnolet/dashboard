@@ -1,0 +1,44 @@
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    gap: 10px;
+    height: 20px;
+    width: 100%;
+}
+
+.loading div {
+    width: 10px;
+    height: 10px;
+    background-color: black;
+    border-radius: 50%;
+    animation: fadeStagger 1.5s infinite ease-in-out;
+}
+
+.loading div:nth-child(1) {
+    animation-delay: 0s;
+}
+.loading div:nth-child(2) {
+    animation-delay: 0.3s;
+}
+.loading div:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+@keyframes fadeStagger {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
