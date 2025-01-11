@@ -16,7 +16,7 @@
     width: 35%;
     height: 100vh;
     z-index: 1;
-    background-color: var(--secondary-color);
+    background-color: var(--background-color);
 
     input {
         width: 55%;
@@ -55,7 +55,7 @@
     width: 55%;
     height: 30px;
     background-color: var(--secondary-color);
-    border: 1px solid var(--text-color);
+    border: 1px solid var(--border-color);
     color: var(--text-color);
     border-radius: 4px;
     transition: all 0.4s;
@@ -70,7 +70,7 @@
 #context-bg {
     position: relative;
     background-color: var(--background-color);
-    color: var(--text-color);
+    color: #333;
 }
 
 h2 {
