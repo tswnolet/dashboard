@@ -52,7 +52,7 @@ const App = () => {
   }
 
   return (
-    <Router>
+    <Router basename="/repo">
       <div className={`app`}>
         <AppRoutes loggedIn={loggedIn} setLoggedIn={setLoggedIn} changeTheme={changeTheme} theme={theme} />
       </div>
