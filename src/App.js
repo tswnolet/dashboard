@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import Loading from './modules/Loading';
 import Dashboard from './modules/Dashboard';
 import Context from './modules/Context';
+import Settings from './modules/Settings';
+import Nav from './modules/Nav';
 import { getCookie, setCookie } from './utils/cookies';
 import './styles/Cookies.css';
 import './styles/Theme.css';
@@ -47,26 +49,46 @@ const App = () => {
     }
   };
 
+  const logout = async () => {
+    if (process.env.NODE_ENV === 'development') {
+        return;
+    }
+    await fetch('https://tylernolet.com/api/session.php?close', { method: 'GET' });
+    setLoggedIn(false);
+    window.location.href = '/login';
+  };
+
   if (loading) {
     return <Loading />;
   }
 
   return (
-    <Router basename="/repo">
-      <div className={`app`}>
+    <Router>
+        <ConditionalNav changeTheme={changeTheme} theme={theme} logout={logout} />
         <AppRoutes loggedIn={loggedIn} setLoggedIn={setLoggedIn} changeTheme={changeTheme} theme={theme} />
-      </div>
     </Router>
   );
 }
 
-// Component to handle application routes
+const ConditionalNav = ({ changeTheme, theme, logout }) => {
+  const location = useLocation();
+  const pathName = location.pathname.substring(1);
+  const title = pathName.charAt(0).toUpperCase() + pathName.slice(1);
+
+  if (pathName === 'login' || pathName === 'signup') {
+    return null;
+  }
+
+  return <Nav title={title || 'Dashboard'} changeTheme={changeTheme} theme={theme} logout={logout} />;
+};
+
 const AppRoutes = ({ loggedIn, setLoggedIn, changeTheme, theme }) => {
   return (
     <Routes>
       {loggedIn ? (
         <>
           <Route path="/dashboard" element={<Dashboard setLoggedIn={setLoggedIn} changeTheme={changeTheme} theme={theme} />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/dashboard" />} />
         </>
       ) : (

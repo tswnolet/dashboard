@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import '../styles/Cookies.css';
 import { allCookies, eraseCookie, getCookie, setCookie } from '../utils/cookies';
+import BackSvg from './BackSvg';
 
 const CookieSvg = () => (
   <svg viewBox="0 0 122.88 122.25" y="0px" x="0px" id="cookieSvg" version="1.1">
@@ -18,16 +19,7 @@ const CloseSvg = ({ onClick }) => (
   </div>
 );
 
-const BackSvg = ({ onClick }) => (
-  <div id='backSvg'>
-    <svg id="fi_3114883" height="512" viewBox="0 0 24 24" width="512" xmlns="http://www.w3.org/2000/svg" dataName="Layer 2" onClick={onClick}>
-      <path d="m22 11h-17.586l5.293-5.293a1 1 0 1 0 -1.414-1.414l-7 7a1 1 0 0 0 0 1.414l7 7a1 1 0 0 0 1.414-1.414l-5.293-5.293h17.586a1 1 0 0 0 0-2z"></path>
-    </svg>
-  </div>
-);
-
 export default function Cookies() {
-  eraseCookie('cookie-acceptance');
   const [cookieAcceptance, setCookieAcceptance] = useState(getCookie('cookie-acceptance'));
   const [readPolicy, setReadPolicy] = useState(false);
 
@@ -47,7 +39,7 @@ export default function Cookies() {
 
   return (
     (cookieAcceptance === null || cookieAcceptance === '') && (
-      <div id='cookies'>
+      <div id='cookies' className={readPolicy ? 'expanded' : ''}>
         {!readPolicy ? (
           <>
             <CookieSvg />
@@ -64,15 +56,21 @@ export default function Cookies() {
           </>
         ) : (
           <>
-            <BackSvg onClick={() => setReadPolicy(false)} />
-            <h1 className='cookieHeader'>Cookies List</h1>
-            <ul className='cookieDescription'>
-              {allCookies().map((cookie, index) => (
-                <li key={index}>{cookie.name}: {cookie.value} (Expires: {cookie.expires})</li>
-              ))}
-            </ul>
+            <BackSvg cookie={true} onClick={() => setReadPolicy(false)}/>
+            <h1 className='cookieHeader'>Cookies Policy</h1>
             <p className='cookiePolicy'>
-              Our cookie policy explains what cookies are, how we use cookies, how third-parties we may partner with may use cookies on the service, your choices regarding cookies, and further information about cookies.
+              Our website uses cookies to improve your experience. Cookies are small text files that are placed on your device to help the site provide a better user experience. In general, cookies are used to retain user preferences, store information for things like shopping carts, and provide anonymized tracking data to third-party applications like Google Analytics. As a rule, cookies will make your browsing experience better. However, you may prefer to disable cookies on this site and on others. The most effective way to do this is to disable cookies in your browser. We suggest consulting the Help section of your browser or taking a look at the <a href="https://www.aboutcookies.org">About Cookies website</a> which offers guidance for all modern browsers.
+            </p>
+            <div className='cookiePolicy'>
+              <strong>Types of Cookies We Use:</strong>
+              <ul>
+                <li><strong>Essential Cookies:</strong> These cookies are necessary for the website to function and cannot be switched off in our systems. They are usually only set in response to actions made by you which amount to a request for services, such as setting your privacy preferences, logging in, or filling in forms.</li>
+                <li><strong>Performance Cookies:</strong> These cookies allow us to count visits and traffic sources so we can measure and improve the performance of our site. They help us to know which pages are the most and least popular and see how visitors move around the site.</li>
+                <li><strong>Functional Cookies:</strong> These cookies enable the website to provide enhanced functionality and personalization. They may be set by us or by third-party providers whose services we have added to our pages.</li>
+              </ul>
+            </div>
+            <p className='cookiePolicy'>
+              By using our website, you agree to the use of cookies as described in this policy. If you have any questions about our use of cookies, please contact us at support@example.com.
             </p>
           </>
         )}

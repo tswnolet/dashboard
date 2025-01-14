@@ -2,8 +2,8 @@
 .switch {
   display: block;
   position: relative;
-  width: var(--width-of-button);
-  height: var(--height-of-button);
+  width: 3.5em;
+  height: 32px;
 }
 
 .switch input {
@@ -40,11 +40,11 @@
 }
 
 input:checked + .slider {
-  background-color: var(--card-color);
+  background-color: var(--background-color);
 }
 
 input:checked + .slider:before {
   left: calc(100% - (var(--size-of-icon,1.4em) + var(--slider-offset,0.3em)));
-  background: var(--card-color);
+  background: var(--background-color);
   box-shadow: inset -3px -2px 5px -2px #8983f7, inset -10px -4px 0 0 #a3dafb;
 }

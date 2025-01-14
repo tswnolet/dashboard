@@ -71,7 +71,7 @@ const Context = ({ setLoggedIn }) => {
           <div></div>
           <div></div>
         </div>
-        <h2>Your data. All in. All the time.</h2>
+        <h2>Your data. All in. <span style={{ fontWeight: "900" }}>All the time.</span></h2>
       </div>
     </div>
   );

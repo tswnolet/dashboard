@@ -5,7 +5,7 @@ import Loading from './Loading';
 import Card from './Card';
 import Cookies from '../components/Cookies';
 
-const Dashboard = ({ setLoggedIn, changeTheme, theme }) => {
+const Dashboard = ({ setLoggedIn, changeTheme, theme, logout }) => {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [startDate, setStartDate] = useState('');
@@ -55,15 +55,6 @@ const Dashboard = ({ setLoggedIn, changeTheme, theme }) => {
         checkSession();
     }, [setLoggedIn]);
 
-    const logout = async () => {
-        if (process.env.NODE_ENV === 'development') {
-            return;
-        }
-        await fetch('https://tylernolet.com/api/session.php?close', { method: 'GET' });
-        setLoggedIn(false);
-        window.location.href = '/login';
-    };
-
     const handleFilter = (showAll = false) => {
         if (showAll) {
             // Fetch all data without filtering
@@ -85,19 +76,7 @@ const Dashboard = ({ setLoggedIn, changeTheme, theme }) => {
     }
 
     return (
-        <div id='dashboard'>
-            <Nav
-                user={user}
-                logout={logout}
-                title="Dashboard"
-                changeTheme={changeTheme}
-                theme={theme}
-                startDate={startDate}
-                endDate={endDate}
-                setStartDate={setStartDate}
-                setEndDate={setEndDate}
-                handleFilter={handleFilter}
-            />
+        <div id='dashboard' className='page-container'>
             <Cookies />
             <div className="cards">
                 {Array.isArray(data) && data.map((data) => (

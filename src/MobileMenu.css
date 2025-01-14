@@ -1,0 +1,56 @@
+input[type="checkbox"] {
+  -webkit-appearance: none;
+  display: none;
+  visibility: hidden;
+}
+
+.bar {
+  display: block;
+  position: relative;
+  cursor: pointer;
+  width: 50px;
+  height: 40px;
+}
+
+.bar span {
+  position: absolute;
+  width: 45px;
+  height: 7px;
+  background: #495057;
+  border-radius: 100px;
+  display: inline-block;
+  transition: 0.3s ease;
+  left: 0;
+}
+
+.bar span.top {
+  top: 0;
+}
+
+.bar span.middle {
+  top: 17px;
+}
+
+.bar span.bottom {
+  bottom: 0;
+}
+
+.bar.open .top {
+  transform: rotate(45deg);
+  transform-origin: center;
+  width: 45px;
+  left: 0;
+}
+
+.bar.open .middle {
+  transform: scale(0);
+  opacity: 0;
+}
+
+.bar.open .bottom {
+  transform: rotate(-45deg);
+  transform-origin: center;
+  width: 45px;
+  left: 0;
+  bottom: 0;
+}

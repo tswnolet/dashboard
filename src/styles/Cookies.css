@@ -1,10 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300&display=swap');
-
 * {
   box-sizing: border-box;
 }
+
 #cookies {
   display: flex;
   justify-content: center;
@@ -22,21 +19,33 @@
   padding: 20px 30px;
   gap: 13px;
   z-index: 1001;
+  transition: width 0.3s, height 0.3s;
 }
 
-#cookieSvg, #closeSvg, #backSvg {
+#cookies.expanded {
+  width: 50%;
+  height: 50%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+#cookieSvg, .backSvg {
   fill: var(--svg-fill);
   width: 32px;
   height: 32px;
+  left: 0;
 }
 
-#closeSvg, #backSvg {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+#cookieBackSvg {
   position: absolute;
   top: 10px;
   left: 10px;
+}
+
+#closeSvg, .backSvg {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   border-radius: 5px;
 
   svg {
@@ -45,9 +54,9 @@
   }
 }
 
-#closeSvg:hover, #backSvg:hover {
+#closeSvg:hover, .backSvg:hover {
   cursor: pointer;
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(var(--dark), var(--dark), var(--dark), 0.1);
 }
 
 h1 {
@@ -92,13 +101,6 @@ h1 {
   flex-direction: row;
 }
 
-button {
-  width: auto;
-  height: auto;
-  min-width: var(--width-of-button);
-  min-height: var(--height-of-button);
-}
-
 .acceptButton, .declineButton {
   width: 90px;
   height: 30px;
@@ -137,18 +139,5 @@ button {
   #cookies {
     width: 90%;
     padding: 15px 20px;
-  }
-
-  h1 {
-    font-size: 1em;
-  }
-
-  .cookieDescription, .cookiePolicy {
-    font-size: 0.6em;
-  }
-
-  .acceptButton, .declineButton {
-    width: 70px;
-    height: 25px;
   }
 }

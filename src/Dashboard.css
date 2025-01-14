@@ -4,9 +4,6 @@
     justify-content: start;
     align-items: center;
     flex-direction: column;
-    font-family: 'Poppins', Arial, sans-serif;
-    padding: 100px 20px 20px;
-    background-color: var(--background-color);
     min-height: 100vh;
     transition: background-color 0.3s, border 0.3s, color 0.3s;
 }
@@ -30,9 +27,16 @@ nav {
 }
 
 #page-title {
-    line-height: 1;
-    margin: 0;
-    transition: color 0.3s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+
+    h3 {
+        line-height: 1;
+        margin: 0;
+        transition: color 0.3s;
+    }
 }
 
 #nav-logo {
@@ -63,19 +67,6 @@ nav {
 
 #nav-actions input[type="date"]::placeholder {
   color: var(--placeholder-color);
-}
-
-button {
-    background-color: var(--text-color);
-    color: var(--secondary-color);
-    font-weight: 600;
-    border: none;
-    height: auto;
-    width: auto;
-    padding: 0 20px;
-    border-radius: 30px;
-    cursor: pointer;
-    transition: background-color 0.3s, border 0.3s, color 0.3s;
 }
 
 .cards {
@@ -111,7 +102,6 @@ button {
 }
 
 .account-greeting {
-    margin: 0;
     padding: 0;
 }
 
@@ -128,20 +118,33 @@ button {
     background-color: #ff1f3a;
 }
 
+button {
+    background-color: var(--text-color);
+    color: var(--secondary-color);
+    font-weight: 600;
+    border: none;
+    height: 32px;
+    padding: 8px;
+    min-width: 68px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s, border 0.3s, color 0.3s;
+}
+
 @media (min-width: 1025px) {
     nav {
         height: auto;
         padding: 10px;
     }
 
-    button {
-        width: 100%;
-        padding: 10px;
-    }
-
     .cards {
         display: grid;
         gap: 10px;
+    }
+
+    .account-dropdown {
+        width: 200%;
+        right: 0;
     }
 }
 
@@ -161,11 +164,6 @@ button {
     #nav-actions {
         flex-direction: column;
         gap: 10px;
-    }
-
-    button {
-        width: 100%;
-        padding: 10px;
     }
 
     .account-dropdown {
