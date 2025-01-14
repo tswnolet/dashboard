@@ -4,6 +4,8 @@ import Loading from './modules/Loading';
 import Dashboard from './modules/Dashboard';
 import Context from './modules/Context';
 import { getCookie, setCookie } from './utils/cookies';
+import './styles/Cookies.css';
+import './styles/Theme.css';
 
 const App = () => {
   const [loading, setLoading] = useState(true);
@@ -15,25 +17,14 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    if (theme === 'light') {
-      document.documentElement.style.setProperty('--background-color', '#f4f4f4');
-      document.documentElement.style.setProperty('--secondary-color', '#ffffff');
-      document.documentElement.style.setProperty('--text-color', '#333');
-      document.documentElement.style.setProperty('--border-color', '#ddd');
-    } else {
-      document.documentElement.style.setProperty('--background-color', '#212121');
-      document.documentElement.style.setProperty('--secondary-color', '#333');
-      document.documentElement.style.setProperty('--text-color', 'white');
-      document.documentElement.style.setProperty('--border-color', '#444444');
-    }
+    document.documentElement.className = theme;
     setCookie('theme', theme, 365);
   }, [theme]);
 
   const changeTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
-  }
+    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+  };
 
-  // Function to check if the user is logged in
   const checkUserLoggedIn = async () => {
     if (process.env.NODE_ENV === 'development') {
       setLoggedIn(true);
@@ -62,7 +53,7 @@ const App = () => {
 
   return (
     <Router>
-      <div className={`app ${theme}`}>
+      <div className={`app`}>
         <AppRoutes loggedIn={loggedIn} setLoggedIn={setLoggedIn} changeTheme={changeTheme} theme={theme} />
       </div>
     </Router>

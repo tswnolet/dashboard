@@ -1,0 +1,154 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+#cookies {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position: fixed;
+  bottom: 25px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  height: 220px;
+  width: 320px;
+  background-color: var(--card-color);
+  box-shadow: var(--large-box-shadow);
+  border-radius: 15px;
+  padding: 20px 30px;
+  gap: 13px;
+  z-index: 1001;
+}
+
+#cookieSvg, #closeSvg, #backSvg {
+  fill: var(--svg-fill);
+  width: 32px;
+  height: 32px;
+}
+
+#closeSvg, #backSvg {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  border-radius: 5px;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+#closeSvg:hover, #backSvg:hover {
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  font-size: 1.2em;
+  font-weight: 800;
+  color: var(--text-color);
+  margin: 0;
+}
+
+.cookieDescription {
+  color: var(--subtext-color);
+}
+
+.cookiePolicy {
+  color: var(--text-color);
+}
+
+.cookieDescription, .cookiePolicy {
+  margin: 0;
+  text-align: center;
+  font-size: 0.8em;
+  font-weight: 600;
+  margin: 0;
+  list-style: none;
+  padding: 0;
+}
+
+.cookieDescription a {
+  --tw-text-opacity: 1;
+  color: rgb(59 130 246);
+}
+
+.cookieDescription a:hover {
+  -webkit-text-decoration-line: underline;
+  text-decoration-line: underline;
+  cursor: pointer;
+}
+
+.buttonContainer {
+  display: flex;
+  gap: 10px;
+  flex-direction: row;
+}
+
+button {
+  width: auto;
+  height: auto;
+  min-width: var(--width-of-button);
+  min-height: var(--height-of-button);
+}
+
+.acceptButton, .declineButton {
+  width: 90px;
+  height: 30px;
+  transition-duration: .2s;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  border-radius: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all .6s ease;
+}
+
+.acceptButton {
+  background-color: #7b57ff;
+  color: rgb(241, 241, 241);
+}
+
+.declineButton {
+  background-color: #dadada;
+  color: rgb(46, 46, 46);
+  text-align: center;
+}
+
+.declineButton:hover {
+  background-color: #ebebeb;
+  box-shadow: 0 10px 15px -3px #4a4a4a, 0 4px 6px -2px #6262622c;
+  transition-duration: .2s;
+}
+
+.acceptButton:hover {
+  background-color: #9173ff;
+  box-shadow: 0 10px 15px -3px #4a4a4a, 0 4px 6px -2px #6262622c;
+}
+
+@media (max-width: 768px) {
+  #cookies {
+    width: 90%;
+    padding: 15px 20px;
+  }
+
+  h1 {
+    font-size: 1em;
+  }
+
+  .cookieDescription, .cookiePolicy {
+    font-size: 0.6em;
+  }
+
+  .acceptButton, .declineButton {
+    width: 70px;
+    height: 25px;
+  }
+}

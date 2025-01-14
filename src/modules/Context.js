@@ -71,7 +71,7 @@ const Context = ({ setLoggedIn }) => {
           <div></div>
           <div></div>
         </div>
-        <h2>A new approach to your data.</h2>
+        <h2>Your data. All in. All the time.</h2>
       </div>
     </div>
   );

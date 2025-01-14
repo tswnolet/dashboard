@@ -21,9 +21,18 @@ function getCookie(name) {
     return null;
 }
 
+// Get all cookies
+function allCookies() {
+    const cookies = document.cookie.split(';');
+    return cookies.map(cookie => {
+        const [name, ...rest] = cookie.split('=');
+        return { name: name.trim(), value: rest.join('=').trim(), expires: document.cookie.match(/expires=([^;]+)/)?.[1] || 'Session' };
+    });
+}
+
 // Erase a cookie
 function eraseCookie(name) {
     document.cookie = name + '=; Max-Age=-99999999;';
 }
 
-export { setCookie, getCookie, eraseCookie };
+export { setCookie, getCookie, eraseCookie, allCookies };

@@ -2,21 +2,45 @@
 
 * {
   box-sizing: border-box;
+  font-family: 'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  sans-serif;
 }
 
 :root {
-  --background-color: #f4f4f4;
-  --secondary-color: white;
+  --background-color: #eceff1;
+  --secondary-color: #fff;
+  --card-color: #F7F8F9;
   --text-color: #333;
+  --subtext-color: rgb(99, 99, 99);
+  --svg-fill: rgb(81, 81, 97);
   --border-color: #ddd;
+  --button-box-shadow: 0 0 10px 10px rgba(0, 0, 0, 0.1);
+  --large-box-shadow: 0 0 50px 25px rgba(0, 0, 0, 0.1);
   --hover-color: #8b8b8b;
+  --context-color: white;
+  --width-of-button: 3.5em;
+  --height-of-button: 32px;
+  --size-of-icon: 1.4em;
+  --slider-offset: 0.3em;
+}
+
+.dark {
+  --background-color: #101214;
+  --secondary-color: #1d2125;
+  --card-color: #2c343b;
+  --text-color: #F7F8F9;
+  --subtext-color: #C7D1DB;
+  --svg-fill: #cccccc;
+  --border-color: #181818;
+  --button-box-shadow: 0 0 10px 10px rgba(255, 255, 255, 0.05);
+  --large-box-shadow: 0 0 25px rgba(255, 255, 255, 0.05);
+  --hover-color: #8b8b8b;
+  --context-color: rgb(0, 0, 0);
 }
 
 body {
   margin: 0;
-  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -28,4 +52,15 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+
+  button {
+    width: 100%;
+    padding: 10px;
+  }
 }

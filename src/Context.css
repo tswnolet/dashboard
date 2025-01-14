@@ -16,7 +16,7 @@
     width: 35%;
     height: 100vh;
     z-index: 1;
-    background-color: var(--background-color);
+    background-color: var(--context-color);
 
     input {
         width: 55%;
@@ -32,9 +32,9 @@
 
     .action-btn {
         width: 55%;
-        max-width: 350px;
-        min-width: 125px;
-        height: 30px;
+        height: auto;
+        min-width: var(--width-of-button);
+        min-height: var(--height-of-button);
         margin: 5px 0;
         background-color: var(--text-color);
         color: var(--secondary-color);
