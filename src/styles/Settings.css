@@ -4,6 +4,7 @@
     align-items: center;
     justify-content: center;
     position: relative;
+
 }
 
 #settings h1 {
@@ -13,25 +14,25 @@
     margin-bottom: 20px;
 }
 
-.cookies-section, .account-section {
+.section, .account-section {
     width: 100%;
-    max-width: 600px;
+    max-width: 450px;
     margin-bottom: 20px;
 }
 
-.cookies-section h2, .account-section h2 {
+.section h2, .account-section h2 {
     font-size: 1.2em;
     font-weight: 700;
     color: var(--text-color);
     margin-bottom: 10px;
 }
 
-.cookies-section ul {
+.section ul {
     list-style: none;
     padding: 0;
 }
 
-.cookies-section li {
+.section li {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -39,17 +40,18 @@
     border-bottom: 1px solid var(--border-color);
 }
 
-.cookies-section button {
-    background-color: #ff4d4d;
-    color: white;
+.section button {
+    background-color: var(--text-color);
+    color: var(--background-color);
     border: none;
     padding: 5px 10px;
-    border-radius: 5px;
+    border-radius: 30px;
     cursor: pointer;
+    width: 50px;
 }
 
-.cookies-section button:hover {
-    background-color: #ff1f1f;
+.section button:hover {
+    background-color: var(--hover-color);
 }
 
 .account-section label {
@@ -59,7 +61,6 @@
 }
 
 .account-section input {
-    width: 100%;
     padding: 10px;
     margin-top: 5px;
     margin-bottom: 15px;

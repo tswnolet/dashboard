@@ -1,17 +1,22 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Logo from '../resources/logo.png';
 import BackSvg from '../components/BackSvg';
 import MobileMenu from "./MobileMenu";
+import '../styles/Nav.css';
 
-export default function Nav({ user, logout, title, theme, changeTheme, startDate, setStartDate, endDate, setEndDate, handleFilter }) {
+const Nav = ({ user, logout, title, theme, changeTheme, data, setData, setFilteredData }) => {
   const [isChecked, setIsChecked] = useState(theme === 'dark');
   const [showDateInputs, setShowDateInputs] = useState(false);
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [scrolled, setScrolled] = useState(false);
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     setIsChecked(theme === 'dark');
@@ -46,6 +51,41 @@ export default function Nav({ user, logout, title, theme, changeTheme, startDate
     };
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const nav = document.querySelector('nav');
+      if (window.scrollY > 0) {
+        if(window.innerWidth > 1024) {
+          nav.classList.add('scrolled');
+        }
+        setScrolled(true);
+      } else {
+        nav.classList.remove('scrolled');
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  const handleFilter = (showAll = false) => {
+    if (showAll) {
+      setFilteredData(data);
+    } else {
+      const filteredData = data.filter(item => {
+          const itemStartDate = new Date(item.startDate);
+          const itemEndDate = new Date(item.endDate);
+          const filterStartDate = new Date(startDate);
+          const filterEndDate = new Date(endDate);
+          return itemStartDate >= filterStartDate && itemEndDate <= filterEndDate;
+      });
+      setFilteredData(filteredData);
+    }
+  };
+
   const handleFilterClick = () => {
     if (!startDate && !endDate) {
       handleFilter(true);
@@ -55,28 +95,27 @@ export default function Nav({ user, logout, title, theme, changeTheme, startDate
     setShowDateInputs(false);
   };
 
-  const handleAccountClick = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
+  const handleAccountClick = (e) => {
     setShowAccountDropdown(prev => !prev);
   };
 
   return (
-    <nav>
-      {isMobile ? (
-        <MobileMenu />
-      ) : (
-        <>
-          <div id='page-title'>
-            {title !== 'Dashboard' && <BackSvg onClick={() => navigate(-1)} />}
-            <h3 id='page-title'>{title}</h3>
-          </div>
-          <img src={Logo} alt="logo" id='nav-logo' style={{filter: theme === 'dark' ? 'brightness(1000%)' : 'brightness(0%)'}}/>
+    <>
+      <div id="scrolled" style={{opacity: scrolled ? "1" : "0"}}></div>
+      <nav>
+      <div id='page-title'>
+        {title !== 'Dashboard' && <BackSvg onClick={() => navigate(-1)} />}
+        <h3 class='page-title'>{title}</h3>
+      </div>
+      <img src={Logo} alt="logo" id='nav-logo' style={{filter: theme === 'dark' ? 'brightness(1000%)' : 'brightness(0%)'}}/>
+        {isMobile ? (
+          <MobileMenu />
+        ) : (
           <div id='nav-actions'>
             {showDateInputs && (
               <>
-                <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-                <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                <input type="date" className="date-input" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                <input type="date" className="date-input" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
               </>
             )}
             <button onClick={() => {
@@ -86,10 +125,25 @@ export default function Nav({ user, logout, title, theme, changeTheme, startDate
             >
               Filter
             </button>
+            <button onClick={() => {
+                navigate('/new-data')
+              }}
+              disabled={location.pathname === '/new-data'}
+            >
+              New Data
+            </button>
             <button ref={buttonRef} className="account" onClick={handleAccountClick}>Account</button>
             <div ref={dropdownRef} className={`account-dropdown ${showAccountDropdown ? 'visible' : 'hidden'}`} onClick={(e) => e.stopPropagation()}>
               <h4 style={{ color: 'var(--text-color'}} className='account-greeting'>Welcome back, {user || 'Tyler'}!</h4>
-              <button onClick={() => navigate('/settings')} className="settings">Settings</button>
+              <button onClick={() => {
+                  navigate('/settings');
+                  handleAccountClick();
+                }}
+                disabled={location.pathname === '/settings'}
+                className="settings"
+              >
+                Settings
+              </button>
               <button onClick={logout} className="logout">Logout</button>
               <label className="switch">
                 <input 
@@ -101,8 +155,10 @@ export default function Nav({ user, logout, title, theme, changeTheme, startDate
               </label>
             </div>
           </div>
-        </>
-      )}
-    </nav>
+        )}
+      </nav>
+    </>
   );
 }
+
+export default Nav;

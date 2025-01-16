@@ -5,14 +5,18 @@ import Dashboard from './modules/Dashboard';
 import Context from './modules/Context';
 import Settings from './modules/Settings';
 import Nav from './modules/Nav';
+import NewCardForm from './modules/NewCardForm';
 import { getCookie, setCookie } from './utils/cookies';
 import './styles/Cookies.css';
 import './styles/Theme.css';
+import './styles/NewCardForm.css';
 
 const App = () => {
   const [loading, setLoading] = useState(true);
   const [loggedIn, setLoggedIn] = useState(false);
   const [theme, setTheme] = useState(getCookie('theme') || 'light');
+  const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
 
   useEffect(() => {
     checkUserLoggedIn();
@@ -22,6 +26,10 @@ const App = () => {
     document.documentElement.className = theme;
     setCookie('theme', theme, 365);
   }, [theme]);
+
+  useEffect(() => {
+    setFilteredData(data);
+  }, [data]);
 
   const changeTheme = () => {
     setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
@@ -58,37 +66,51 @@ const App = () => {
     window.location.href = '/login';
   };
 
+  const addCard = (newCard) => {
+    setData([...data, newCard]);
+  };
+
   if (loading) {
     return <Loading />;
   }
 
   return (
     <Router>
-        <ConditionalNav changeTheme={changeTheme} theme={theme} logout={logout} />
-        <AppRoutes loggedIn={loggedIn} setLoggedIn={setLoggedIn} changeTheme={changeTheme} theme={theme} />
+        <ConditionalNav changeTheme={changeTheme} theme={theme} logout={logout} data={data} setData={setData} setFilteredData={setFilteredData} />
+        <AppRoutes loggedIn={loggedIn} setLoggedIn={setLoggedIn} changeTheme={changeTheme} theme={theme} data={filteredData} setData={setData} addCard={addCard} logout={logout} setFilteredData={setFilteredData} />
     </Router>
   );
 }
 
-const ConditionalNav = ({ changeTheme, theme, logout }) => {
+const ConditionalNav = ({ changeTheme, theme, logout, data, setData, setFilteredData }) => {
   const location = useLocation();
   const pathName = location.pathname.substring(1);
-  const title = pathName.charAt(0).toUpperCase() + pathName.slice(1);
+
+  const formatTitle = (path) => {
+    return path
+      .replace(/[-_]/g, ' ')
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
+  const title = formatTitle(pathName);
 
   if (pathName === 'login' || pathName === 'signup') {
     return null;
   }
 
-  return <Nav title={title || 'Dashboard'} changeTheme={changeTheme} theme={theme} logout={logout} />;
+  return <Nav title={title || 'Dashboard'} changeTheme={changeTheme} theme={theme} logout={logout} data={data} setData={setData} setFilteredData={setFilteredData} />;
 };
 
-const AppRoutes = ({ loggedIn, setLoggedIn, changeTheme, theme }) => {
+const AppRoutes = ({ loggedIn, setLoggedIn, changeTheme, theme, data, setData, addCard, logout, setFilteredData }) => {
   return (
     <Routes>
       {loggedIn ? (
         <>
-          <Route path="/dashboard" element={<Dashboard setLoggedIn={setLoggedIn} changeTheme={changeTheme} theme={theme} />} />
-          <Route path="/settings" element={<Settings />} />
+          <Route path="/dashboard" element={<Dashboard setLoggedIn={setLoggedIn} changeTheme={changeTheme} theme={theme} data={data} setData={setData} />} />
+          <Route path="/settings" element={<Settings changeTheme={changeTheme} theme={theme} logout={logout} data={data} setData={setData} setFilteredData={setFilteredData} />} />
+          <Route path="/new-data" element={<NewCardForm addCard={addCard} changeTheme={changeTheme} theme={theme} logout={logout} data={data} setData={setData} setFilteredData={setFilteredData} />} />
           <Route path="*" element={<Navigate to="/dashboard" />} />
         </>
       ) : (

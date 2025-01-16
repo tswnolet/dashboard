@@ -21,6 +21,7 @@
   --context-color: white;
   --size-of-icon: 1.4em;
   --slider-offset: 0.3em;
+  --disabled-color: #ccc;
   --dark: 0;
 }
 
@@ -31,15 +32,17 @@
   --text-color: #F7F8F9;
   --subtext-color: #C7D1DB;
   --svg-fill: #cccccc;
-  --border-color: #181818;
+  --border-color: #333;
   --button-box-shadow: 0 0 10px 10px rgba(255, 255, 255, 0.05);
   --large-box-shadow: 0 0 25px rgba(255, 255, 255, 0.05);
   --hover-color: #8b8b8b;
   --context-color: rgb(0, 0, 0);
+  --disabled-color: #555;
   --dark: 255;
 }
 
 body {
+  width: 100%;
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -59,19 +62,18 @@ code {
   color: var(--text-color);
   gap: 15px;
   width: 100%;
+}
 
-  > div {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    background-color: var(--card-color);
-    border: 1px solid var(--border-color);
-    box-shadow: var(--button-box-shadow);
-    border-radius: 8px;
-    padding: 20px;
-    min-width: 80%;
-  }
+#settings > div, .section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background-color: var(--secondary-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 20px;
+  max-width: 450px;
 }
 
 #settings h1 {
@@ -108,8 +110,8 @@ code {
   font-weight: bold;
 }
 
-#settings input {
-  width: 450px;
+input {
+  width: 250px;
   padding: 10px;
   margin: 0;
   border: 1px solid var(--border-color);
@@ -118,22 +120,23 @@ code {
   color: var(--text-color);
 }
 
-#settings button {
-  padding: 8px;
-  background-color: var(--text-color);
-  color: var(--context-color);
-  border: none;
-  border-radius: 30px;
-  cursor: pointer;
-}
-
-#settings button:hover {
+button:hover {
   background-color: var(--hover-color);
   box-shadow: var(--large-box-shadow);
 }
 
 .page-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
   padding: 100px 20px 20px;
+
+  > form > input, form > button {
+    width: 55%;
+    max-width: 150px;
+    min-width: 100px;
+  }
 }
 
 @media (max-width: 768px) {

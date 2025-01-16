@@ -5,12 +5,8 @@ import Loading from './Loading';
 import Card from './Card';
 import Cookies from '../components/Cookies';
 
-const Dashboard = ({ setLoggedIn, changeTheme, theme, logout }) => {
-    const [data, setData] = useState([]);
+const Dashboard = ({ setLoggedIn, data, setData }) => {
     const [loading, setLoading] = useState(true);
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
-    const [user, setUser] = useState('Tyler');
 
     useEffect(() => {
         const checkSession = async () => {
@@ -53,22 +49,10 @@ const Dashboard = ({ setLoggedIn, changeTheme, theme, logout }) => {
             setLoading(false);
         };
         checkSession();
-    }, [setLoggedIn]);
+    }, [setLoggedIn, setData]);
 
-    const handleFilter = (showAll = false) => {
-        if (showAll) {
-            // Fetch all data without filtering
-            setData(data);
-        } else {
-            const filteredData = data.filter(item => {
-                const itemStartDate = new Date(item.startDate);
-                const itemEndDate = new Date(item.endDate);
-                const filterStartDate = new Date(startDate);
-                const filterEndDate = new Date(endDate);
-                return itemStartDate >= filterStartDate && itemEndDate <= filterEndDate;
-            });
-            setData(filteredData);
-        }
+    const addCard = (newCard) => {
+        setData([...data, newCard]);
     };
 
     if (loading) {

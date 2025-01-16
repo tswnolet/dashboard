@@ -75,7 +75,7 @@ const Settings = () => {
 
   return (
     <div id='settings' className='page-container'>
-      <div className="cookies-section">
+      <div className="section">
         <h2>Manage Cookies</h2>
         <ul>
           {cookies.map((cookie, index) => (
