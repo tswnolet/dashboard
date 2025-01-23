@@ -1,7 +1,3 @@
-* {
-  box-sizing: border-box;
-}
-
 #cookies {
   display: flex;
   justify-content: center;

@@ -7,7 +7,7 @@ import '../Context.css';
 import '../index.css';
 
 const Context = ({ setLoggedIn }) => {
-  const [formData, setFormData] = useState({ user: '', password: '', confirm_password: '' });
+  const [formData, setFormData] = useState({ user: '', password: '', confirm_password: '', email: '' });
   const [close, setClose] = useState(false);
   const [error, setError] = useState(null);
   const location = useLocation();
@@ -17,7 +17,7 @@ const Context = ({ setLoggedIn }) => {
   // Function to handle form submission
   const fetchData = (e) => {
     e.preventDefault();
-    fetch(`https://tylernolet.com/api/${isLogin ? 'user' : 'signup'}.php`, {
+    fetch(`/api/${isLogin ? 'user' : 'signup'}.php`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData)
@@ -45,7 +45,6 @@ const Context = ({ setLoggedIn }) => {
       });
   };
 
-  // Function to handle form input changes
   const formUpdate = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -63,16 +62,17 @@ const Context = ({ setLoggedIn }) => {
           {isLogin ? 'Sign Up' : 'Login'}
         </button>
       </form>
-      
-      <div id="context-bg">
-        <div id="context-bg-container">
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
+      {window.innerWidth > 1024 &&
+        <div id="context-bg">
+          <div id="context-bg-container">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+          <h2>Your data. All in. <span style={{ fontWeight: "900" }}>All the time.</span></h2>
         </div>
-        <h2>Your data. All in. <span style={{ fontWeight: "900" }}>All the time.</span></h2>
-      </div>
+      }
     </div>
   );
 }

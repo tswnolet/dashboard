@@ -13,11 +13,14 @@
     color: var(--text-color);
     margin-bottom: 20px;
 }
-
 .section, .account-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     width: 100%;
     max-width: 450px;
     margin-bottom: 20px;
+    position: relative;
 }
 
 .section h2, .account-section h2 {
@@ -56,7 +59,6 @@
 
 .account-section label {
     display: block;
-    margin-bottom: 10px;
     color: var(--text-color);
 }
 
@@ -71,11 +73,11 @@
 }
 
 .account-section button {
-    background-color: #4CAF50;
-    color: white;
+    background-color: var(--text-color);
+    color: var(--secondary-color);
     border: none;
     padding: 10px 20px;
-    border-radius: 5px;
+    border-radius: 30px;
     cursor: pointer;
 }
 

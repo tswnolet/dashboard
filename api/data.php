@@ -1,32 +1,37 @@
 <?php
-header('Content-Type: application/json');
+require './headers.php';
+require './db.php';
+session_start(); // Add this line to start the session
 
-// Database credentials
-$host = 'localhost';
-$db = 'tpugramy_social';
-$user = 'tpugramy_social';
-$pass = 'Dalyblack300!';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    $title = $conn->real_escape_string($input['title']);
+    $value = $conn->real_escape_string($input['value']);
+    $col = (int)$input['col'];
+    $row = (int)$input['row'];
+    $startDate = $conn->real_escape_string($input['startDate']);
+    $endDate = $conn->real_escape_string($input['endDate']);
 
-// Create connection
-$conn = new mysqli($host, $user, $pass, $db);
+    $sql = "INSERT INTO data (title, value, col, `row`, startDate, endDate) VALUES ('$title', '$value', $col, $row, '$startDate', '$endDate')";
 
-// Check connection
-if ($conn->connect_error) {
-    die(json_encode(['success' => false, 'message' => 'Database connection failed', 'error' => $conn->connect_error]));
-}
-
-// Fetch data from the table
-$sql = 'SELECT * FROM data';
-$result = $conn->query($sql);
-
-if ($result->num_rows > 0) {
-    $data = [];
-    while ($row = $result->fetch_assoc()) {
-        $data[] = $row;
+    if ($conn->query($sql) === TRUE) {
+        echo json_encode(['success' => true, 'data' => $input]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Error adding data', 'error' => $conn->error]);
     }
-    echo json_encode(['data' => $data]);
 } else {
-    echo json_encode(['success' => false, 'message' => 'No data found']);
+    $sql = 'SELECT * FROM data';
+    $result = $conn->query($sql);
+
+    if ($result->num_rows > 0) {
+        $value = [];
+        while ($row = $result->fetch_assoc()) {
+            $value[] = $row;
+        }
+        echo json_encode(['data' => $value]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'No data found']);
+    }
 }
 
 $conn->close();

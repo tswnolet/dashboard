@@ -5,7 +5,7 @@ import BackSvg from '../components/BackSvg';
 import MobileMenu from "./MobileMenu";
 import '../styles/Nav.css';
 
-const Nav = ({ user, logout, title, theme, changeTheme, data, setData, setFilteredData }) => {
+const Nav = ({ user, logout, theme, changeTheme, data, setData, setFilteredData }) => {
   const [isChecked, setIsChecked] = useState(theme === 'dark');
   const [showDateInputs, setShowDateInputs] = useState(false);
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
@@ -13,6 +13,7 @@ const Nav = ({ user, logout, title, theme, changeTheme, data, setData, setFilter
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [scrolled, setScrolled] = useState(false);
+  const [title, setTitle] = useState('');
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
   const navigate = useNavigate();
@@ -71,6 +72,19 @@ const Nav = ({ user, logout, title, theme, changeTheme, data, setData, setFilter
     };
   }, []);
 
+  useEffect(() => {
+    const formatTitle = (path) => {
+      return path
+        .replace(/[-_]/g, ' ')
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    };
+
+    const pathName = location.pathname.substring(1);
+    setTitle(formatTitle(pathName));
+  }, [location]);
+
   const handleFilter = (showAll = false) => {
     if (showAll) {
       setFilteredData(data);
@@ -105,33 +119,44 @@ const Nav = ({ user, logout, title, theme, changeTheme, data, setData, setFilter
       <nav>
       <div id='page-title'>
         {title !== 'Dashboard' && <BackSvg onClick={() => navigate(-1)} />}
-        <h3 class='page-title'>{title}</h3>
+        <h2 className='page-title'>{title}</h2>
       </div>
       <img src={Logo} alt="logo" id='nav-logo' style={{filter: theme === 'dark' ? 'brightness(1000%)' : 'brightness(0%)'}}/>
         {isMobile ? (
           <MobileMenu />
         ) : (
           <div id='nav-actions'>
-            {showDateInputs && (
-              <>
+            {showDateInputs && title === 'Dashboard' && (
+              <div id='filter-container'>
                 <input type="date" className="date-input" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
                 <input type="date" className="date-input" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-              </>
+              </div>
             )}
-            <button onClick={() => {
-                setShowDateInputs(!showDateInputs) 
-                showDateInputs && (handleFilterClick())
-              }}
-            >
-              Filter
-            </button>
-            <button onClick={() => {
-                navigate('/new-data')
-              }}
-              disabled={location.pathname === '/new-data'}
-            >
-              New Data
-            </button>
+            {title === 'Dashboard' && (
+              <button id='filter-button' style={{ backgroundColor: showDateInputs ? 'var(--secondary-color' : 'transparent', borderBottomLeftRadius: '0', borderBottomRightRadius: '0'}} onClick={() => {
+                  setShowDateInputs(!showDateInputs) 
+                  showDateInputs && (handleFilterClick())
+                }}
+              >
+                Filter
+              </button>
+            )}
+            {location.pathname !== '/weather' && (
+              <button className='weather-events' onClick={() => {
+                  navigate('/weather')}
+                }
+              >
+                Weather Events
+              </button>
+          )}
+            {location.pathname !== '/new-data' &&
+              <button onClick={() => {
+                  navigate('/new-data')
+                }}
+              >
+                New Data
+              </button>
+            }
             <button ref={buttonRef} className="account" onClick={handleAccountClick}>Account</button>
             <div ref={dropdownRef} className={`account-dropdown ${showAccountDropdown ? 'visible' : 'hidden'}`} onClick={(e) => e.stopPropagation()}>
               <h4 style={{ color: 'var(--text-color'}} className='account-greeting'>Welcome back, {user || 'Tyler'}!</h4>

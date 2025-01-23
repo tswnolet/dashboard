@@ -4,7 +4,7 @@ import '../styles/NewCardForm.css';
 const NewCardForm = ({ addCard }) => {
   const [formData, setFormData] = useState({
     title: '',
-    data: '',
+    value: '',
     col: 1,
     row: 1,
     startDate: '',
@@ -19,7 +19,7 @@ const NewCardForm = ({ addCard }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('https://tylernolet.com/api/data.php', {
+      const response = await fetch('/api/data.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -29,7 +29,7 @@ const NewCardForm = ({ addCard }) => {
         addCard(result.data);
         setFormData({
           title: '',
-          data: '',
+          value: '',
           col: 1,
           row: 1,
           startDate: '',
@@ -61,9 +61,9 @@ const NewCardForm = ({ addCard }) => {
             Data:
             <input
                 type="text"
-                name="data"
+                name="value"
                 placeholder="Data"
-                value={formData.data}
+                value={formData.value}
                 onChange={handleChange}
                 required
             />

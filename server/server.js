@@ -24,9 +24,9 @@ app.use(bodyParser.json());
 // MySQL Database Connection
 const db = mysql.createConnection({
   host: 'localhost',
-  user: 'tpugramy_social',
+  user: 'lehzrxmy_WPSGZ',
   password: 'Scorpius123!',
-  database: 'tpugramy_social',
+  database: 'lehzrxmy_WPSGZ',
 });
 
 db.connect((err) => {

@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 
 export default function SignUp({ formUpdate, formData }) {
+    const [passwordMatch, setPasswordMatch] = useState(true);
+
+    useEffect(() => {
+        setPasswordMatch(formData.password === formData.confirm_password);
+    }, [formData.password, formData.confirm_password]);
+
     return (
         <>
             <input
@@ -12,8 +18,8 @@ export default function SignUp({ formUpdate, formData }) {
             />
             <input
                 type='text'
-                name='user'
-                value={formData.user}
+                name='email'
+                value={formData.email}
                 onChange={formUpdate}
                 placeholder='Email'
             />
@@ -24,6 +30,9 @@ export default function SignUp({ formUpdate, formData }) {
                 onChange={formUpdate}
                 placeholder='Password'
             />
+            {!passwordMatch && 
+                <span className='password-info'>Passwords do not match!</span>
+            }
             <input
                 type='password'
                 name='confirm_password'

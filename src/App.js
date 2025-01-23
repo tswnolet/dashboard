@@ -10,6 +10,7 @@ import { getCookie, setCookie } from './utils/cookies';
 import './styles/Cookies.css';
 import './styles/Theme.css';
 import './styles/NewCardForm.css';
+import Weather from './modules/Weather';
 
 const App = () => {
   const [loading, setLoading] = useState(true);
@@ -42,7 +43,7 @@ const App = () => {
       return;
     }
     try {
-      const response = await fetch('https://tylernolet.com/api/session.php');
+      const response = await fetch('/api/session.php');
       const data = await response.json();
       if (data.isLoggedIn) {
         setLoggedIn(true);
@@ -61,7 +62,7 @@ const App = () => {
     if (process.env.NODE_ENV === 'development') {
         return;
     }
-    await fetch('https://tylernolet.com/api/session.php?close', { method: 'GET' });
+    await fetch('/api/session.php?close', { method: 'GET' });
     setLoggedIn(false);
     window.location.href = '/login';
   };
@@ -109,8 +110,9 @@ const AppRoutes = ({ loggedIn, setLoggedIn, changeTheme, theme, data, setData, a
       {loggedIn ? (
         <>
           <Route path="/dashboard" element={<Dashboard setLoggedIn={setLoggedIn} changeTheme={changeTheme} theme={theme} data={data} setData={setData} />} />
+          <Route path="/weather" element={<Weather />} />
           <Route path="/settings" element={<Settings changeTheme={changeTheme} theme={theme} logout={logout} data={data} setData={setData} setFilteredData={setFilteredData} />} />
-          <Route path="/new-data" element={<NewCardForm addCard={addCard} changeTheme={changeTheme} theme={theme} logout={logout} data={data} setData={setData} setFilteredData={setFilteredData} />} />
+          <Route path="/new-data" element={<NewCardForm addCard={addCard} />} />
           <Route path="*" element={<Navigate to="/dashboard" />} />
         </>
       ) : (

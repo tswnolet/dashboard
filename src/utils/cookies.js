@@ -26,7 +26,10 @@ function allCookies() {
     const cookies = document.cookie.split(';');
     return cookies.map(cookie => {
         const [name, ...rest] = cookie.split('=');
-        return { name: name.trim(), value: rest.join('=').trim(), expires: document.cookie.match(/expires=([^;]+)/)?.[1] || 'Session' };
+        const value = rest.join('=').trim();
+        const expiresMatch = document.cookie.match(new RegExp(`${name.trim()}=[^;]+;\\s*expires=([^;]+)`));
+        const expires = expiresMatch ? expiresMatch[1] : 'Session';
+        return { name: name.trim(), value, expires };
     });
 }
 

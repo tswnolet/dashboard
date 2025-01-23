@@ -15,6 +15,7 @@
   --subtext-color: rgb(99, 99, 99);
   --svg-fill: rgb(81, 81, 97);
   --border-color: #ddd;
+  --line-color: rgba(0,0,0,0.1);
   --button-box-shadow: 0 0 10px 10px rgba(0, 0, 0, 0.1);
   --large-box-shadow: 0 0 50px 25px rgba(0, 0, 0, 0.1);
   --hover-color: #8b8b8b;
@@ -33,11 +34,12 @@
   --subtext-color: #C7D1DB;
   --svg-fill: #cccccc;
   --border-color: #333;
+  --line-color: rgba(255,255,255,0.1);
   --button-box-shadow: 0 0 10px 10px rgba(255, 255, 255, 0.05);
   --large-box-shadow: 0 0 25px rgba(255, 255, 255, 0.05);
   --hover-color: #8b8b8b;
   --context-color: rgb(0, 0, 0);
-  --disabled-color: #555;
+  --disabled-color: transparent;
   --dark: 255;
 }
 
@@ -58,13 +60,25 @@ code {
     monospace;
 }
 
+.pages {
+  margin: 5px;
+}
+
+label, .pages span {
+  color: var(--text-color);
+}
+
+.page-size {
+  margin-bottom: 5px;
+}
+
 #settings {
   color: var(--text-color);
   gap: 15px;
   width: 100%;
 }
 
-#settings > div, .section {
+#settings > div:not(.alert), .section {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -76,6 +90,22 @@ code {
   max-width: 450px;
 }
 
+#new-data-form > label {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  flex-direction: column;
+}
+
+.input-section-container {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+  padding: 0 20px;
+}
+
 #settings h1 {
   font-size: 2em;
   margin-bottom: 20px;
@@ -85,14 +115,19 @@ code {
   margin-bottom: 20px;
 }
 
-.cookie-delete {
+.delete {
+  background-color: rgb(247, 50, 50);
+  color: var(--card-color);
   margin-left: 10px;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 #settings h2 {
   font-size: 1.5em;
   margin: 0 0 10px 0;
   text-align: center;
+  width: 100%;
 }
 
 #settings ul {
@@ -101,13 +136,43 @@ code {
   text-transform: capitalize;
 }
 
+.label-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  flex-direction: column;
+  
+  > label {
+    line-height: 1;
+    height: 38px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+  }
+}
+
+.input-container {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
 #settings label {
   display: flex;
-  width: 550px;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
   font-weight: bold;
+}
+
+.page-container > div {
+  width: 90%;
+
+  > table, tbody {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+  }
 }
 
 input {
@@ -121,8 +186,11 @@ input {
 }
 
 button:hover {
-  background-color: var(--hover-color);
-  box-shadow: var(--large-box-shadow);
+  scale: 1.1;
+
+  :not(:hover) {
+    color: white;
+  }
 }
 
 .page-container {
@@ -137,6 +205,43 @@ button:hover {
     max-width: 150px;
     min-width: 100px;
   }
+}
+
+tr {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--text-color);
+  width: 100%;
+
+  td {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+  }
+}
+
+table:not(.schools) > tbody > tr > td {
+  height: 100%;
+  border-right: 1px solid var(--border-color);
+  border-left: 1px solid var(--border-color);
+}
+
+.schools {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.light, .column-active {
+  background-color: var(--line-color);
+}
+
+.clear {
+  background-color: transparent;
 }
 
 @media (max-width: 768px) {
