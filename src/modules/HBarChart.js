@@ -1,33 +1,51 @@
 import React from 'react';
 
 const HBarChart = ({ data }) => {
-    const maxTotal = Math.max(...Object.values(data).flat());
+    // Parse the data into an object
+    const parsedData = JSON.parse(data);
+
+    // Define the chronological order of months
+    const monthOrder = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    ];
+
+    // Sort the data by month order
+    const sortedEntries = Object.entries(parsedData).sort(
+        ([a], [b]) => monthOrder.indexOf(a) - monthOrder.indexOf(b)
+    );
+
+    // Get the maximum total to scale the bars
+    const maxTotal = Math.max(...Object.values(parsedData).flat());
 
     return (
         <>
             <div className="horizontal-graph chart">
-                {Object.entries(data).map(([period, values]) => {
-                    const [intakeTotal, newCasesTotal] = values;
+                {/* Iterate through sorted data */}
+                {sortedEntries.map(([month, values]) => {
+                    const [intakeTotal, newCasesTotal] = values; // Destructure the values
                     return (
-                        <div className='period' key={period}>
-                            <div 
-                                className="ttb-bar intake" 
-                                style={{ height: `${(intakeTotal / maxTotal) * 100}%` }}
-                                title={intakeTotal}
-                            ></div>
-                            <div 
-                                className="ttb-bar new-cases" 
-                                style={{ height: `${(newCasesTotal / maxTotal) * 100}%` }}
-                                title={newCasesTotal}
-                            ></div>
+                        <div className="period" key={month}>
+                            <div className='graph-bars'>
+                                {/* Intake Bar */}
+                                <div 
+                                    className="ttb-bar intake" 
+                                    style={{ height: `${(intakeTotal / maxTotal) * 100}%` }} // Scale by maxTotal
+                                    title={`Intake: ${intakeTotal}`}
+                                ></div>
+                                {/* New Cases Bar */}
+                                <div 
+                                    className="ttb-bar new-cases" 
+                                    style={{ height: `${(newCasesTotal / maxTotal) * 100}%` }} // Scale by maxTotal
+                                    title={`New Cases: ${newCasesTotal}`}
+                                ></div>
+                            </div>
+                            <div className="graph-titles">
+                                <h4>{month}</h4>
+                            </div>
                         </div>
                     );
                 })}
-            </div>
-            <div className="graph-titles">
-                {Object.entries(data).map(([key]) => (
-                    <h4 key={key}>{key}</h4>
-                ))}
             </div>
         </>
     );

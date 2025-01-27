@@ -28,7 +28,7 @@ nav {
   align-items: center;
   gap: 10px;
 
-  h2 {
+  h3 {
       line-height: 1;
       margin: 0;
       transition: color 0.3s;
@@ -41,6 +41,10 @@ nav.scrolled {
   color: var(--secondary-color);
   width: calc(100% - 40px);
   border-radius: 15px;
+
+  #nav-actions button {
+    color: var(--secondary-color);
+  }
 }
 
 #scrolled {

@@ -11,17 +11,39 @@ const Card = ({ data, type }) => {
         gridRow: `span ${parseInt(data.row) || 1}`
     };
 
+    const formatNumber = (num, approx = null, type = '') => {
+        if (!num && num !== 0) return "N/A";
+    
+        const number = parseFloat(num);
+    
+        if (approx === "e") {
+            return `${type === "$" ? '$' : ''}${number.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+    
+        if (approx === "a") {
+            return `${type === "$" ? '$' : ''}${number.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+        }
+    
+        if (number >= 1_000_000) {
+            return `${type === "$" ? '$' : ''}${(number / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+        } else if (number >= 1_000) {
+            return `${type === "$" ? '$' : ''}${(number / 1_000).toFixed(1).replace(/\.0$/, '')}K`;
+        }
+    
+        return `${type === "$" ? '$' : ''}${number.toString()}`;
+    };
+
     return (
         <div className='card' style={cardStyle}>
             <p>{data.title}</p>
             {!type ? (
-                <h2>{data.data}</h2>
+                <h1>{formatNumber(data.data, "$")}</h1>
             ) : type === 'h-bar' ? (
-                <HBarChart data={data.data} />
+                <HBarChart data={data.data} title={data.title} />
             ) : type === 'v-bar' ? (
-                <VBarChart data={data.data} />
+                <VBarChart data={data.data} title={data.title} />
             ) : type === 'pie' ? (
-                <PieChartComponent data={data.data} />
+                <PieChartComponent data={data.data} title={data.title} formatNumber={formatNumber} />
             ) : null}
         </div>
     );

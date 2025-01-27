@@ -157,7 +157,7 @@ export default function Weather() {
 
             if (!isNaN(aValue) && !isNaN(bValue)) {
                 return newDirection === 'asc' ? aValue - bValue : bValue - aValue;
-            } else if (typeof aValue === 'string' && typeof bValue === 'string') {
+            } else if (typeof aValue == 'string' && typeof bValue == 'string') {
                 return newDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
             } else if (column === 'event_date') {
                 const dateA = new Date(aValue);
@@ -462,9 +462,9 @@ export default function Weather() {
                                         onClick={() => handleRowClick(event, index)}
                                         style={{ cursor: 'pointer' }}
                                     >
-                                        <td title={event.event_type} className={sortColumn =='event_type' ? "column_active" : ""}>{event.event_type}</td>
-                                        <td title={event.event_magnitude} className={sortColumn =='event_magnitude' ? "column_active" : ""}>{event.event_magnitude}{event.event_magnitude != null ? (event.event_type === "Hail" ? '"' : "MPH") : ""}</td>
-                                        <td title={event.event_date} className={sortColumn =='event_date' ? "column_active" : ""}>
+                                        <td title={event.event_type} className={sortColumn ==='event_type' ? "column_active" : ""}>{event.event_type}</td>
+                                        <td title={event.event_magnitude} className={sortColumn ==='event_magnitude' ? "column_active" : ""}>{event.event_magnitude}{event.event_magnitude != null ? (event.event_type === "Hail" ? '"' : "MPH") : ""}</td>
+                                        <td title={event.event_date} className={sortColumn ==='event_date' ? "column_active" : ""}>
                                             {new Date(event.event_date + 'T00:00:00').toLocaleDateString('en-US', {
                                                 timeZone: 'America/Chicago',  // Specify your timezone (CST)
                                                 year: 'numeric',
@@ -472,8 +472,8 @@ export default function Weather() {
                                                 day: 'numeric'
                                             })}
                                         </td>
-                                        <td title={event.event_property_damage} className={sortColumn =='event_property_damage' ? "column_active" : ""}>{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(event.event_property_damage)}</td>
-                                        <td title={event.address_count} className={sortColumn =='address_count' ? "column_active" : ""}>{event.address_count}</td>
+                                        <td title={event.event_property_damage} className={sortColumn === 'event_property_damage' ? "column_active" : ""}>{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(event.event_property_damage)}</td>
+                                        <td title={event.address_count} className={sortColumn === 'address_count' ? "column_active" : ""}>{event.address_count}</td>
                                     </tr>
                                     {selectedEvent && selectedEvent.id === event.id && schoolData.length > 0 && (
                                         <tr>

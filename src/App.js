@@ -78,13 +78,13 @@ const App = () => {
 
   return (
     <Router>
-        <ConditionalNav changeTheme={changeTheme} theme={theme} logout={logout} data={data} setData={setData} setFilteredData={setFilteredData} />
+        <ConditionalNav loggedIn={loggedIn} changeTheme={changeTheme} theme={theme} logout={logout} data={data} setData={setData} setFilteredData={setFilteredData} />
         <AppRoutes loggedIn={loggedIn} setLoggedIn={setLoggedIn} changeTheme={changeTheme} theme={theme} data={filteredData} setData={setData} addCard={addCard} logout={logout} setFilteredData={setFilteredData} />
     </Router>
   );
 }
 
-const ConditionalNav = ({ changeTheme, theme, logout, data, setData, setFilteredData }) => {
+const ConditionalNav = ({ loggedIn, changeTheme, theme, logout, data, setData, setFilteredData }) => {
   const location = useLocation();
   const pathName = location.pathname.substring(1);
 
@@ -102,7 +102,7 @@ const ConditionalNav = ({ changeTheme, theme, logout, data, setData, setFiltered
     return null;
   }
 
-  return <Nav title={title || 'Dashboard'} changeTheme={changeTheme} theme={theme} logout={logout} data={data} setData={setData} setFilteredData={setFilteredData} />;
+  return <Nav title={title || 'Dashboard'} loggedIn={loggedIn} changeTheme={changeTheme} theme={theme} logout={logout} />;
 };
 
 const AppRoutes = ({ loggedIn, setLoggedIn, changeTheme, theme, data, setData, addCard, logout, setFilteredData }) => {
@@ -111,7 +111,7 @@ const AppRoutes = ({ loggedIn, setLoggedIn, changeTheme, theme, data, setData, a
       <Route path="/referral" element={<LeadUploader />} />
       {loggedIn ? (
         <>
-          <Route path="/dashboard" element={<Dashboard setLoggedIn={setLoggedIn} changeTheme={changeTheme} theme={theme} data={data} setData={setData} />} />
+          <Route path="/dashboard" element={<Dashboard setLoggedIn={setLoggedIn} changeTheme={changeTheme} theme={theme} data={data} setData={setData} setFilteredData={setFilteredData} />} />
           <Route path="/weather" element={<Weather />} />
           <Route path="/settings" element={<Settings changeTheme={changeTheme} theme={theme} logout={logout} data={data} setData={setData} setFilteredData={setFilteredData} />} />
           <Route path="/new-data" element={<NewCardForm addCard={addCard} />} />

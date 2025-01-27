@@ -6,13 +6,13 @@ session_start(); // Add this line to start the session
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
     $title = $conn->real_escape_string($input['title']);
-    $value = $conn->real_escape_string($input['value']);
+    $data = $conn->real_escape_string($input['data']);
     $col = (int)$input['col'];
     $row = (int)$input['row'];
     $startDate = $conn->real_escape_string($input['startDate']);
     $endDate = $conn->real_escape_string($input['endDate']);
 
-    $sql = "INSERT INTO data (title, value, col, `row`, startDate, endDate) VALUES ('$title', '$value', $col, $row, '$startDate', '$endDate')";
+    $sql = "INSERT INTO data (title, data, col, `row`, startDate, endDate) VALUES ('$title', '$data', $col, $row, '$startDate', '$endDate')";
 
     if ($conn->query($sql) === TRUE) {
         echo json_encode(['success' => true, 'data' => $input]);
@@ -24,11 +24,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {
-        $value = [];
+        $data = [];
         while ($row = $result->fetch_assoc()) {
-            $value[] = $row;
+            $data[] = $row;
         }
-        echo json_encode(['data' => $value]);
+        echo json_encode(['data' => $data]);
     } else {
         echo json_encode(['success' => false, 'message' => 'No data found']);
     }

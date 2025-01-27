@@ -6,12 +6,9 @@ import MobileMenu from "./MobileMenu";
 import '../styles/Nav.css';
 import { Theme } from "./Theme";
 
-const Nav = ({ user, logout, theme, changeTheme, data, setData, setFilteredData }) => {
-  const [showDateInputs, setShowDateInputs] = useState(false);
+const Nav = ({ user, loggedIn, logout, theme, changeTheme }) => {
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
   const [scrolled, setScrolled] = useState(false);
   const [title, setTitle] = useState('');
   const dropdownRef = useRef(null);
@@ -81,30 +78,6 @@ const Nav = ({ user, logout, theme, changeTheme, data, setData, setFilteredData 
     setTitle(formatTitle(pathName));
   }, [location]);
 
-  const handleFilter = (showAll = false) => {
-    if (showAll) {
-      setFilteredData(data);
-    } else {
-      const filteredData = data.filter(item => {
-          const itemStartDate = new Date(item.startDate);
-          const itemEndDate = new Date(item.endDate);
-          const filterStartDate = new Date(startDate);
-          const filterEndDate = new Date(endDate);
-          return itemStartDate >= filterStartDate && itemEndDate <= filterEndDate;
-      });
-      setFilteredData(filteredData);
-    }
-  };
-
-  const handleFilterClick = () => {
-    if (!startDate && !endDate) {
-      handleFilter(true);
-    } else {
-      handleFilter();
-    }
-    setShowDateInputs(false);
-  };
-
   const handleAccountClick = (e) => {
     setShowAccountDropdown(prev => !prev);
   };
@@ -114,51 +87,44 @@ const Nav = ({ user, logout, theme, changeTheme, data, setData, setFilteredData 
       <div id="scrolled" style={{opacity: scrolled ? "1" : "0"}}></div>
       <nav>
         <div id='page-title'>
-          {title !== 'Dashboard' && user && <BackSvg onClick={() => navigate(-1)} />}
-          <h2 className='page-title'>{title}</h2>
+          {title !== 'Dashboard' && loggedIn && <BackSvg onClick={() => navigate(-1)} />}
+          <h3 className='page-title'>{title}</h3>
         </div>
         <img src={Logo} alt="logo" id='nav-logo'
           onClick={() => {
               navigate('/')
             }
           }
-            style={{filter: theme === 'dark' ? `brightness(${scrolled ? '0%' : '1000%'})` : `brightness(${scrolled ? '0%' : '1000%'})`}}/>
+            style={{filter: theme === 'dark' ? `brightness(${scrolled ? '0%' : '1000%'})` : `brightness(${scrolled ? '1000%' : '0%'})`}}/>
           {isMobile ? (
             <MobileMenu />
-          ) : (user ? (
+          ) : (loggedIn ? (
             <div id='nav-actions'>
-              {showDateInputs && title === 'Dashboard' && (
-                <div id='filter-container'>
-                  <input type="date" className="date-input" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-                  <input type="date" className="date-input" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-                </div>
-              )}
-              {title === 'Dashboard' && (
-                <button id='filter-button' style={{ backgroundColor: showDateInputs ? 'var(--secondary-color' : 'transparent', borderBottomLeftRadius: '0', borderBottomRightRadius: '0'}} onClick={() => {
-                    setShowDateInputs(!showDateInputs) 
-                    showDateInputs && (handleFilterClick())
-                  }}
-                >
-                  Filter
-                </button>
-              )}
               {location.pathname !== '/weather' && (
-                <button className='weather-events' onClick={() => {
+                <button className='weather-events nav-btn' onClick={() => {
                     navigate('/weather')}
                   }
                 >
                   Weather Events
                 </button>
-            )}
+              )}
               {location.pathname !== '/new-data' &&
-                <button onClick={() => {
+                <button className='nav-btn' onClick={() => {
                     navigate('/new-data')
                   }}
                 >
                   New Data
                 </button>
               }
-              <button ref={buttonRef} className="account" onClick={handleAccountClick}>Account</button>
+              {location.pathname !== '/referral' &&
+                <button className='nav-btn' onClick={() => {
+                    navigate('/referral')
+                  }}
+                >
+                  Referral
+                </button>
+              }
+              <button ref={buttonRef} className="account nav-btn" onClick={handleAccountClick}>Account</button>
               <div ref={dropdownRef} className={`account-dropdown ${showAccountDropdown ? 'visible' : 'hidden'}`} onClick={(e) => e.stopPropagation()}>
                 <h4 style={{ color: 'var(--text-color'}} className='account-greeting'>Welcome back, {user || 'Tyler'}!</h4>
                 <button onClick={() => {

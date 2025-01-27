@@ -48,6 +48,14 @@
     flex-direction: column;
 }
 
+.chart-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 80%;
+}
+
 .pie-container {
     position: relative;
     display: flex;
@@ -55,8 +63,33 @@
     align-items: center;
     flex-grow: 1;
     width: auto;
+    height: 1000%;
     aspect-ratio: 1 / 1;
+    gap: 20px;
     max-height: 100%;
+}
+
+.pie-legend {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    color: var(--text-color);
+    gap: 5px;
+    text-transform: capitalize;
+    width: 40%;
+}
+
+.pie-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pie-legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    display: inline-block;
 }
 
 .pie-chart {
@@ -84,12 +117,16 @@
     white-space: nowrap;
 }
 
-.period {
+.period, .graph-bars {
     display: flex;
     align-items: end;
     justify-content: center;
     height: 100%;
-    gap: 10px;
+    gap: 5px;
+}
+
+.period {
+    flex-direction: column;
 }
 
 .v {
@@ -121,7 +158,14 @@
 .ttb-bar {
     width: 15px;
     border-radius: 2px 2px 0 0;
-    height: auto; /* Ensure height is auto to allow percentage-based heights */
+    height: auto;
+    border: 1px solid transparent;
+    transition: transform 0.3s ease;
+}
+
+.ttb-bar:hover {
+    transform: scaleX(1.15);
+    cursor: pointer;
 }
 
 .ltr-bar {
@@ -136,6 +180,13 @@
 .bar-total {
     height: 2px;
     background-color: var(--graph-color);
+}
+
+.card > h1 {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .card h1, .card h2, .card h3, .card h4, .card p {
