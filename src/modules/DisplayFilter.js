@@ -2,7 +2,7 @@ import React from 'react';
 
 const DisplayFilter = ({ allFields, selectedFields, handleFieldSelection }) => {
     return (
-        <div style={{ marginTop: "16px" }}>
+        <div className='filter-container' style={{ marginTop: "16px" }}>
             {allFields.map((field) => (
             <div key={field}>
                 <input

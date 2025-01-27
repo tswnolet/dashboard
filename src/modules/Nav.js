@@ -117,7 +117,12 @@ const Nav = ({ user, logout, theme, changeTheme, data, setData, setFilteredData 
           {title !== 'Dashboard' && user && <BackSvg onClick={() => navigate(-1)} />}
           <h2 className='page-title'>{title}</h2>
         </div>
-        <img src={Logo} alt="logo" id='nav-logo' style={{filter: theme === 'dark' ? 'brightness(1000%)' : 'brightness(0%)'}}/>
+        <img src={Logo} alt="logo" id='nav-logo'
+          onClick={() => {
+              navigate('/')
+            }
+          }
+            style={{filter: theme === 'dark' ? `brightness(${scrolled ? '0%' : '1000%'})` : `brightness(${scrolled ? '0%' : '1000%'})`}}/>
           {isMobile ? (
             <MobileMenu />
           ) : (user ? (

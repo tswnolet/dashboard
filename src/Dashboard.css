@@ -8,35 +8,6 @@
     transition: background-color 0.3s, border 0.3s, color 0.3s;
 }
 
-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: calc(100% - 40px);
-    height: 70px;
-    color: var(--text-color);
-    padding: 10px 20px;
-    margin: 15px 20px 20px 20px;
-    transition: background-color 0.3s, border 0.3s, color 0.3s;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1001;
-}
-
-#page-title {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-
-    h2 {
-        line-height: 1;
-        margin: 0;
-        transition: color 0.3s;
-    }
-}
-
 #nav-logo {
     position: absolute;
     top: 50%;
@@ -152,10 +123,6 @@ nav {
         height: 245px;
         display: flex;
     }
-}
-
-.filter-btn {
-
 }
 
 .load-options {
@@ -280,7 +247,7 @@ button, select {
 @media (min-width: 1025px) {
     nav {
         height: auto;
-        padding: 10px;
+        padding: 10px 20px;
     }
 
     .cards {
