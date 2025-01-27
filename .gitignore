@@ -18,6 +18,8 @@
 .env.test.local
 .env.production.local
 .env
+eval $(ssh-agent -s)
+eval $(ssh-agent -s)
 
 npm-debug.log*
 yarn-debug.log*
