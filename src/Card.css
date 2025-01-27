@@ -1,56 +1,107 @@
 .cards {
     grid-template-columns: repeat(4, 1fr);
     grid-auto-rows: 165px;
-    gap: 15px;
     width: 100%;
 }
 
-/* Card container */
 .card {
     background-color: var(--secondary-color);
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 30px 30px;
     box-shadow: var(--box-shadow);
-    text-align: center;
+    text-align: start;
     display: flex;
     flex-direction: column;
     justify-content: start;
-    align-items: start;
+    align-items: center;
     position: relative;
     gap: 20px;
     grid-column: span 1;
     grid-row: span 1;
     transition: background-color 0.3s, border 0.3s, color 0.3s, filter 0.3s;
     font-weight: 600;
-
+    height: 100%;
+    
     &:hover {
         filter: brightness(90%);
     }
 }
 
-.vertical-graph {
+.chart {
+    height: 175px;
+    width: 100%;
+}
+
+.horizontal-graph, .vertical-graph {
     display: flex;
     justify-content: space-evenly;
-    align-items: end;
     flex-grow: 1;
     width: 100%;
 }
 
-.month {
+.horizontal-graph {
+    align-items: flex-end;
+}
+
+.vertical-graph {
+    flex-direction: column;
+}
+
+.pie-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+    width: auto;
+    aspect-ratio: 1 / 1;
+    max-height: 100%;
+}
+
+.pie-chart {
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    transform: rotate(-90deg);
+    clip-path: circle(50%);
+
+    > circle {
+        transition: stroke-dasharray 0.5s ease-in-out, stroke-dashoffset 0.5s ease-in-out;
+    }
+}
+
+.pie-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: black;
+    white-space: nowrap;
+}
+
+.period {
     display: flex;
     align-items: end;
     justify-content: center;
-    gap: 10px;
     height: 100%;
+    gap: 10px;
+}
+
+.v {
+    flex-direction: column;
 }
 
 .intake {
-    background-color: #bcf2ff;
+    background-color: #7b57ff;
 }
 
 .new-cases {
-    background-color: rgb(186, 247, 223);
+    background-color: var(--graph-color);
 }
 
 .graph-titles {
@@ -60,18 +111,38 @@
     width: 100%;
 }
 
-.graph-bar {
+.graph-data-labels {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.ttb-bar {
     width: 15px;
+    border-radius: 2px 2px 0 0;
+    height: auto; /* Ensure height is auto to allow percentage-based heights */
 }
 
-.card p, .card h3 {
-    margin: 0;
+.ltr-bar {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    height: 2px;
+    width: 100%;
+    background-color: var(--border-color);
 }
 
-.card h3 {
+.bar-total {
+    height: 2px;
+    background-color: var(--graph-color);
+}
+
+.card h1, .card h2, .card h3, .card h4, .card p {
     padding: 0;
     line-height: 1;
     color: var(--text-color);
+    margin: 0;
     transition: color 0.3s;
 }
 
@@ -81,4 +152,17 @@
     font-size: 0.9rem;
     color: var(--hover-color);
     transition: color 0.3s;
+    width: 100%;
+}
+
+.tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.75);
+    color: white;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    pointer-events: none;
+    white-space: nowrap;
+    transform: translate(-50%, -100%);
 }

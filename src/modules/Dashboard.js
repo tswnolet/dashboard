@@ -14,12 +14,12 @@ const Dashboard = ({ setLoggedIn, data, setData }) => {
                     { id: 1, title: 'Test Item 1', data: 'Value 1', col: 1, row: 1, startDate: '2023-01-01', endDate: '2023-01-31' },
                     { id: 2, title: 'Test Item 2', data: 'Value 2', col: 1, row: 1, startDate: '2023-02-01', endDate: '2023-02-28' },
                     { id: 3, title: 'Largest Settlement', data: '$1.3m', col: 2, row: 1, startDate: '2023-03-01', endDate: '2023-03-31' },
-                    { id: 4, title: 'Settlement Total Allfgh Time', data: {"Jan": [91, 67], "Feb": [74, 15],"Mar": [15, 10],"Apr": [15, 10],"Jun": [15, 10], "Jul": [15, 10]}, col: 3, row: 2, startDate: '2023-10-01', endDate: '2023-10-31', type: "h-bar"},
-                    { id: 5, title: 'Settlement Total All Time', data: '$5', col: 1, row: 2, startDate: '2023-04-01', endDate: '2023-04-30' },
+                    { id: 4, title: 'Settlement Total Allfgh Time', data: {"Jan": [54, 26], "Feb": [31, 21],"Mar": [15, 10],"Apr": [15, 10],"Jun": [65, 51], "Jul": [15, 10]}, col: 2, row: 2, startDate: '2023-10-01', endDate: '2023-10-31', type: "h-bar"},
+                    { id: 5, title: 'Settlement Total All Time', data: {marketing: [32000, '#7b57ff'], digital: [40000, 'var(--graph-color)'], rockets: [10000, 'grey']}, col: 1, row: 2, startDate: '2023-04-01', endDate: '2023-04-30', type: 'pie' },
                     { id: 6, title: 'New Cases', data: '144', col: 1, row: 1, startDate: '2023-05-01', endDate: '2023-05-31' },
                     { id: 7, title: 'Settlement Total All Time', data: '$5', col: 1, row: 1, startDate: '2023-06-01', endDate: '2023-06-30' },
-                    { id: 8, title: 'New Cases', data: '144', col: 1, row: 1, startDate: '2023-07-01', endDate: '2023-07-31' },
-                    { id: 9, title: 'Settlement Total All Time', data: '$5', col: 2, row: 2, startDate: '2023-08-01', endDate: '2023-08-31' },
+                    { id: 8, title: 'New Cases', data: '144', col: 1, row: 2, startDate: '2023-07-01', endDate: '2023-07-31' },
+                    { id: 9, title: 'Settlement Total All Time', data: {'First Party': 65, 'Personal Injury': 42, 'Med Mal': 6, 'Other': 2}, col: 2, row: 2, startDate: '2023-08-01', endDate: '2023-08-31', type: 'v-bar' },
                     { id: 10, title: 'Settlement Total All Time', data: '$5', col: 1, row: 1, startDate: '2023-09-01', endDate: '2023-09-30' },
                 ]);
                 setLoading(false);

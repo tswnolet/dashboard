@@ -11,6 +11,7 @@ import './styles/Cookies.css';
 import './styles/Theme.css';
 import './styles/NewCardForm.css';
 import Weather from './modules/Weather';
+import LeadUploader from './modules/LeadUploader';
 
 const App = () => {
   const [loading, setLoading] = useState(true);
@@ -107,6 +108,7 @@ const ConditionalNav = ({ changeTheme, theme, logout, data, setData, setFiltered
 const AppRoutes = ({ loggedIn, setLoggedIn, changeTheme, theme, data, setData, addCard, logout, setFilteredData }) => {
   return (
     <Routes>
+      <Route path="/referral" element={<LeadUploader />} />
       {loggedIn ? (
         <>
           <Route path="/dashboard" element={<Dashboard setLoggedIn={setLoggedIn} changeTheme={changeTheme} theme={theme} data={data} setData={setData} />} />

@@ -241,6 +241,7 @@ th > svg {
     justify-content: center;
     align-items: center;
 }
+
 .page-size {
     display: flex;
     justify-content: center;
@@ -248,9 +249,7 @@ th > svg {
     gap: 10px;
 }
 
-button, select {
-    color: var(--text-color);
-    background-color: transparent;
+button, select, .file-upload > label {
     font-weight: 800;
     font-size: 16px;
     border: none;
@@ -264,6 +263,11 @@ button, select {
     align-items: center;
     cursor: pointer;
     transition: background-color 0.3s, border 0.3s, color 0.3s, scale 0.3s ease;
+}
+
+button, select {
+    color: var(--text-color);
+    background-color: transparent;
 }
 
 .account-dropdown > button {
@@ -281,7 +285,7 @@ button, select {
 
     .cards {
         display: grid;
-        gap: 10px;
+        gap: 15px;
     }
 
     .account-dropdown {
@@ -314,11 +318,13 @@ button, select {
     .cards {
         display: flex;
         flex-direction: column;
+        align-items: stretch;
+        flex-direction: column;
         gap: 10px;
     }
 
     .card {
-        height: 150px;
+        min-height: 150px;
     }
 }
 

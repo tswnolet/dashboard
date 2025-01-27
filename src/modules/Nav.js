@@ -4,9 +4,9 @@ import Logo from '../resources/logo.png';
 import BackSvg from '../components/BackSvg';
 import MobileMenu from "./MobileMenu";
 import '../styles/Nav.css';
+import { Theme } from "./Theme";
 
 const Nav = ({ user, logout, theme, changeTheme, data, setData, setFilteredData }) => {
-  const [isChecked, setIsChecked] = useState(theme === 'dark');
   const [showDateInputs, setShowDateInputs] = useState(false);
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
@@ -18,10 +18,6 @@ const Nav = ({ user, logout, theme, changeTheme, data, setData, setFilteredData 
   const buttonRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
-
-  useEffect(() => {
-    setIsChecked(theme === 'dark');
-  }, [theme]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -117,70 +113,65 @@ const Nav = ({ user, logout, theme, changeTheme, data, setData, setFilteredData 
     <>
       <div id="scrolled" style={{opacity: scrolled ? "1" : "0"}}></div>
       <nav>
-      <div id='page-title'>
-        {title !== 'Dashboard' && <BackSvg onClick={() => navigate(-1)} />}
-        <h2 className='page-title'>{title}</h2>
-      </div>
-      <img src={Logo} alt="logo" id='nav-logo' style={{filter: theme === 'dark' ? 'brightness(1000%)' : 'brightness(0%)'}}/>
-        {isMobile ? (
-          <MobileMenu />
-        ) : (
-          <div id='nav-actions'>
-            {showDateInputs && title === 'Dashboard' && (
-              <div id='filter-container'>
-                <input type="date" className="date-input" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-                <input type="date" className="date-input" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+        <div id='page-title'>
+          {title !== 'Dashboard' && user && <BackSvg onClick={() => navigate(-1)} />}
+          <h2 className='page-title'>{title}</h2>
+        </div>
+        <img src={Logo} alt="logo" id='nav-logo' style={{filter: theme === 'dark' ? 'brightness(1000%)' : 'brightness(0%)'}}/>
+          {isMobile ? (
+            <MobileMenu />
+          ) : (user ? (
+            <div id='nav-actions'>
+              {showDateInputs && title === 'Dashboard' && (
+                <div id='filter-container'>
+                  <input type="date" className="date-input" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                  <input type="date" className="date-input" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                </div>
+              )}
+              {title === 'Dashboard' && (
+                <button id='filter-button' style={{ backgroundColor: showDateInputs ? 'var(--secondary-color' : 'transparent', borderBottomLeftRadius: '0', borderBottomRightRadius: '0'}} onClick={() => {
+                    setShowDateInputs(!showDateInputs) 
+                    showDateInputs && (handleFilterClick())
+                  }}
+                >
+                  Filter
+                </button>
+              )}
+              {location.pathname !== '/weather' && (
+                <button className='weather-events' onClick={() => {
+                    navigate('/weather')}
+                  }
+                >
+                  Weather Events
+                </button>
+            )}
+              {location.pathname !== '/new-data' &&
+                <button onClick={() => {
+                    navigate('/new-data')
+                  }}
+                >
+                  New Data
+                </button>
+              }
+              <button ref={buttonRef} className="account" onClick={handleAccountClick}>Account</button>
+              <div ref={dropdownRef} className={`account-dropdown ${showAccountDropdown ? 'visible' : 'hidden'}`} onClick={(e) => e.stopPropagation()}>
+                <h4 style={{ color: 'var(--text-color'}} className='account-greeting'>Welcome back, {user || 'Tyler'}!</h4>
+                <button onClick={() => {
+                    navigate('/settings');
+                    handleAccountClick();
+                  }}
+                  disabled={location.pathname === '/settings'}
+                  className="settings"
+                >
+                  Settings
+                </button>
+                <button onClick={logout} className="logout">Logout</button>
+                <Theme theme={theme} changeTheme={changeTheme} />
               </div>
-            )}
-            {title === 'Dashboard' && (
-              <button id='filter-button' style={{ backgroundColor: showDateInputs ? 'var(--secondary-color' : 'transparent', borderBottomLeftRadius: '0', borderBottomRightRadius: '0'}} onClick={() => {
-                  setShowDateInputs(!showDateInputs) 
-                  showDateInputs && (handleFilterClick())
-                }}
-              >
-                Filter
-              </button>
-            )}
-            {location.pathname !== '/weather' && (
-              <button className='weather-events' onClick={() => {
-                  navigate('/weather')}
-                }
-              >
-                Weather Events
-              </button>
-          )}
-            {location.pathname !== '/new-data' &&
-              <button onClick={() => {
-                  navigate('/new-data')
-                }}
-              >
-                New Data
-              </button>
-            }
-            <button ref={buttonRef} className="account" onClick={handleAccountClick}>Account</button>
-            <div ref={dropdownRef} className={`account-dropdown ${showAccountDropdown ? 'visible' : 'hidden'}`} onClick={(e) => e.stopPropagation()}>
-              <h4 style={{ color: 'var(--text-color'}} className='account-greeting'>Welcome back, {user || 'Tyler'}!</h4>
-              <button onClick={() => {
-                  navigate('/settings');
-                  handleAccountClick();
-                }}
-                disabled={location.pathname === '/settings'}
-                className="settings"
-              >
-                Settings
-              </button>
-              <button onClick={logout} className="logout">Logout</button>
-              <label className="switch">
-                <input 
-                  type="checkbox" 
-                  onChange={changeTheme} 
-                  checked={isChecked}
-                />
-                <span className="slider"></span>
-              </label>
             </div>
-          </div>
-        )}
+          ) : (
+            <Theme theme={theme} changeTheme={changeTheme} />
+          ))}
       </nav>
     </>
   );

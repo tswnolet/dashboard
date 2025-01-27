@@ -1,4 +1,4 @@
-input[type = "checkbox"] {
+.bar input[type = "checkbox"] {
     -webkit-appearance: none;
     display: none;
     visibility: hidden;
