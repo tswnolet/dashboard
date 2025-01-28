@@ -37,11 +37,11 @@ const Card = ({ data, type }) => {
         <div className='card' style={cardStyle}>
             <p>{data.title}</p>
             {!type ? (
-                <h1>{formatNumber(data.data, "$")}</h1>
+                <h1>{formatNumber(data.data, null, "$")}</h1>
             ) : type === 'h-bar' ? (
-                <HBarChart data={data.data} title={data.title} />
+                <HBarChart data={data.data} title={data.title} formatNumber={formatNumber} />
             ) : type === 'v-bar' ? (
-                <VBarChart data={data.data} title={data.title} />
+                <VBarChart data={data.data} title={data.title} formatNumber={formatNumber} />
             ) : type === 'pie' ? (
                 <PieChartComponent data={data.data} title={data.title} formatNumber={formatNumber} />
             ) : null}

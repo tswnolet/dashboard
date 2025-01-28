@@ -49,9 +49,7 @@ const Nav = ({ user, loggedIn, logout, theme, changeTheme }) => {
     const handleScroll = () => {
       const nav = document.querySelector('nav');
       if (window.scrollY > 0) {
-        if(window.innerWidth > 1024) {
-          nav.classList.add('scrolled');
-        }
+        nav.classList.add('scrolled');
         setScrolled(true);
       } else {
         nav.classList.remove('scrolled');

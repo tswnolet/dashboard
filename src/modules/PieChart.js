@@ -38,7 +38,7 @@ const PieChartComponent = ({ data, title, formatNumber }) => {
                 {slices.map((slice, index) => (
                     <div className="pie-legend-item" key={index}>
                         <span className="pie-legend-color" style={{ backgroundColor: slice.color }}></span>
-                        <span>{slice.name} - {formatNumber(slice.value, title === 'Marketing Budget' ? "e" : 'a', title == 'Marketing Budget' ? '$' : '')}</span>
+                        <span>{slice.name} {window.innerWidth > 1024 ? `- ${formatNumber(slice.value, title === 'Marketing Budget' ? "e" : 'a', title == 'Marketing Budget' ? '$' : '')}` : `${formatNumber(slice.percentage, "e")}%`}</span>
                     </div>
                 ))}
             </div>

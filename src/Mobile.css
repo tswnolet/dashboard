@@ -1,59 +1,42 @@
-.bar input[type = "checkbox"] {
+.bar input[type="checkbox"] {
     -webkit-appearance: none;
     display: none;
     visibility: hidden;
 }
 
 .bar {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     position: relative;
     cursor: pointer;
-    width: 50px;
-    height: 40px;
-    position: absolute;
-    right: 0;
-    scale: 0.8;
+    width: 30px;
+    height: 25px;
 }
 
 .bar span {
-    position: absolute;
-    width: 45px;
-    height: 7px;
+    width: 30px;
+    height: 5px;
     background: var(--text-color);
     border-radius: 100px;
     display: inline-block;
     transition: 0.3s ease;
-    left: 0;
 }
 
-.bar span.top {
-    top: 0;
-}
-
-.bar span.middle {
-    top: 17px;
-}
-
-.bar span.bottom {
-    bottom: 0;
-}
-
-input[type]:checked ~ span.top {
+input[type="checkbox"]:checked ~ span.top {
     transform: rotate(45deg);
     transform-origin: top left;
-    width: 48px;
-    left: 5px;
 }
 
-input[type]:checked ~ span.bottom {
+input[type="checkbox"]:checked ~ span.bottom {
     transform: rotate(-45deg);
-    transform-origin: top left;
-    width: 48px;
-    bottom: -1px;
     box-shadow: 0 0 10px #495057;
+    position: absolute;
+    bottom: 10px;
+    left: -6px;
 }
 
-input[type]:checked ~ span.middle {
+input[type="checkbox"]:checked ~ span.middle {
     transform: translateX(-20px);
     opacity: 0;
 }

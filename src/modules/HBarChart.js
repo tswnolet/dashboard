@@ -1,44 +1,77 @@
-import React from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 
-const HBarChart = ({ data }) => {
-    // Parse the data into an object
+const HBarChart = ({ data, formatNumber }) => {
     const parsedData = JSON.parse(data);
+    const parentRef = useRef(null);
+    const [parentHeight, setParentHeight] = useState(0);
 
-    // Define the chronological order of months
+    useEffect(() => {
+        if (parentRef.current) {
+            setParentHeight(parentRef.current.clientHeight - 31);
+        }
+    }, []);
+
     const monthOrder = [
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
     ];
 
-    // Sort the data by month order
-    const sortedEntries = Object.entries(parsedData).sort(
-        ([a], [b]) => monthOrder.indexOf(a) - monthOrder.indexOf(b)
-    );
+    const sortedEntries = Object.entries(parsedData)
+        .sort(([a], [b]) => monthOrder.indexOf(a) - monthOrder.indexOf(b));
 
-    // Get the maximum total to scale the bars
-    const maxTotal = Math.max(...Object.values(parsedData).flat());
+    const monthsToShow = window.innerWidth > 1024 ? sortedEntries.length : 3;
+    const displayedEntries = sortedEntries.slice(-monthsToShow);
+
+    const maxTotal = Math.max(...displayedEntries.flatMap(([_, values]) => values));
+
+    const labelsCount = window.innerWidth > 1024 ? 5 : 3;
+    const yAxisLabels = labelsCount === 5 
+        ? Array.from({ length: 5 }, (_, i) => `${formatNumber((maxTotal / 4) * i, "a")} - `).reverse()
+        : [
+            `${formatNumber(maxTotal, "a")} - `,
+            `${formatNumber(maxTotal / 2, "a")} - `,
+            `0 - `
+        ];
 
     return (
-        <>
+        <div className='horizontal-graph-container' ref={parentRef}>
+            {/* Y-Axis */}
+            <div className="y-axis">
+                {yAxisLabels.map((label, index) => (
+                    <div key={index} className="y-axis-label">{label}</div>
+                ))}
+            </div>
+
+            {/* Graph Content */}
             <div className="horizontal-graph chart">
-                {/* Iterate through sorted data */}
-                {sortedEntries.map(([month, values]) => {
-                    const [intakeTotal, newCasesTotal] = values; // Destructure the values
+                {/* Grid Lines */}
+                <div className='grid-lines'>
+                    {yAxisLabels.map((_, index) => (
+                        <div key={`${index}-grid-line`} className="y-grid-line"></div>
+                    ))}
+                </div>
+
+                {/* Bars */}
+                {displayedEntries.map(([month, values]) => {
+                    const [intakeTotal = 0, newCasesTotal = null] = values;
+                    const intakeHeightPx = (intakeTotal / maxTotal) * parentHeight;
+                    const newCasesHeightPx = newCasesTotal !== null ? (newCasesTotal / maxTotal) * parentHeight : 0;
+
                     return (
                         <div className="period" key={month}>
                             <div className='graph-bars'>
-                                {/* Intake Bar */}
                                 <div 
-                                    className="ttb-bar intake" 
-                                    style={{ height: `${(intakeTotal / maxTotal) * 100}%` }} // Scale by maxTotal
+                                    className="ttb-bar intake"
+                                    style={{ height: `${intakeHeightPx}px` }}
                                     title={`Intake: ${intakeTotal}`}
                                 ></div>
-                                {/* New Cases Bar */}
-                                <div 
-                                    className="ttb-bar new-cases" 
-                                    style={{ height: `${(newCasesTotal / maxTotal) * 100}%` }} // Scale by maxTotal
-                                    title={`New Cases: ${newCasesTotal}`}
-                                ></div>
+                                {newCasesTotal !== null && (
+                                    <div 
+                                        className="ttb-bar new-cases"
+                                        style={{ height: `${newCasesHeightPx}px` }}
+                                        title={`New Cases: ${newCasesTotal}`}
+                                    ></div>
+                                )}
                             </div>
                             <div className="graph-titles">
                                 <h4>{month}</h4>
@@ -47,7 +80,7 @@ const HBarChart = ({ data }) => {
                     );
                 })}
             </div>
-        </>
+        </div>
     );
 }
 

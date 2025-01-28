@@ -26,17 +26,24 @@
     position: relative;
 }
 
-.filter-container {
+.data-action-container {
     display: flex;
-    justify-content: center;
-    align-items: end;
-    flex-direction: column;
+    justify-content: end;
+    align-items: start;
     position: relative;
     padding: 0 20px;
     gap: 10px;
 }
 
-#filter-button {
+.filter-container {
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#filter-button, #refresh {
     transition: background-color 0s, border 0.3s, color 0.3s, scale 0.3s ease;
     gap: 10px;
     color: var(--text-color);
@@ -44,6 +51,15 @@
     border: 1px solid var(--border-color);
     padding: 0 10px;
     font-weight: normal;
+}
+
+#refresh.spinning svg {
+    animation: spin 0.5s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 #filter-items {
@@ -236,7 +252,6 @@ button, select, .file-upload > label {
     border: none;
     height: 32px;
     padding: 8px;
-    min-width: 68px;
     border-radius: 15px;
     text-align: center;
     display: flex;
@@ -278,12 +293,24 @@ button, select, .file-upload > label {
         width: 100%;
         right: 0;
     }
+
+    .pie-legend {
+        flex-direction: column;
+    }
 }
 
 @media (max-width: 1024px) {
     nav {
         height: auto;
-        padding: 10px;
+        padding: 10px 20px;
+
+        &.scrolled {
+            height: 55px;
+
+            > svg {
+                filter: brightness(0);
+            }
+        }
     }
 
     #nav-logo {
@@ -311,6 +338,18 @@ button, select, .file-upload > label {
 
     .card {
         min-height: 150px;
+    }
+
+    .chart-wrapper {
+        min-height: 260px;
+    }
+
+    .chart-wrapper {
+        flex-direction: column;
+    }
+
+    .pie-legend {
+        justify-content: center;
     }
 }
 
