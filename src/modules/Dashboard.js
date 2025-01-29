@@ -5,6 +5,7 @@ import Card from './Card';
 import Cookies from '../modules/Cookies';
 import { Filter } from './Filter';
 import Refresh from './Refresh';
+import Alert from './Alert';
 
 const Dashboard = ({ setLoggedIn, data, setData, setFilteredData }) => {
     const [loading, setLoading] = useState(true);
@@ -12,6 +13,7 @@ const Dashboard = ({ setLoggedIn, data, setData, setFilteredData }) => {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [refreshing, setRefreshing] = useState(false);
+    const [showAlert, setShowAlert] = useState(false);
 
     const handleFilter = (showAll = false) => {
         if (showAll) {
@@ -37,7 +39,7 @@ const Dashboard = ({ setLoggedIn, data, setData, setFilteredData }) => {
         setShowDateInputs(false);
     };
 
-    const fetchData = async () => {
+    const fetchData = async (manual = false) => {
         setRefreshing(true);
         const startTime = Date.now();
         try {
@@ -53,12 +55,11 @@ const Dashboard = ({ setLoggedIn, data, setData, setFilteredData }) => {
             setData([]);
         }
         const elapsedTime = Date.now() - startTime;
-        const minSpinTime = 500; // 1 second for a full rotation
-        if (elapsedTime < minSpinTime) {
-            setTimeout(() => setRefreshing(false), minSpinTime - elapsedTime);
-        } else {
+        const minSpinTime = 500;
+        setTimeout(() => {
             setRefreshing(false);
-        }
+            if(manual) setShowAlert(true);
+        }, Math.max(0, minSpinTime - elapsedTime));
     };
 
     useEffect(() => {
@@ -96,8 +97,8 @@ const Dashboard = ({ setLoggedIn, data, setData, setFilteredData }) => {
                 <div className='filter-container'>
                     <button id='filter-button' 
                         onClick={() => {
-                            setShowDateInputs(!showDateInputs) 
-                            showDateInputs && (handleFilterClick())
+                            setShowDateInputs(!showDateInputs);
+                            showDateInputs && handleFilterClick();
                         }}
                     >
                         <Filter />
@@ -110,9 +111,10 @@ const Dashboard = ({ setLoggedIn, data, setData, setFilteredData }) => {
                         </div>
                     )}
                 </div>
-                <button title='Refresh data' id='refresh' onClick={fetchData} className={refreshing ? 'spinning' : ''}>
+                <button title='Refresh data' id='refresh' onClick={() => (fetchData(true))} className={refreshing ? 'spinning' : ''}>
                     <Refresh />
                 </button>
+                {showAlert && <Alert message="Data updated successfully." type="success" onClose={() => setShowAlert(false)} />}
             </div>
             <div className="cards">
                 {data.map((data) => (

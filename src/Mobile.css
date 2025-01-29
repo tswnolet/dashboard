@@ -1,3 +1,8 @@
+.mobile-menu-container {
+    position: relative;
+    z-index: 1000;
+}
+
 .bar input[type="checkbox"] {
     -webkit-appearance: none;
     display: none;
@@ -11,16 +16,58 @@
     position: relative;
     cursor: pointer;
     width: 30px;
-    height: 25px;
+    height: 21px;
+    z-index: 1100;
 }
 
 .bar span {
     width: 30px;
     height: 5px;
-    background: var(--text-color);
     border-radius: 100px;
     display: inline-block;
-    transition: 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.mobile-dropdown {
+    position: absolute;
+    top: 45px;
+    right: 0px;
+    background: var(--secondary-color);
+    border-radius: 10px;
+    box-shadow: var(--button-box-shadow);
+    display: flex;
+    flex-direction: column;
+    padding: 12px 25px;
+    min-width: 100%;
+    border: 1px solid var(--border-color);
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    gap: 10px;
+}
+
+.mobile-dropdown button {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    padding: 10px 12px;
+    text-align: left;
+    width: 100%;
+    font-size: 16px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.mobile-dropdown button:hover {
+    background: var(--hover-color);
+    color: white;
+}
+
+.mobile-dropdown.open {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 input[type="checkbox"]:checked ~ span.top {

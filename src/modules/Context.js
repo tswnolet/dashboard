@@ -6,7 +6,7 @@ import Alert from "./Alert";
 import '../Context.css';
 import '../index.css';
 
-const Context = ({ setLoggedIn }) => {
+const Context = ({ setLoggedIn, setShowAlert, showAlert }) => {
   const [formData, setFormData] = useState({ user: '', password: '', confirm_password: '', email: '' });
   const [close, setClose] = useState(false);
   const [error, setError] = useState(null);
@@ -62,17 +62,16 @@ const Context = ({ setLoggedIn }) => {
           {isLogin ? 'Sign Up' : 'Login'}
         </button>
       </form>
-      {window.innerWidth > 1024 &&
-        <div id="context-bg">
-          <div id="context-bg-container">
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
-          </div>
-          <h2>Your data. All in. <span style={{ fontWeight: "900" }}>All the time.</span></h2>
+      <div id="context-bg">
+        <div id="context-bg-container">
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
         </div>
-      }
+        <h2>Your data. All in. <span style={{ fontWeight: "900" }}>All the time.</span></h2>
+      </div>
+      {showAlert && <Alert message="User logged out." type="info" onClose={() => setShowAlert(false)} />}
     </div>
   );
 }

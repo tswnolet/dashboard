@@ -19,6 +19,7 @@ const App = () => {
   const [theme, setTheme] = useState(getCookie('theme') || 'light');
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
+  const [showAlert, setShowAlert] = useState(false);
 
   useEffect(() => {
     checkUserLoggedIn();
@@ -66,6 +67,7 @@ const App = () => {
     await fetch('/api/session.php?close', { method: 'GET' });
     setLoggedIn(false);
     window.location.href = '/login';
+    setShowAlert(true);
   };
 
   const addCard = (newCard) => {
@@ -79,7 +81,7 @@ const App = () => {
   return (
     <Router>
         <ConditionalNav loggedIn={loggedIn} changeTheme={changeTheme} theme={theme} logout={logout} data={data} setData={setData} setFilteredData={setFilteredData} />
-        <AppRoutes loggedIn={loggedIn} setLoggedIn={setLoggedIn} changeTheme={changeTheme} theme={theme} data={filteredData} setData={setData} addCard={addCard} logout={logout} setFilteredData={setFilteredData} />
+        <AppRoutes loggedIn={loggedIn} setLoggedIn={setLoggedIn} changeTheme={changeTheme} theme={theme} data={filteredData} setData={setData} addCard={addCard} logout={logout} setFilteredData={setFilteredData} setShowAlert={setShowAlert} showAlert={showAlert} />
     </Router>
   );
 }
@@ -105,7 +107,7 @@ const ConditionalNav = ({ loggedIn, changeTheme, theme, logout, data, setData, s
   return <Nav title={title || 'Dashboard'} loggedIn={loggedIn} changeTheme={changeTheme} theme={theme} logout={logout} />;
 };
 
-const AppRoutes = ({ loggedIn, setLoggedIn, changeTheme, theme, data, setData, addCard, logout, setFilteredData }) => {
+const AppRoutes = ({ loggedIn, setLoggedIn, changeTheme, theme, data, setData, addCard, logout, setFilteredData, setShowAlert, showAlert }) => {
   return (
     <Routes>
       <Route path="/referral" element={<LeadUploader />} />
@@ -119,8 +121,8 @@ const AppRoutes = ({ loggedIn, setLoggedIn, changeTheme, theme, data, setData, a
         </>
       ) : (
         <>
-          <Route path="/login" element={<Context setLoggedIn={setLoggedIn} />} />
-          <Route path="/signup" element={<Context setLoggedIn={setLoggedIn} />} />
+          <Route path="/login" element={<Context setLoggedIn={setLoggedIn} setShowAlert={setShowAlert} showAlert={showAlert} />} />
+          <Route path="/signup" element={<Context setLoggedIn={setLoggedIn} setShowAlert={setShowAlert} showAlert={showAlert} />} />
           <Route path="*" element={<Navigate to="/login" />} />
         </>
       )}

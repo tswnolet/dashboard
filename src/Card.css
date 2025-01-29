@@ -78,6 +78,7 @@
     width: auto;
     height: 1000%;
     aspect-ratio: 1 / 1;
+    border-radius: 50%;
     gap: 20px;
     max-height: 100%;
 }
@@ -111,6 +112,7 @@
     max-height: 100%;
     transform: rotate(-90deg);
     clip-path: circle(50%);
+    -webkit-clip-path: circle(50%);
 
     > circle {
         transition: stroke-dasharray 0.5s ease-in-out, stroke-dashoffset 0.5s ease-in-out;

@@ -22,7 +22,6 @@
   --context-color: white;
   --size-of-icon: 1.4em;
   --slider-offset: 0.3em;
-  --disabled-color: #ccc;
   --dark: 0;
   --graph-color: #624b8f;
 }
@@ -36,11 +35,10 @@
   --svg-fill: #cccccc;
   --border-color: #333;
   --line-color: rgba(255,255,255,0.1);
-  --button-box-shadow: 0 0 10px 10px rgba(97, 126, 255, 0.05);
+  --button-box-shadow: 0 0 10px 10px rgba(129, 150, 255, 0.025);
   --large-box-shadow: 0 0 25px rgba(255, 255, 255, 0.05);
   --hover-color: #8b8b8b;
   --context-color: rgb(0, 0, 0);
-  --disabled-color: transparent;
   --dark: 255;
   --graph-color: #ede8ff;
 }
@@ -154,7 +152,8 @@ label, .pages span {
 
 .input-container {
   display: flex;
-  justify-content: center;
+  height: 100%;
+  justify-content: space-between;
   flex-direction: column;
 }
 
@@ -177,7 +176,7 @@ label, .pages span {
   }
 }
 
-input:not([type='checkbox']):not([type='file']) {
+#new-data-form input {
   width: 250px;
   padding: 10px;
   margin: 0;
@@ -186,7 +185,7 @@ input:not([type='checkbox']):not([type='file']) {
   color: var(--text-color);
 }
 
-input[type='text'] {
+input {
   background-color: var(--secondary-color);
 }
 

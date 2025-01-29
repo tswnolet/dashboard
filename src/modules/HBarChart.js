@@ -4,11 +4,26 @@ const HBarChart = ({ data, formatNumber }) => {
     const parsedData = JSON.parse(data);
     const parentRef = useRef(null);
     const [parentHeight, setParentHeight] = useState(0);
+    const [monthsToShow, setMonthsToShow] = useState(3);
+    const [labelsCount, setLabelsCount] = useState(3);
 
     useEffect(() => {
-        if (parentRef.current) {
-            setParentHeight(parentRef.current.clientHeight - 31);
-        }
+        const updateChartSettings = () => {
+            if (parentRef.current) {
+                requestAnimationFrame(() => {
+                    setParentHeight(parentRef.current.clientHeight - 31);
+                });
+            }
+    
+            setMonthsToShow(window.innerWidth > 1024 ? sortedEntries.length : 3);
+            setLabelsCount(window.innerWidth > 1024 ? 5 : 3);
+        };
+    
+        updateChartSettings();
+    
+        window.addEventListener("resize", updateChartSettings);
+    
+        return () => window.removeEventListener("resize", updateChartSettings);
     }, []);
 
     const monthOrder = [
@@ -19,14 +34,12 @@ const HBarChart = ({ data, formatNumber }) => {
     const sortedEntries = Object.entries(parsedData)
         .sort(([a], [b]) => monthOrder.indexOf(a) - monthOrder.indexOf(b));
 
-    const monthsToShow = window.innerWidth > 1024 ? sortedEntries.length : 3;
     const displayedEntries = sortedEntries.slice(-monthsToShow);
 
     const maxTotal = Math.max(...displayedEntries.flatMap(([_, values]) => values));
 
-    const labelsCount = window.innerWidth > 1024 ? 5 : 3;
     const yAxisLabels = labelsCount === 5 
-        ? Array.from({ length: 5 }, (_, i) => `${formatNumber((maxTotal / 4) * i, "a")} - `).reverse()
+        ? Array.from({ length: 5 }, (_, i) => `${formatNumber((maxTotal / 4) * i, "a")}`).reverse()
         : [
             `${formatNumber(maxTotal, "a")} - `,
             `${formatNumber(maxTotal / 2, "a")} - `,

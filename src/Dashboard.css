@@ -53,6 +53,14 @@
     font-weight: normal;
 }
 
+#filter-button {
+    width: 92px;
+}
+
+#refresh {
+    width: 44px;
+}
+
 #refresh.spinning svg {
     animation: spin 0.5s linear infinite;
 }
@@ -67,6 +75,9 @@
     justify-content: center;
     align-items: center;
     padding: 10px;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 10px);
     border-radius: 8px;
     gap: 10px;
     background-color: var(--secondary-color);
@@ -121,6 +132,7 @@
 
 .account-greeting {
     padding: 0;
+    color: var(--text-color);
 }
 
 .theme-toggle {
@@ -354,6 +366,7 @@ button, select, .file-upload > label {
 }
 
 button:disabled {
-    background-color: var(--disabled-color);
+    background-color: var(--hover-color);
+    border: 1px solid var(--border-color);
     cursor: not-allowed;
 }
