@@ -30,11 +30,12 @@
 
 .horizontal-graph-container {
     display: flex;
-    align-items: stretch; /* Ensures all child elements stretch equally */
+    align-items: stretch;
     width: 100%;
-    height: auto; /* Allows natural expansion */
+    height: auto;
     flex-grow: 1;
-    min-height: 175px; /* Ensures it does not collapse */
+    min-height: 175px;
+    gap: 10px;
 }
 
 .horizontal-graph, .vertical-graph {

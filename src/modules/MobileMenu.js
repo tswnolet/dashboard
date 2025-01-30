@@ -1,29 +1,23 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../Mobile.css';
 
 const MobileMenu = ({ theme, scrolled, routes }) => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
-  const mobileRef = useRef(null);
+  const [displayMenu, setDisplayMenu] = useState('none');
 
   routes["Settings"] = "/settings";
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        mobileRef.current &&
-        !mobileRef.current.contains(event.target)
-      ) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
   const handleToggle = () => {
     setIsOpen(!isOpen);
+    if(isOpen == false) {
+        setDisplayMenu("flex");
+    } else {
+      setTimeout(() => {
+        setDisplayMenu("none");
+      }, 300);
+    }
   };
 
   const spanStyle = {
@@ -34,13 +28,14 @@ const MobileMenu = ({ theme, scrolled, routes }) => {
   };
 
   return (
-    <div className="mobile-menu-container" ref={mobileRef}>
-      <label className="bar" onClick={handleToggle}>
+    <div className="mobile-menu-container">
+      <label className="bar">
+        <input type="checkbox" id="check" onChange={handleToggle} checked={isOpen} />
         <span className="top" style={spanStyle}></span>
         <span className="middle" style={spanStyle}></span>
         <span className="bottom" style={spanStyle}></span>
       </label>
-      <div className={`mobile-dropdown ${isOpen ? 'open' : ''}`}>
+      <div className={`mobile-dropdown ${isOpen ? 'open' : ''}`} style={{display: displayMenu}}>
         {Object.entries(routes).map(([title, path]) => (
           <button key={title} onClick={() => {
             navigate(path);

@@ -6,6 +6,7 @@ import Cookies from '../modules/Cookies';
 import { Filter } from './Filter';
 import Refresh from './Refresh';
 import Alert from './Alert';
+import GoogleAdsComponent from './GoogleAdsComponent';
 
 const Dashboard = ({ setLoggedIn, data, setData, setFilteredData }) => {
     const [loading, setLoading] = useState(true);
@@ -107,6 +108,7 @@ const Dashboard = ({ setLoggedIn, data, setData, setFilteredData }) => {
                     {showDateInputs && (
                         <div id='filter-items'>
                             <input type="date" className="date-input" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                            <h4>to</h4>
                             <input type="date" className="date-input" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
                         </div>
                     )}
@@ -120,6 +122,7 @@ const Dashboard = ({ setLoggedIn, data, setData, setFilteredData }) => {
                 {data.map((data) => (
                     <Card key={data.id} data={data} type={data.type ? data.type : ""}/>
                 ))}
+                <GoogleAdsComponent />
             </div>
         </div>
     );

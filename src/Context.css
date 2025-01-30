@@ -144,9 +144,7 @@ h2 {
 
 #context-bg-container:after {
     content: "";
-    height: 100%;
     position: absolute;
-    width: 100%;
 }
 
 .password-info {
@@ -199,13 +197,15 @@ h2 {
 @media (min-width: 1025px){
     #context-form {
         height: 100vh;
+        width: 35%;
     }
 }
 
 @media (max-width: 1024px) {
     #context-form {
-        width: 100%;
-        height: 55%;
+        width: 90%;
+        height: 35%;
+        border-radius: 8px;
         position: absolute;
         top: 50%;
         transform: translateY(-50%);

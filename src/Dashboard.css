@@ -33,6 +33,11 @@
     position: relative;
     padding: 0 20px;
     gap: 10px;
+
+    h4 {
+        color: var(--text-color);
+        margin: 0;
+    }
 }
 
 .filter-container {
@@ -53,10 +58,6 @@
     font-weight: normal;
 }
 
-#filter-button {
-    width: 92px;
-}
-
 #refresh {
     width: 44px;
 }
@@ -70,27 +71,28 @@
     100% { transform: rotate(360deg); }
 }
 
+.filter-container input[type="date"] {
+    padding: 5px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-color);
+    background-color: var(--secondary-color);
+    font-family: 'Inter', 'Poppins', sans-serif;
+}
+
 #filter-items {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 10px;
+    flex-direction: column;
     position: absolute;
-    right: 0;
+    padding: 12px 25px;
+    border-radius: 10px;
     top: calc(100% + 10px);
-    border-radius: 8px;
-    gap: 10px;
     background-color: var(--secondary-color);
     border: 1px solid var(--border-color);
-}
-
-.filter-container input[type="date"] {
-    padding: 5px 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
-    background-color: var(--card-color);
-    color: var(--text-color);
-    font-family: 'Inter', 'Poppins', sans-serif;
+    gap: 10px;
+    z-index: 1;
 }
 
 #nav-actions input[type="date"]::placeholder {
@@ -261,8 +263,8 @@ th > svg {
 button, select, .file-upload > label {
     font-weight: 800;
     font-size: 16px;
-    border: none;
     height: 32px;
+    border: none;
     padding: 8px;
     border-radius: 15px;
     text-align: center;
@@ -271,6 +273,19 @@ button, select, .file-upload > label {
     align-items: center;
     cursor: pointer;
     transition: background-color 0.3s, border 0.3s, color 0.3s, scale 0.3s ease;
+}
+
+#filter-button {
+    font-weight: 800;
+    font-size: 16px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 15px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
 }
 
 #nav-actions > button, select {

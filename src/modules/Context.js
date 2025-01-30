@@ -54,6 +54,7 @@ const Context = ({ setLoggedIn, setShowAlert, showAlert }) => {
     <div id='context' style={{ animation: close ? 'fade-out 2s forwards' : '' }}>
       {error && <Alert message={error} type="error" onClose={() => setError(null)} />}
       <form id='context-form' onSubmit={fetchData}>
+        {window.innerWidth <= 1024 && <h2>Your data. All in. <span style={{ fontWeight: "900" }}>All the time.</span></h2>}
         {isLogin ? <Login formUpdate={formUpdate} formData={formData} /> : <SignUp formUpdate={formUpdate} formData={formData} />}
         <button type="submit" className='action-btn'>
           {isLogin ? 'Login' : 'Sign Up'}
@@ -69,7 +70,7 @@ const Context = ({ setLoggedIn, setShowAlert, showAlert }) => {
           <div></div>
           <div></div>
         </div>
-        <h2>Your data. All in. <span style={{ fontWeight: "900" }}>All the time.</span></h2>
+        {window.innerWidth > 1024 && <h2>Your data. All in. <span style={{ fontWeight: "900" }}>All the time.</span></h2>}
       </div>
       {showAlert && <Alert message="User logged out." type="info" onClose={() => setShowAlert(false)} />}
     </div>
