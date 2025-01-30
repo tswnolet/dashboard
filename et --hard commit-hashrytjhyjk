@@ -1,0 +1,125 @@
+[33mcommit d6e523e0d9f8b72c9fa6a49454eaa1408c31c6c0[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: tswnolet <tsnolet@outlook.com>
+Date:   Wed Jan 29 18:04:23 2025 -0600
+
+    Google Ads API
+
+[33mcommit 8c1d4213340e372baac74afd6c0d83d1eafb4c36[m
+Author: tswnolet <tsnolet@outlook.com>
+Date:   Wed Jan 29 18:03:46 2025 -0600
+
+    Google Ads API
+
+[33mcommit c51fb636d9c5cb00c2f38b17af31a8d84bb66519[m
+Author: tswnolet <tsnolet@outlook.com>
+Date:   Wed Jan 29 18:02:54 2025 -0600
+
+    Google Ads API
+
+[33mcommit 4c552496410b3e1dbee64c69636345f7e9219090[m[33m ([m[1;31morigin/main[m[33m)[m
+Author: tswnolet <tsnolet@outlook.com>
+Date:   Wed Jan 29 10:58:17 2025 -0600
+
+    User delight updates
+
+[33mcommit 6cbe6b5449c885e90e6bd716292a0d8151d9cd6a[m
+Author: tswnolet <tsnolet@outlook.com>
+Date:   Tue Jan 28 17:30:12 2025 -0600
+
+    UX updates
+
+[33mcommit 095ec8dff31a1e4679cc9f4b963dc2a3c777ebf6[m
+Author: tswnolet <tsnolet@outlook.com>
+Date:   Mon Jan 27 17:29:05 2025 -0600
+
+    Additional styling and data updates
+
+[33mcommit 5ec99ac07b11c7a7566486bf80afdd7cda9e439c[m
+Author: Tyler Nolet <tnolet@RDLF.local>
+Date:   Sun Jan 26 20:49:10 2025 -0600
+
+    Referral and nav updates
+
+[33mcommit 590a437fc192d7f4e879ba4d696d6710e27d9c7e[m
+Author: Tyler Nolet <tnolet@RDLF.local>
+Date:   Sun Jan 26 20:46:36 2025 -0600
+
+    Referral UI and nav changes
+
+[33mcommit c4444984086d84c4117972191ce34b184410fba5[m
+Author: Tyler Nolet <tsnolet@outlook.com>
+Date:   Sun Jan 26 19:07:51 2025 -0600
+
+    Delete .env
+
+[33mcommit 4db380109492eb220704aab8c757b7513c697f14[m
+Author: Tyler Nolet <tsnolet@outlook.com>
+Date:   Sun Jan 26 19:07:35 2025 -0600
+
+    Delete fv.py
+
+[33mcommit b212f52b4540e8a5d945273b17db830bfd2c3140[m
+Author: Tyler Nolet <tsnolet@outlook.com>
+Date:   Sun Jan 26 19:07:22 2025 -0600
+
+    Delete eval $(ssh-agent -s).pub
+
+[33mcommit b3e92e7a10640d64fa227c80ae77e92a9bc511ff[m
+Author: Tyler Nolet <tsnolet@outlook.com>
+Date:   Sun Jan 26 19:07:13 2025 -0600
+
+    Delete eval $(ssh-agent -s)
+
+[33mcommit b4763438040fd9c5d10bd89c979e0de676cebce7[m
+Author: Tyler Nolet <tnolet@RDLF.local>
+Date:   Sun Jan 26 19:04:13 2025 -0600
+
+    Referral functionality
+
+[33mcommit 426b879dfd9f4af44e76b93271ec090e114a5d85[m
+Author: tswnolet <tsnolet@outlook.com>
+Date:   Thu Jan 23 17:22:03 2025 -0600
+
+    Graph config
+
+[33mcommit 0b2913b76f0da6864c3f37bf76ec2f84cd71b5f4[m
+Author: tswnolet <tsnolet@outlook.com>
+Date:   Wed Jan 15 18:03:17 2025 -0600
+
+    Additional UI dev.
+
+[33mcommit 8b1d2e47abbf7520da2b18fc71d0317577500414[m
+Author: tswnolet <tsnolet@outlook.com>
+Date:   Tue Jan 14 17:28:20 2025 -0600
+
+    Frontend v0.1
+
+[33mcommit 930b08d4c7f971a91b9b7b6db19a10ef5aed16b2[m
+Author: tswnolet <tsnolet@outlook.com>
+Date:   Mon Jan 13 18:17:04 2025 -0600
+
+    Dashboard Update.
+
+[33mcommit 4d5245a73dbd0cace6a032f10d4871311cbe60fd[m
+Author: tswnolet <tsnolet@outlook.com>
+Date:   Mon Jan 13 18:00:03 2025 -0600
+
+    Dashboard update. Theme changes.
+
+[33mcommit 70cc71b011ad28237388d3ecc6d5db7f7b7d127e[m
+Author: tswnolet <tsnolet@outlook.com>
+Date:   Fri Jan 10 18:04:27 2025 -0600
+
+    Theme changes.
+
+[33mcommit da380885868f90bf99d48bf4aa472f5f14e3eeb5[m
+Author: tswnolet <tsnolet@outlook.com>
+Date:   Fri Jan 10 17:59:27 2025 -0600
+
+    Theme and Server side configuration.
+
+[33mcommit 713819a8784ba3a31288b1cdd5dfe66af68a8674[m
+Author: tswnolet <tsnolet@outlook.com>
+Date:   Thu Jan 9 18:14:58 2025 -0600
+
+    test
