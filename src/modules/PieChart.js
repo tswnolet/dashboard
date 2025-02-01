@@ -2,13 +2,10 @@ import React from 'react';
 import '../Card.css';
 
 const PieChartComponent = ({ data, title, formatNumber }) => {
-    // Parse the data string to get the actual object
-    let parsedData = {};
-    try {
-        parsedData = JSON.parse(data);
-    } catch (error) {
-        console.error("Invalid JSON format in PieChartComponent:", error);
-        return <div className="error-message">Error: Invalid Data Format</div>;
+    const parsedData = typeof data === "string" ? JSON.parse(data) : data;
+
+    if (!parsedData || Object.keys(parsedData).length === 0) {
+        return <div className="error-message">No data available</div>;
     }
 
     const colors = ["#7b57ff", "var(--graph-color)", "#b37afa", "#d8a2f8", "#c187f9", "#f1cef9"]; // Expand as needed

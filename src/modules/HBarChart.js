@@ -1,7 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react';
 
 const HBarChart = ({ data, formatNumber }) => {
-    const parsedData = JSON.parse(data);
+    const parsedData = data && typeof data === "string" ? JSON.parse(data) : data || {};
+
     const parentRef = useRef(null);
     const [parentHeight, setParentHeight] = useState(0);
     const [monthsToShow, setMonthsToShow] = useState(3);
@@ -14,17 +15,20 @@ const HBarChart = ({ data, formatNumber }) => {
                     setParentHeight(parentRef.current.clientHeight - 31);
                 });
             }
-    
-            setMonthsToShow(window.innerWidth > 1024 ? sortedEntries.length : 3);
+
+            setMonthsToShow(window.innerWidth > 1024 ? Object.keys(parsedData || {}).length : 3);
             setLabelsCount(window.innerWidth > 1024 ? 5 : 3);
         };
-    
+
         updateChartSettings();
-    
         window.addEventListener("resize", updateChartSettings);
-    
+
         return () => window.removeEventListener("resize", updateChartSettings);
-    }, []);
+    }, [parsedData]);
+
+    if (!parsedData || Object.keys(parsedData).length === 0) {
+        return <div className="error-message">No data available</div>;
+    }
 
     const monthOrder = [
         "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -36,9 +40,17 @@ const HBarChart = ({ data, formatNumber }) => {
 
     const displayedEntries = sortedEntries.slice(-monthsToShow);
 
-    const maxTotal = Math.max(...displayedEntries.flatMap(([_, values]) => values));
+    if (displayedEntries.length === 0) {
+        return <div className="error-message">No data available</div>;
+    }
 
-    const yAxisLabels = labelsCount === 5 
+    const maxTotal = Math.max(
+        ...displayedEntries.flatMap(([_, values]) =>
+            Array.isArray(values) ? values : [values]
+        )
+    ) || 1;
+
+    const yAxisLabels = labelsCount === 5
         ? Array.from({ length: 5 }, (_, i) => `${formatNumber((maxTotal / 4) * i, "a")}`).reverse()
         : [
             `${formatNumber(maxTotal, "a")} - `,
@@ -48,41 +60,43 @@ const HBarChart = ({ data, formatNumber }) => {
 
     return (
         <div className='horizontal-graph-container' ref={parentRef}>
-            {/* Y-Axis */}
             <div className="y-axis">
                 {yAxisLabels.map((label, index) => (
                     <div key={index} className="y-axis-label">{label}</div>
                 ))}
             </div>
-
-            {/* Graph Content */}
             <div className="horizontal-graph chart">
-                {/* Grid Lines */}
                 <div className='grid-lines'>
                     {yAxisLabels.map((_, index) => (
                         <div key={`${index}-grid-line`} className="y-grid-line"></div>
                     ))}
                 </div>
-
-                {/* Bars */}
                 {displayedEntries.map(([month, values]) => {
-                    const [intakeTotal = 0, newCasesTotal = null] = values;
-                    const intakeHeightPx = (intakeTotal / maxTotal) * parentHeight;
-                    const newCasesHeightPx = newCasesTotal !== null ? (newCasesTotal / maxTotal) * parentHeight : 0;
+                    let firstTotal = 0;
+                    let secondTotal = 0;
+
+                    if (Array.isArray(values)) {
+                        [firstTotal = 0, secondTotal = 0] = values;
+                    } else {
+                        firstTotal = values;
+                    }
+
+                    const firstHeightPx = (firstTotal / maxTotal) * parentHeight;
+                    const secondHeightPx = (secondTotal / maxTotal) * parentHeight;
 
                     return (
                         <div className="period" key={month}>
                             <div className='graph-bars'>
                                 <div 
-                                    className="ttb-bar intake"
-                                    style={{ height: `${intakeHeightPx}px` }}
-                                    title={`Intake: ${intakeTotal}`}
+                                    className="ttb-bar first"
+                                    style={{ height: `${firstHeightPx}px` }}
+                                    title={`Intake: ${firstTotal}`}
                                 ></div>
-                                {newCasesTotal !== null && (
+                                {secondTotal > 0 && (
                                     <div 
-                                        className="ttb-bar new-cases"
-                                        style={{ height: `${newCasesHeightPx}px` }}
-                                        title={`New Cases: ${newCasesTotal}`}
+                                        className="ttb-bar second"
+                                        style={{ height: `${secondHeightPx}px` }}
+                                        title={`New Cases: ${secondTotal}`}
                                     ></div>
                                 )}
                             </div>
@@ -95,6 +109,6 @@ const HBarChart = ({ data, formatNumber }) => {
             </div>
         </div>
     );
-}
+};
 
 export default HBarChart;

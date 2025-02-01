@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../Mobile.css';
 
-const MobileMenu = ({ theme, scrolled, routes }) => {
+const MobileMenu = ({ theme, scrolled, routes, logout}) => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const [displayMenu, setDisplayMenu] = useState('none');
@@ -44,6 +44,7 @@ const MobileMenu = ({ theme, scrolled, routes }) => {
             {title}
           </button>
         ))}
+        <button onClick={logout} className="logout">Logout</button>
       </div>
     </div>
   );

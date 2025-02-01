@@ -20,7 +20,6 @@ const Nav = ({ user, loggedIn, logout, theme, changeTheme }) => {
   const routes = {
     "Weather Events": "/weather",
     "New Data": "/new-data",
-    "Referral": "/referral",
   };
 
   useEffect(() => {
@@ -82,7 +81,7 @@ const Nav = ({ user, loggedIn, logout, theme, changeTheme }) => {
           }}
         />
         {isMobile ? (
-          <MobileMenu theme={theme} scrolled={scrolled} routes={routes} />
+          <MobileMenu theme={theme} scrolled={scrolled} routes={routes} logout={logout} />
         ) : (
           loggedIn ? (
             <div id='nav-actions'>
@@ -97,7 +96,7 @@ const Nav = ({ user, loggedIn, logout, theme, changeTheme }) => {
                 Account
               </button>
               <div ref={dropdownRef} className={`account-dropdown ${showAccountDropdown ? 'visible' : 'hidden'}`}>
-                <h4 className='account-greeting'>Welcome back, {user || 'Tyler'}!</h4>
+                <h4 className='account-greeting'>Welcome back, {user || 'User'}!</h4>
                 <button onClick={() => { navigate('/settings'); setShowAccountDropdown(false); }} disabled={location.pathname === '/settings'}>Settings</button>
                 <button onClick={logout} className="logout">Logout</button>
                 <Theme theme={theme} changeTheme={changeTheme} />

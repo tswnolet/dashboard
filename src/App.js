@@ -110,7 +110,6 @@ const ConditionalNav = ({ loggedIn, changeTheme, theme, logout, data, setData, s
 const AppRoutes = ({ loggedIn, setLoggedIn, changeTheme, theme, data, setData, addCard, logout, setFilteredData, setShowAlert, showAlert }) => {
   return (
     <Routes>
-      <Route path="/referral" element={<LeadUploader />} />
       {loggedIn ? (
         <>
           <Route path="/dashboard" element={<Dashboard setLoggedIn={setLoggedIn} changeTheme={changeTheme} theme={theme} data={data} setData={setData} setFilteredData={setFilteredData} />} />

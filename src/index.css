@@ -290,3 +290,73 @@ table:not(.schools) > tbody > tr > td {
     padding: 10px;
   }
 }
+
+/* Ensure table has equal column widths */
+.page-container > div:not(.file-upload) {
+  width: 90%;
+}
+
+table {
+  margin: 50px;
+}
+
+.page-container > div:not(.file-upload) table {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Table Headers */
+.page-container table th {
+  padding: 10p;
+  font-weight: bold;
+  color: var(--text-color);
+  background-color: var(--secondary-color);
+  text-align: center;
+  border-bottom: 2px solid var(--border-color);
+  white-space: nowrap; /* Prevents text wrapping */
+}
+
+/* Convert CamelCase headers to spaced words */
+.page-container table th::before {
+  content: attr(data-label);
+  display: block;
+}
+
+/* Table Rows */
+.page-container table tr {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+/* Table Cells */
+.page-container table td {
+  padding: 8px;
+  text-align: center;
+  flex: 1; /* Makes all columns equal width */
+  max-width: 150px; /* Prevents excessive widening */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Truncate text */
+  white-space: nowrap;
+  border-right: 1px solid var(--border-color);
+  border-left: 1px solid var(--border-color);
+}
+
+/* Show full text on hover */
+.page-container table td:hover {
+  overflow: visible;
+  white-space: normal;
+  text-overflow: unset;
+  word-break: break-word;
+  position: relative;
+  z-index: 10;
+  background: var(--card-color);
+  box-shadow: var(--large-box-shadow);
+  padding: 10px;
+  max-width: unset;
+}

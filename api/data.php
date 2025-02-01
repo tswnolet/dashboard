@@ -1,7 +1,6 @@
 <?php
-require './headers.php';
 require './db.php';
-session_start(); // Add this line to start the session
+session_start();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);

@@ -1,0 +1,26 @@
+.minimalist-line-graph {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    width: 100%;
+    height: 100%;
+    background-color: var(--secondary-color);
+    border-radius: 12px;
+    box-shadow: var(--large-box-shadow);
+    padding: 20px;
+    gap: 10px;
+}
+
+.chart-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #B0B0B0;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.graph-canvas {
+    width: 100% !important;
+    height: auto;
+    max-height: 100%;
+}

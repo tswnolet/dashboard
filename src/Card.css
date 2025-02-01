@@ -155,11 +155,11 @@
     flex-direction: column;
 }
 
-.intake {
+.first {
     background-color: #7b57ff;
 }
 
-.new-cases {
+.second {
     background-color: var(--graph-color);
 }
 
@@ -168,10 +168,10 @@
     flex-direction: column;
     justify-content: space-between;
     align-items: flex-end;
-    width: 50px; /* Fixed width */
-    height: inherit !important; /* Ensures it takes full parent height */
-    min-height: 100%; /* Forces it to stretch */
-    flex-grow: 1; /* Allow it to expand */
+    width: 50px;
+    height: inherit !important;
+    min-height: 100%;
+    flex-grow: 1;
     font-size: 0.9rem;
     font-weight: bold;
     color: var(--text-color);
@@ -186,6 +186,13 @@
     white-space: nowrap;
 }
 
+.graph-container {
+    position: relative;
+    height: 100%;
+    flex-grow: 1;
+    width: 100%;
+}
+
 .grid-lines {
     display: flex;
     flex-direction: column;
@@ -194,7 +201,20 @@
     width: 100%;
     height: 100%;
     z-index: 0;
-    padding: 9px 0 22px 0;
+}
+
+.grid-lines:not(.canvas) {
+    padding: 7px 0 22px 0;
+}
+
+.canvas {
+    padding: -15px 0;
+    justify-content: space-between;
+    padding: 40px 31px 38px 31px;
+}
+
+canvas {
+    z-index: 2;
 }
 
 .graph-titles > h4{

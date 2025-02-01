@@ -9,6 +9,9 @@
   transition: opacity 0.5s ease-in-out;
   z-index: 1001;
   user-select: none;
+  display: inline-block;
+  white-space: nowrap;
+  max-width: unset;
 }
 
 .alert.fade-in {
