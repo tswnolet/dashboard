@@ -2,10 +2,8 @@ import React, { useState, useEffect } from "react";
 import Card from "./Card";
 import "../Dashboard.css";
 
-const GoogleAdsComponent = () => {
+const GoogleAdsComponent = ({ startDate, endDate}) => {
     const [loading, setLoading] = useState(true);
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
     const [totals, setTotals] = useState({ impressions: 0, clicks: 0, conversions: 0, cost: 0 });
 
     const fetchData = async () => {
@@ -42,10 +40,10 @@ const GoogleAdsComponent = () => {
 
     return (
         <>
-            <Card data={{ title: "Total Impressions", data: totals.impressions.toLocaleString() }} />
-            <Card data={{ title: "Total Clicks", data: totals.clicks.toLocaleString() }} />
-            <Card data={{ title: "Total Conversions", data: totals.conversions.toLocaleString() }} />
-            <Card data={{ title: "Total Cost", data: `$${totals.cost.toLocaleString()}` }} />
+            <Card data={{ title: "Total Impressions - Google Ads", data: totals.impressions.toLocaleString() }} />
+            <Card data={{ title: "Total Clicks - Google Ads", data: totals.clicks.toLocaleString() }} />
+            <Card data={{ title: "Total Conversions - Google Ads", data: totals.conversions.toLocaleString() }} />
+            <Card data={{ title: "Total Cost - Google Ads", data: `$${totals.cost.toLocaleString()}` }} />
         </>
     );
 };

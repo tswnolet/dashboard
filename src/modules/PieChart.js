@@ -1,11 +1,13 @@
 import React from 'react';
+import { Box, Typography } from '@mui/material';
 import '../Card.css';
+import Loading from './Loading';
 
 const PieChartComponent = ({ data, title, formatNumber }) => {
     const parsedData = typeof data === "string" ? JSON.parse(data) : data;
 
     if (!parsedData || Object.keys(parsedData).length === 0) {
-        return <div className="error-message">No data available</div>;
+        return <Loading />;
     }
 
     const colors = ["#7b57ff", "var(--graph-color)", "#b37afa", "#d8a2f8", "#c187f9", "#f1cef9"]; // Expand as needed
@@ -30,16 +32,16 @@ const PieChartComponent = ({ data, title, formatNumber }) => {
     });
 
     return (
-        <div className='chart-wrapper'>
-            <div className="pie-legend">
+        <Box className='chart-wrapper'>
+            <Box className="pie-legend">
                 {slices.map((slice, index) => (
-                    <div className="pie-legend-item" key={index}>
-                        <span className="pie-legend-color" style={{ backgroundColor: slice.color }}></span>
-                        <span>{slice.name} {window.innerWidth > 1024 ? `- ${formatNumber(slice.value, title === 'Marketing Budget' ? "e" : 'a', title == 'Marketing Budget' ? '$' : '')}` : `${formatNumber(slice.percentage, "e")}%`}</span>
-                    </div>
+                    <Box className="pie-legend-item" key={index}>
+                        <Box className="pie-legend-color" sx={{ backgroundColor: slice.color }}></Box>
+                        <Typography variant="body2">{slice.name} {window.innerWidth > 1024 ? `- ${formatNumber(slice.value, title === 'Marketing Budget' ? "e" : 'a', title == 'Marketing Budget' ? '$' : '')}` : `${formatNumber(slice.percentage, "e")}%`}</Typography>
+                    </Box>
                 ))}
-            </div>
-            <div className="pie-container chart">
+            </Box>
+            <Box className="pie-container chart">
                 <svg viewBox="0 0 32 32" className="pie-chart" preserveAspectRatio="xMidYMid meet">
                     {slices.map((slice, index) => (
                         <circle
@@ -57,12 +59,12 @@ const PieChartComponent = ({ data, title, formatNumber }) => {
                         />
                     ))}
                 </svg>
-                <div className="pie-text">
-                    <h1>{formatNumber(totalSum)}</h1>
-                    <h3 style={{ color: "var(--hover-color)" }}>{title === 'Marketing Budget' ? `/ ${formatNumber(FIXED_TOTAL)}` : ''}</h3>
-                </div>
-            </div>
-        </div>
+                <Box className="pie-text">
+                    <Typography variant="h4">{formatNumber(totalSum)}</Typography>
+                    <Typography variant="subtitle1" sx={{ color: "var(--hover-color)" }}>{title === 'Marketing Budget' ? `/ ${formatNumber(FIXED_TOTAL)}` : ''}</Typography>
+                </Box>
+            </Box>
+        </Box>
     );
 };
 

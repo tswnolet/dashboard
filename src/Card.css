@@ -187,6 +187,9 @@
 }
 
 .graph-container {
+    display: flex;
+    justify-content: center;
+    align-items: end;
     position: relative;
     height: 100%;
     flex-grow: 1;
@@ -198,19 +201,20 @@
     flex-direction: column;
     justify-content: space-between;
     position: absolute;
-    width: 100%;
-    height: 100%;
     z-index: 0;
 }
 
 .grid-lines:not(.canvas) {
     padding: 7px 0 22px 0;
+    height: 100%;
+    width: 100%;
 }
 
 .canvas {
-    padding: -15px 0;
     justify-content: space-between;
-    padding: 40px 31px 38px 31px;
+    height: calc(100% - 20px);
+    width: 85%;
+    padding-bottom: 25px;
 }
 
 canvas {

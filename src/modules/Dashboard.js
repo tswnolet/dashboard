@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import '../Dashboard.css';
+import { Box, Button, Typography, IconButton, TextField } from '@mui/material';
 import Loading from './Loading';
 import Card from './Card';
 import Cookies from '../modules/Cookies';
 import { Filter } from './Filter';
-import Refresh from './Refresh';
+// import Refresh from './Refresh'; // Remove this line
 import Alert from './Alert';
 import GoogleAdsComponent from './GoogleAdsComponent';
 import LeadStatusComponent from './LeadStatusComponent';
@@ -32,7 +32,7 @@ const Dashboard = ({ setLoggedIn }) => {
         const startTime = Date.now();
 
         try {
-            const response = await fetch('https://dalyblackdata.com/api/dashdata.php');
+            const response = await fetch(`https://dalyblackdata.com/api/dashdata.php${startDate ? ("?startDate=" + startDate + (endDate ? "&endDate=" + endDate : "")) : endDate ? "?endDate=" + endDate : ""}`);
             const result = await response.json();
     
             if (result.success) {
@@ -41,7 +41,7 @@ const Dashboard = ({ setLoggedIn }) => {
                     casesByLocation: result.casesByLocation ?? {},
                     casesByPracticeType: result.casesByPracticeType ?? {},
                     casesByStatus: result.casesByStatus ?? {},
-                    leadsVsCases: result.leadsVsCases ?? {},
+                    casesVsSettlements: result.casesVsSettlements ?? {},
                     settlementsOverTime: result.settlementsOverTime ?? {},
                     casesByOffice: result.casesByOffice ?? {},
                     caseOutcomes: result.caseOutcomes ?? {},
@@ -68,46 +68,62 @@ const Dashboard = ({ setLoggedIn }) => {
 
     useEffect(() => {
         fetchStats();
-    }, []);
+    }, [startDate, endDate]);
 
-    const transformedSecondData = Object.fromEntries(
-        Object.entries(stats.casesOpenedVsClosed ?? {}).map(([key, value]) => [key, value?.[1] ?? 0])
-    );
-    
-    console.log("📊 Original Data:", stats);
     return (
-        <div id='dashboard' className='page-container'>
+        <Box id='dashboard' className='page-container'>
             <Cookies />
-            <div className='data-action-container'>
-                <div className='filter-container'>
-                    <button id='filter-button' 
+            <Box className='data-action-container'>
+                <Box className='filter-container'>
+                    <Button 
+                        variant="contained" 
+                        startIcon={<Filter />} 
                         onClick={() => setShowDateInputs(!showDateInputs)}
                     >
-                        <Filter />
                         Filter
-                    </button>
+                    </Button>
                     {showDateInputs && (
-                        <div id='filter-items'>
-                            <input type="date" className="date-input" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-                            <h4>to</h4>
-                            <input type="date" className="date-input" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-                        </div>
+                        <Box id='filter-items'>
+                            <TextField 
+                                type="date" 
+                                className="date-input" 
+                                value={startDate} 
+                                onChange={(e) => setStartDate(e.target.value)} 
+                                margin="normal"
+                            />
+                            <Typography variant="body1">to</Typography>
+                            <TextField 
+                                type="date" 
+                                className="date-input" 
+                                value={endDate} 
+                                onChange={(e) => setEndDate(e.target.value)} 
+                                margin="normal"
+                            />
+                        </Box>
                     )}
-                </div>
-                <button title='Refresh data' id='refresh' onClick={fetchStats} className={refreshing ? 'spinning' : ''}>
-                    <Refresh />
-                </button>
+                </Box>
+                <IconButton title='Refresh data' id='refresh' onClick={fetchStats} className={refreshing ? 'spinning' : ''}>
+                    {/* Replace with a placeholder */}
+                    <span>🔄</span>
+                </IconButton>
                 {showAlert && <Alert message="Data updated successfully." type="success" onClose={() => setShowAlert(false)} />}
-            </div>
-            <div className="cards">
+            </Box>
+            <Box className="cards">
                 <Card data={{ title: "Cases by Location", data: stats.casesByLocation }} type="pie" />
                 <Card data={{ title: "Cases by Practice Type", data: stats.casesByPracticeType }} type="v-bar" />
-                <Card data={{ title: "Settlements Over Time", data: stats.settlementsOverTime }} type="line" yAxisLabel="money" />
+                <Card 
+                    data={{ title: "Settlements Over Time", data: stats.settlementsOverTime }}
+                    secondData={Object.fromEntries(
+                        Object.entries(stats.settlementsOverTime ?? {}).map(([key, value]) => [key, value?.adjustedSettlement ?? 0])
+                    )}
+                    type="line"
+                    yAxisLabel="money"
+                />
                 <Card data={{ title: "Case Outcome Breakdown", data: stats.caseOutcomes }} type="v-bar" />
                 <Card data={{ title: "Total Adjusted Settlement Value", data: stats.totalSettlement, col: 1, row: 2}} />
-                <Card data={{ title: "Leads vs Cases by Month", data: stats.leadsVsCases ?? {} }} type="h-bar" />
-                <Card data={{ title: "Average Settlement by Practice Type", data: stats.avgSettlementByPractice ?? {} }} type="v-bar" />
-                <Card 
+                <Card data={{ title: "New Cases vs Settlements", data: stats.casesVsSettlements ?? {} }} type="h-bar" />
+                <Card data={{ title: "Average Settlement by Practice Type", data: stats.avgSettlementByPractice ?? {} }} type="v-bar" format="f" />
+                <Card
                     data={{ title: "New Cases vs Closed Cases Over Time", data: stats.casesOpenedVsClosed ?? {} }} 
                     type="line" 
                     secondData={Object.fromEntries(
@@ -116,10 +132,10 @@ const Dashboard = ({ setLoggedIn }) => {
                     yAxisLabel="count"
                 />
                 <Card data={{ title: "Case Duration Analysis", data: stats.caseDuration, col: 2, row: 2 }} type="h-bar" />
-                <GoogleAdsComponent />
+                <GoogleAdsComponent startDate={startDate} endDate={endDate}/>
                 <LeadStatusComponent startDate={startDate} endDate={endDate} />
-            </div>
-        </div>
+            </Box>
+        </Box>
     );
 };
 

@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Login from "./Login";
 import SignUp from "./SignUp";
 import Alert from "./Alert";
+import { Box, Button, Typography, TextField } from '@mui/material';
 import '../Context.css';
 import '../index.css';
 
@@ -51,29 +52,29 @@ const Context = ({ setLoggedIn, setShowAlert, showAlert }) => {
   };
 
   return (
-    <div id='context' style={{ animation: close ? 'fade-out 2s forwards' : '' }}>
+    <Box id='context' sx={{ animation: close ? 'fade-out 2s forwards' : '' }}>
       {error && <Alert message={error} type="error" onClose={() => setError(null)} />}
-      <form id='context-form' onSubmit={fetchData}>
-        {window.innerWidth <= 1024 && <h2>Your data. All in. <span style={{ fontWeight: "900" }}>All the time.</span></h2>}
+      <Box component="form" id='context-form' onSubmit={fetchData}>
+        {window.innerWidth <= 1024 && <Typography variant="h2">Your data. All in. <span style={{ fontWeight: "900" }}>All the time.</span></Typography>}
         {isLogin ? <Login formUpdate={formUpdate} formData={formData} /> : <SignUp formUpdate={formUpdate} formData={formData} />}
-        <button type="submit" className='action-btn'>
+        <Button type="submit" className='action-btn'>
           {isLogin ? 'Login' : 'Sign Up'}
-        </button>
-        <button type='button' className='change-context' onClick={() => navigate(isLogin ? '/signup' : '/login')} aria-label="Switch to Login">
+        </Button>
+        <Button type='button' className='change-context' onClick={() => navigate(isLogin ? '/signup' : '/login')} aria-label="Switch to Login">
           {isLogin ? 'Sign Up' : 'Login'}
-        </button>
-      </form>
-      <div id="context-bg">
-        <div id="context-bg-container">
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-        </div>
-        {window.innerWidth > 1024 && <h2>Your data. All in. <span style={{ fontWeight: "900" }}>All the time.</span></h2>}
-      </div>
+        </Button>
+      </Box>
+      <Box id="context-bg">
+        <Box id="context-bg-container">
+          <Box></Box>
+          <Box></Box>
+          <Box></Box>
+          <Box></Box>
+        </Box>
+        {window.innerWidth > 1024 && <Typography variant="h2">Your data. All in. <span style={{ fontWeight: "900" }}>All the time.</span></Typography>}
+      </Box>
       {showAlert && <Alert message="User logged out." type="info" onClose={() => setShowAlert(false)} />}
-    </div>
+    </Box>
   );
 }
 

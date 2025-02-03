@@ -3,14 +3,23 @@ import HBarChart from './HBarChart';
 import VBarChart from './VBarChart';
 import PieChartComponent from './PieChart';
 import LineGraph from './LineGraph';
+import { Box, Typography } from '@mui/material';
 import '../Card.css';
 
-// Card component to display data
-const Card = ({ data, type, secondData, yAxisLabel }) => {
-    // Set default grid sizes based on type
+const Card = ({ data, type, secondData, yAxisLabel, format }) => {
+
     const defaultGridSize = {
-        "h-bar": { col: 3, row: 2 },
-        "v-bar": { col: 2, row: 2 }, // Auto height based on content
+        "h-bar": { 
+            col: typeof data.data === "object" && data.data !== null 
+                ? Object.keys(data.data).length > 4 
+                    ? 3 
+                    : Object.keys(data.data).length === 1 
+                        ? 1
+                        : 2
+                : 2,
+            row: 2
+        },
+        "v-bar": { col: 2, row: 2 }, 
         "pie": { col: 2, row: 2 },
         "line": { col: 2, row: 2}
     };
@@ -45,22 +54,22 @@ const Card = ({ data, type, secondData, yAxisLabel }) => {
     };
 
     return (
-        <div className='card' style={cardStyle}>
-            <p>{data.title}</p>
+        <Box className='card' sx={cardStyle}>
+            <Typography variant="body1">{data.title}</Typography>
             {!type ? (
                 data.title === "Total Adjusted Settlement Value"
-                    ? <h1>{formatNumber(data.data, "e", "$")}</h1>
-                    : <h1>{data.data}</h1>
+                    ? <Typography variant="h4">{formatNumber(data.data, "e", "$")}</Typography>
+                    : <Typography variant="h4">{data.data}</Typography>
             ) : type === 'line' ? (
                 <LineGraph data={data.data} title={data.title} formatNumber={formatNumber} secondData={secondData} yAxisLabel={yAxisLabel} />
             ) : type === 'h-bar' ? (
                 <HBarChart data={data.data} title={data.title} formatNumber={formatNumber} />
             ) : type === 'v-bar' ? (
-                <VBarChart data={data.data} title={data.title} formatNumber={formatNumber} />
+                <VBarChart data={data.data} title={data.title} formatNumber={formatNumber} format={format} />
             ) : type === 'pie' ? (
                 <PieChartComponent data={data.data} title={data.title} formatNumber={formatNumber} />
             ) : null}
-        </div>
+        </Box>
     );
 }
 

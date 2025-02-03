@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { handleFileUpload } from "../utils";
+import { Box, Typography, Button, Input } from '@mui/material';
 
 export const Uploader = ({ setFile, setLeads, handleFileChange }) => {
     const [dragging, setDragging] = useState(false);
@@ -30,25 +31,34 @@ export const Uploader = ({ setFile, setLeads, handleFileChange }) => {
     };
 
     return (
-        <>
-            <div
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                className='file-upload'
-            >
+        <Box
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            sx={{
+                border: '2px dashed grey',
+                padding: '20px',
+                textAlign: 'center',
+                cursor: 'pointer',
+                backgroundColor: dragging ? '#f0f0f0' : 'white'
+            }}
+        >
+            <Typography variant="body1">
                 {dragging ? "Drop the file here..." : (fileName || "Drag and drop a file here or click to upload")}
-                <label>
-                    <input 
-                        type="file" 
-                        onChange={handleChange} 
-                        accept=".csv,.xlsx" 
-                        onDragOver={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                    />
+            </Typography>
+            <label>
+                <Input 
+                    type="file" 
+                    onChange={handleChange} 
+                    accept=".csv,.xlsx" 
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    sx={{ display: 'none' }}
+                />
+                <Button variant="contained" component="span">
                     {fileName ? 'Change file' : "Choose a file"}
-                </label>
-            </div>
-        </>
+                </Button>
+            </label>
+        </Box>
     );
 }

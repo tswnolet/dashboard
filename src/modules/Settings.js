@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Alert from './Alert';
 import { allCookies, eraseCookie } from '../utils/cookies';
+import { Box, Typography, Button, TextField, List, ListItem, ListItemText, IconButton } from '@mui/material';
+// import DeleteIcon from '@mui/icons-material/Delete';
 import '../styles/Settings.css';
 import '../Alert.css';
 
@@ -100,42 +102,44 @@ const Settings = () => {
   };
 
   return (
-    <div id='settings' className='page-container'>
+    <Box id='settings' className='page-container'>
       {error && <Alert message={error.message} type={error.type} onClose={() => setError(null)} />}
-      <div className="section">
-        <h2>Manage Cookies</h2>
-        <ul>
+      <Box className="section">
+        <Typography variant="h4">Manage Cookies</Typography>
+        <List>
           {cookies.map((cookie, index) => (
-            <li key={index}>
-              {cookie.name}: {cookie.value} (Expires: {cookie.expires})
-              <button className='delete' onClick={() => handleCookieDelete(cookie.name)}>Delete</button>
-            </li>
+            <ListItem key={index} secondaryAction={
+              <IconButton edge="end" aria-label="delete" onClick={() => handleCookieDelete(cookie.name)}>
+                {/* Placeholder for DeleteIcon */}
+              </IconButton>
+            }>
+              <ListItemText primary={`${cookie.name}: ${cookie.value} (Expires: ${cookie.expires})`} />
+            </ListItem>
           ))}
-        </ul>
-      </div>
-      <div className="account-section">
-        <h2>Account Information</h2>
-        <div className='input-section-container'>
-          <div className='label-container'>
-            <label htmlFor="user">Username:</label>
-            <label htmlFor="email">Email:</label>
-            <label htmlFor="password">Password:</label>
-            <label htmlFor="confirm_password">Confirm Password:</label>
-          </div>
-          <div className='input-container'>
-            <input
-              type="text"
+        </List>
+      </Box>
+      <Box className="account-section">
+        <Typography variant="h4">Account Information</Typography>
+        <Box className='input-section-container'>
+          <Box className='label-container'>
+            <TextField
+              label="Username"
               name="user"
               value={accountInfo.user}
               onChange={handleInputChange}
+              fullWidth
+              margin="normal"
             />
-            <input
-              type="email"
+            <TextField
+              label="Email"
               name="email"
               value={accountInfo.email}
               onChange={handleInputChange}
+              fullWidth
+              margin="normal"
             />
-            <input
+            <TextField
+              label="Password"
               type="password"
               name="password"
               value={accountInfo.password}
@@ -150,8 +154,11 @@ const Settings = () => {
                 }
               }}
               onChange={handleInputChange}
+              fullWidth
+              margin="normal"
             />
-            <input
+            <TextField
+              label="Confirm Password"
               type="password"
               name="confirm_password"
               value={accountInfo.confirm_password}
@@ -166,12 +173,14 @@ const Settings = () => {
                 }
               }}
               onChange={handleInputChange}
+              fullWidth
+              margin="normal"
             />
-          </div>
-        </div>
-        <button onClick={handleAccountUpdate}>Update Account</button>
-      </div>
-    </div>
+          </Box>
+        </Box>
+        <Button variant="contained" onClick={handleAccountUpdate}>Update Account</Button>
+      </Box>
+    </Box>
   );
 };
 

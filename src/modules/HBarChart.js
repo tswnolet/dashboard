@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
+import Loading from './Loading';
 
 const HBarChart = ({ data, formatNumber }) => {
     const parsedData = data && typeof data === "string" ? JSON.parse(data) : data || {};
@@ -27,7 +28,7 @@ const HBarChart = ({ data, formatNumber }) => {
     }, [parsedData]);
 
     if (!parsedData || Object.keys(parsedData).length === 0) {
-        return <div className="error-message">No data available</div>;
+        return <Loading />;
     }
 
     const monthOrder = [
@@ -41,7 +42,7 @@ const HBarChart = ({ data, formatNumber }) => {
     const displayedEntries = sortedEntries.slice(-monthsToShow);
 
     if (displayedEntries.length === 0) {
-        return <div className="error-message">No data available</div>;
+        return <Loading />;
     }
 
     const maxTotal = Math.max(
@@ -53,9 +54,9 @@ const HBarChart = ({ data, formatNumber }) => {
     const yAxisLabels = labelsCount === 5
         ? Array.from({ length: 5 }, (_, i) => `${formatNumber((maxTotal / 4) * i, "a")}`).reverse()
         : [
-            `${formatNumber(maxTotal, "a")} - `,
-            `${formatNumber(maxTotal / 2, "a")} - `,
-            `0 - `
+            `${formatNumber(maxTotal, "a")}`,
+            `${formatNumber(maxTotal / 2, "a")}`,
+            `0`
         ];
 
     return (
@@ -71,7 +72,7 @@ const HBarChart = ({ data, formatNumber }) => {
                         <div key={`${index}-grid-line`} className="y-grid-line"></div>
                     ))}
                 </div>
-                {displayedEntries.map(([month, values]) => {
+                {displayedEntries.map(([name, values]) => {
                     let firstTotal = 0;
                     let secondTotal = 0;
 
@@ -85,23 +86,23 @@ const HBarChart = ({ data, formatNumber }) => {
                     const secondHeightPx = (secondTotal / maxTotal) * parentHeight;
 
                     return (
-                        <div className="period" key={month}>
+                        <div className="period" key={name}>
                             <div className='graph-bars'>
                                 <div 
                                     className="ttb-bar first"
                                     style={{ height: `${firstHeightPx}px` }}
-                                    title={`Intake: ${firstTotal}`}
+                                    title={`${name}: ${firstTotal}`}
                                 ></div>
                                 {secondTotal > 0 && (
                                     <div 
                                         className="ttb-bar second"
                                         style={{ height: `${secondHeightPx}px` }}
-                                        title={`New Cases: ${secondTotal}`}
+                                        title={`${name}: ${secondTotal}`}
                                     ></div>
                                 )}
                             </div>
                             <div className="graph-titles">
-                                <h4>{month}</h4>
+                                <h4>{name}</h4>
                             </div>
                         </div>
                     );

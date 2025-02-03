@@ -1,52 +1,49 @@
 import React from 'react';
+import { Box, Typography, LinearProgress } from '@mui/material';
+import Loading from './Loading';
 
-const VBarChart = ({ data }) => {
-    // Ensure data is always an object
+const VBarChart = ({ data, formatNumber, format }) => {
     const parsedData = data && typeof data === "string" ? JSON.parse(data) : data || {};
 
-    // If data is still empty, return a message instead of breaking
     if (!parsedData || Object.keys(parsedData).length === 0) {
-        return <div className="error-message">No data available</div>;
+        return <Loading />;
     }
 
-    // Convert object to array and sort by value (descending)
     let sortedEntries = Object.entries(parsedData).sort((a, b) => b[1] - a[1]);
 
-    // Take the top 4 categories, sum the rest into "Other"
     const topCategories = sortedEntries.slice(0, 4);
     const otherSum = sortedEntries.slice(4).reduce((acc, [, value]) => acc + value, 0);
 
-    // Construct final data structure
     const finalData = [...topCategories];
     if (otherSum > 0) {
         finalData.push(["Other", otherSum]);
     }
 
-    // Calculate the total sum of all values
-    const totalSum = finalData.reduce((acc, [, val]) => acc + val, 0) || 1; // Prevent division by zero
+    const totalSum = finalData.reduce((acc, [, val]) => acc + val, 0) || 1;
 
     return (
-        <div className='vertical-graph chart'>
+        <Box className='vertical-graph chart'>
             {finalData.map(([category, value]) => {
                 const percentage = ((value / totalSum) * 100).toFixed(2);
 
                 return (
-                    <div className='period v' key={category}>
-                        <div className='graph-data-labels'>
-                            <h4>{category} / {value}</h4>
-                            <h4>{percentage}%</h4>
-                        </div>
-                        <div className="ltr-bar">
-                            <div 
-                                className='bar-total' 
-                                style={{ width: `${percentage}%` }} 
+                    <Box className='period v' key={category} sx={{ mb: 2 }}>
+                        <Box className='graph-data-labels' sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Typography variant="h6">{category} / {format ? formatNumber(value, "e", "$") : value}</Typography>
+                            <Typography variant="h6">{percentage}%</Typography>
+                        </Box>
+                        <Box className="ltr-bar" sx={{ mt: 1 }}>
+                            <LinearProgress 
+                                variant="determinate" 
+                                value={percentage} 
+                                sx={{ height: 10, borderRadius: 5 }} 
                                 title={`${category}: ${value} (${percentage}%)`}
-                            ></div>
-                        </div>
-                    </div>
+                            />
+                        </Box>
+                    </Box>
                 );
             })}
-        </div>
+        </Box>
     );
 }
 
