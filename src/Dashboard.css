@@ -17,12 +17,6 @@
 }
 
 #nav-actions {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    gap: 13px;
-    min-width: 275px;
     position: relative;
 }
 
@@ -97,13 +91,6 @@
 
 #nav-actions input[type="date"]::placeholder {
   color: var(--placeholder-color);
-}
-
-.cards {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
-    width: 100%;
-    padding: 20px;
 }
 
 .account-dropdown {

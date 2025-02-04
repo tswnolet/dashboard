@@ -1,10 +1,7 @@
 <?php
 require './db.php';
-session_start();
-header('Content-Type: application/json');
 
-$startDate = isset($_GET["startDate"]) ? $_GET['startDate'] : null;
-$endDate = isset($_GET["endDate"]) ? $_GET['endDate'] : null;
+session_start();
 
 function dateFilter($column, $startDate, $endDate) {
     if($startDate && $endDate) {
@@ -18,22 +15,29 @@ function dateFilter($column, $startDate, $endDate) {
 }
 
 function fetchTotalSettlement($conn, $startDate, $endDate) {
-    $sqlAvg = "SELECT AVG(suit_percentage / 100) AS avgSuitPercentage FROM cases WHERE suit_percentage / 100 IS NOT NULL";
+    $sqlAvg = "SELECT AVG(suit_percentage / 100) AS avgSuitPercentage 
+               FROM cases 
+               WHERE suit_percentage / 100 IS NOT NULL";
     $resultAvg = $conn->query($sqlAvg);
     $avgSuitPercentage = $resultAvg->fetch_assoc()['avgSuitPercentage'] ?? 0.4;
+
     $dateFilter = dateFilter("COALESCE(settlement_date, last_activity)", $startDate, $endDate);
 
-    $sql = "SELECT SUM(
-                settlement_amount * COALESCE(suit_percentage / 100, $avgSuitPercentage)
-            ) AS totalAdjustedSettlement 
+    $sql = "SELECT 
+                SUM(settlement_amount) AS totalUnadjustedSettlement,
+                SUM(settlement_amount * COALESCE(suit_percentage / 100, $avgSuitPercentage)) AS totalAdjustedSettlement
             FROM cases 
             WHERE settlement_amount IS NOT NULL $dateFilter";
-    
+
     $result = $conn->query($sql);
-    return $result->fetch_assoc()['totalAdjustedSettlement'] ?? 0;
+    $row = $result->fetch_assoc();
+
+    return [
+        floatval($row['totalUnadjustedSettlement'] ?? 0),
+        floatval($row['totalAdjustedSettlement'] ?? 0)
+    ];
 }
 
-// Fetch cases by location
 function fetchCasesByLocation($conn, $startDate, $endDate) {
     $dateFilter = dateFilter("creation_date", $startDate, $endDate);
     $sql = "SELECT location, COUNT(*) AS count FROM cases WHERE 1=1 $dateFilter GROUP BY location";
@@ -43,14 +47,13 @@ function fetchCasesByLocation($conn, $startDate, $endDate) {
     while ($row = $result->fetch_assoc()) {
         $state = $row['location'];
         if (!in_array($state, ['TX', 'LA', 'CO', 'FL'])) {
-            $state = 'TX'; // Assigns all unknown states to TX
+            $state = 'TX';
         }
         $data[$state] = ($data[$state] ?? 0) + intval($row['count']);
     }
     return $data;
 }
 
-// Fetch cases by practice type
 function fetchCasesByPracticeType($conn, $startDate, $endDate) {
     $dateFilter = dateFilter("creation_date", $startDate, $endDate);
     $sql = "SELECT practice_type, COUNT(*) AS count FROM cases WHERE 1=1 $dateFilter GROUP BY practice_type";
@@ -73,7 +76,6 @@ function fetchCasesByPracticeType($conn, $startDate, $endDate) {
     return $data;
 }
 
-// Fetch cases by status
 function fetchCasesByStatus($conn, $startDate, $endDate) {
     $dateFilter = dateFilter("last_activity", $startDate, $endDate);
     $sql = "SELECT phase AS status, COUNT(*) AS count FROM cases WHERE 1=1 $dateFilter GROUP BY phase";
@@ -86,7 +88,6 @@ function fetchCasesByStatus($conn, $startDate, $endDate) {
     return $data;
 }
 
-// Fetch settlements over time
 function fetchSettlementsOverTime($conn, $startDate, $endDate) {
     $dateFilter = dateFilter("COALESCE(settlement_date, last_activity)", $startDate, $endDate);
 
@@ -95,13 +96,13 @@ function fetchSettlementsOverTime($conn, $startDate, $endDate) {
     $dateDiff = $resultDateDiff->fetch_assoc()['daysDiff'] ?? 365;
 
     if ($dateDiff > 365) {
-        $groupBy = "DATE_FORMAT(settlement_date, '%Y')"; // Group by Year
+        $groupBy = "DATE_FORMAT(settlement_date, '%Y')";
     } elseif ($dateDiff > 30) {
-        $groupBy = "DATE_FORMAT(settlement_date, '%Y-%m')"; // Group by Month
+        $groupBy = "DATE_FORMAT(settlement_date, '%Y-%m')";
     } elseif ($dateDiff > 7) {
-        $groupBy = "DATE_FORMAT(settlement_date, '%Y-%u')"; // Group by Week
+        $groupBy = "DATE_FORMAT(settlement_date, '%Y-%u')";
     } else {
-        $groupBy = "DATE_FORMAT(settlement_date, '%Y-%m-%d')"; // Group by Day
+        $groupBy = "DATE_FORMAT(settlement_date, '%Y-%m-%d')";
     }
 
     $sqlAvg = "SELECT AVG(suit_percentage / 100) AS avgSuitPercentage 
@@ -131,7 +132,6 @@ function fetchSettlementsOverTime($conn, $startDate, $endDate) {
     return $data;
 }
 
-// Fetch new cases vs closed cases over time
 function fetchCasesOpenedVsClosed($conn, $startDate, $endDate) {
     $dateFilterCreated = dateFilter("creation_date", $startDate, $endDate);
     $dateFilterClosed = dateFilter("COALESCE(settlement_date, last_activity)", $startDate, $endDate);
@@ -200,7 +200,6 @@ function fetchCasesOpenedVsClosed($conn, $startDate, $endDate) {
     return $data;
 }
 
-// Fetch case outcome breakdown (Fixed!)
 function fetchCaseOutcomes($conn, $startDate, $endDate) {
     $dateFilter = dateFilter("last_activity", $startDate, $endDate);
     $sql = "SELECT phase AS outcome, COUNT(*) AS total_cases 
@@ -216,7 +215,6 @@ function fetchCaseOutcomes($conn, $startDate, $endDate) {
     return $data;
 }
 
-// Fetch case duration analysis
 function fetchCaseDuration($conn, $startDate, $endDate) {
     $dateFilter = dateFilter("settlement_date", $startDate, $endDate);
     $sql = "SELECT 
@@ -293,22 +291,4 @@ function fetchAvgSettlementByPractice($conn, $startDate, $endDate) {
     }
     return $data;
 }
-
-// Add to response
-$response = [
-    "success" => true,
-    "totalSettlement" => fetchTotalSettlement($conn, $startDate, $endDate),
-    "casesByLocation" => fetchCasesByLocation($conn, $startDate, $endDate),
-    "casesByPracticeType" => fetchCasesByPracticeType($conn, $startDate, $endDate),
-    "casesByStatus" => fetchCasesByStatus($conn, $startDate, $endDate),
-    "casesVsSettlements" => fetchCasesVsSettlements($conn, $startDate, $endDate),
-    "settlementsOverTime" => fetchSettlementsOverTime($conn, $startDate, $endDate),
-    "casesOpenedVsClosed" => fetchCasesOpenedVsClosed($conn, $startDate, $endDate),
-    "caseOutcomes" => fetchCaseOutcomes($conn, $startDate, $endDate),
-    "caseDuration" => fetchCaseDuration($conn, $startDate, $endDate),
-    "avgSettlementByPractice" => fetchAvgSettlementByPractice($conn, $startDate, $endDate)
-];
-
-echo json_encode($response, JSON_PRETTY_PRINT);
-$conn->close();
 ?>

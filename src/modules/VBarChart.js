@@ -1,5 +1,4 @@
 import React from 'react';
-import { Box, Typography, LinearProgress } from '@mui/material';
 import Loading from './Loading';
 
 const VBarChart = ({ data, formatNumber, format }) => {
@@ -22,28 +21,23 @@ const VBarChart = ({ data, formatNumber, format }) => {
     const totalSum = finalData.reduce((acc, [, val]) => acc + val, 0) || 1;
 
     return (
-        <Box className='vertical-graph chart'>
+        <div className='vertical-graph chart'>
             {finalData.map(([category, value]) => {
                 const percentage = ((value / totalSum) * 100).toFixed(2);
 
                 return (
-                    <Box className='period v' key={category} sx={{ mb: 2 }}>
-                        <Box className='graph-data-labels' sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <Typography variant="h6">{category} / {format ? formatNumber(value, "e", "$") : value}</Typography>
-                            <Typography variant="h6">{percentage}%</Typography>
-                        </Box>
-                        <Box className="ltr-bar" sx={{ mt: 1 }}>
-                            <LinearProgress 
-                                variant="determinate" 
-                                value={percentage} 
-                                sx={{ height: 10, borderRadius: 5 }} 
-                                title={`${category}: ${value} (${percentage}%)`}
-                            />
-                        </Box>
-                    </Box>
+                    <div className='period v' key={category}>
+                        <div className='graph-data-labels'>
+                            <h4>{category} / {format ? formatNumber(value, "e", "$") : value}</h4>
+                            <h4>{percentage}%</h4>
+                        </div>
+                        <div className="ltr-bar">
+                            <div style={{width: `${percentage}%`}} className='bar-total' title={`${category}: ${value} (${percentage}%)`}/>
+                        </div>
+                    </div>
                 );
             })}
-        </Box>
+        </div>
     );
 }
 

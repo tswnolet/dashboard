@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Typography, IconButton, TextField } from '@mui/material';
 import Loading from './Loading';
 import Card from './Card';
 import Cookies from '../modules/Cookies';
-import { Filter } from './Filter';
-// import Refresh from './Refresh'; // Remove this line
+import Filter from './Filter';
+import Refresh from './Refresh';
 import Alert from './Alert';
 import GoogleAdsComponent from './GoogleAdsComponent';
 import LeadStatusComponent from './LeadStatusComponent';
-import LineGraph from './LineGraph';
 
 const Dashboard = ({ setLoggedIn }) => {
     const [loading, setLoading] = useState(true);
@@ -17,42 +15,24 @@ const Dashboard = ({ setLoggedIn }) => {
     const [endDate, setEndDate] = useState('');
     const [showAlert, setShowAlert] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
-    const [stats, setStats] = useState({
-        totalSettlement: null,
-        casesByLocation: {},
-        casesByPracticeType: {},
-        casesByStatus: {},
-        leadsVsCases: {},
-        settlementsOverTime: {},
-        caseDuration: {},
-    });
+    const [stats, setStats] = useState({});
 
     const fetchStats = async (manual = false) => {
         setRefreshing(true);
         const startTime = Date.now();
 
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/dashdata.php${startDate ? ("?startDate=" + startDate + (endDate ? "&endDate=" + endDate : "")) : endDate ? "?endDate=" + endDate : ""}`);
+            const response = await fetch(`https://dalyblackdata.com/api/fetch.php${startDate ? ("?startDate=" + startDate + (endDate ? "&endDate=" + endDate : "")) : endDate ? "?endDate=" + endDate : ""}`);
             const result = await response.json();
-    
+            
             if (result.success) {
-                setStats({
-                    totalSettlement: result.totalSettlement ?? "No Data",
-                    casesByLocation: result.casesByLocation ?? {},
-                    casesByPracticeType: result.casesByPracticeType ?? {},
-                    casesByStatus: result.casesByStatus ?? {},
-                    casesVsSettlements: result.casesVsSettlements ?? {},
-                    settlementsOverTime: result.settlementsOverTime ?? {},
-                    casesByOffice: result.casesByOffice ?? {},
-                    caseOutcomes: result.caseOutcomes ?? {},
-                    avgSettlementByPractice: result.avgSettlementByPractice ?? {},
-                    casesOpenedVsClosed: Object.fromEntries(
-                        Object.entries(result.casesOpenedVsClosed ?? {}).map(([key, value]) => [key, value ?? [0, 0]])
-                    ),
-                    caseDuration: result.caseDuration ?? {},
-                });
+                const filteredStats = Object.fromEntries(
+                    Object.entries(result).filter(([key, value]) => key !== "success" && value !== null && value !== undefined)
+                );
+
+                setStats(filteredStats);
             } else {
-                console.error("Error fetching settlement data:", result.message);
+                console.error("Error fetching data:", result.message);
             }
         } catch (error) {
             console.error("Fetch error:", error);
@@ -62,80 +42,114 @@ const Dashboard = ({ setLoggedIn }) => {
         const minSpinTime = 500;
         setTimeout(() => {
             setRefreshing(false);
-            if(manual) setShowAlert(true);
+            if (manual) setShowAlert(true);
         }, Math.max(0, minSpinTime - elapsedTime));
-    };    
+    };
 
     useEffect(() => {
         fetchStats();
     }, [startDate, endDate]);
 
-    return (
-        <Box id='dashboard' className='page-container'>
-            <Cookies />
-            <Box className='data-action-container'>
-                <Box className='filter-container'>
-                    <Button 
-                        variant="contained" 
-                        startIcon={<Filter />} 
-                        onClick={() => setShowDateInputs(!showDateInputs)}
-                    >
-                        Filter
-                    </Button>
-                    {showDateInputs && (
-                        <Box id='filter-items'>
-                            <TextField 
-                                type="date" 
-                                className="date-input" 
-                                value={startDate} 
-                                onChange={(e) => setStartDate(e.target.value)} 
-                                margin="normal"
-                            />
-                            <Typography variant="body1">to</Typography>
-                            <TextField 
-                                type="date" 
-                                className="date-input" 
-                                value={endDate} 
-                                onChange={(e) => setEndDate(e.target.value)} 
-                                margin="normal"
-                            />
-                        </Box>
-                    )}
-                </Box>
-                <IconButton title='Refresh data' id='refresh' onClick={fetchStats} className={refreshing ? 'spinning' : ''}>
-                    {/* Replace with a placeholder */}
-                    <span>🔄</span>
-                </IconButton>
-                {showAlert && <Alert message="Data updated successfully." type="success" onClose={() => setShowAlert(false)} />}
-            </Box>
-            <Box className="cards">
-                <Card data={{ title: "Cases by Location", data: stats.casesByLocation }} type="pie" />
-                <Card data={{ title: "Cases by Practice Type", data: stats.casesByPracticeType }} type="v-bar" />
+    const renderCards = () => {
+        const defaultGridSize = {
+            "h-bar": { 
+                col: (typeof stats === "object" && stats !== null) 
+                    ? Object.keys(stats).length > 5 
+                        ? 3
+                        : Object.keys(stats).length === 1 
+                            ? 1
+                            : 2
+                    : 2,
+                row: 2
+            },
+            "v-bar": { col: 2, row: 2 }, 
+            "pie": { col: 2, row: 2 },
+            "line": { col: 2, row: 2},
+            "def": { col: 1, row: 2 }
+        };
+    
+        const orderedCards = [];
+        let currentRow = [];
+        let availableColumns = 4;
+    
+        Object.entries(stats).forEach(([key, value]) => {
+            if (!value || key === "success") return;
+    
+            let cardType = "v-bar";
+            let secondData = null;
+            let chart = key.toLowerCase();
+    
+            if (chart.includes("location")) cardType = "pie";
+            else if (chart.includes("total")) cardType = "def";
+            else if (chart.includes("over") || chart.includes("openedvsclosed")) {
+                cardType = "line";
+                if (typeof value === "object" && !Array.isArray(value)) {
+                    secondData = Object.fromEntries(
+                        Object.entries(value).map(([subKey, subValue]) => [
+                            subKey, Array.isArray(subValue) ? subValue[1] : 0
+                        ])
+                    );
+                }
+            }
+            else if (chart.includes("caseoutcome")) cardType = "v-bar";
+            else if (chart.includes("duration") || chart.includes("settlements")) cardType = "h-bar";
+
+            const gridSize = defaultGridSize[cardType] || { col: 2, row: 2 };
+
+            if (gridSize.col > availableColumns) {
+                orderedCards.push([...currentRow]);
+                currentRow = [];
+                availableColumns = 4;
+            }
+    
+            currentRow.push(
                 <Card 
-                    data={{ title: "Settlements Over Time", data: stats.settlementsOverTime }}
-                    secondData={Object.fromEntries(
-                        Object.entries(stats.settlementsOverTime ?? {}).map(([key, value]) => [key, value?.adjustedSettlement ?? 0])
-                    )}
-                    type="line"
-                    yAxisLabel="money"
+                    key={key}
+                    data={{ 
+                        title: key.replace(/fetch/i, '').replace(/([A-Z])/g, ' $1').trim(), 
+                        data: value,
+                        col: gridSize.col,
+                        row: gridSize.row
+                    }} 
+                    type={cardType}
+                    {...(secondData ? { secondData } : {})}
+                    {...(chart.includes("over") ? { yAxisLabel: "money" } : {})}
                 />
-                <Card data={{ title: "Case Outcome Breakdown", data: stats.caseOutcomes }} type="v-bar" />
-                <Card data={{ title: "Total Adjusted Settlement Value", data: stats.totalSettlement, col: 1, row: 2}} />
-                <Card data={{ title: "New Cases vs Settlements", data: stats.casesVsSettlements ?? {} }} type="h-bar" />
-                <Card data={{ title: "Average Settlement by Practice Type", data: stats.avgSettlementByPractice ?? {} }} type="v-bar" format="f" />
-                <Card
-                    data={{ title: "New Cases vs Closed Cases Over Time", data: stats.casesOpenedVsClosed ?? {} }} 
-                    type="line" 
-                    secondData={Object.fromEntries(
-                        Object.entries(stats.casesOpenedVsClosed ?? {}).map(([key, value]) => [key, value?.[1] ?? 0])
-                    )}
-                    yAxisLabel="count"
-                />
-                <Card data={{ title: "Case Duration Analysis", data: stats.caseDuration, col: 2, row: 2 }} type="h-bar" />
+            );
+    
+            availableColumns -= gridSize.col;
+        });
+    
+        if (currentRow.length > 0) {
+            orderedCards.push([...currentRow]);
+        }
+    
+        return orderedCards.flat();
+    };    
+
+    return (
+        <div id='dashboard' className='page-container'>
+            <Cookies />
+            <div className='data-action-container'>
+                <Filter startDate={startDate} endDate={endDate} setStartDate={setStartDate} setEndDate={setEndDate} showDateInputs={showDateInputs} setShowDateInputs={setShowDateInputs}/>
+                <button title='Refresh data' id='refresh' onClick={fetchStats} className={refreshing ? 'spinning' : ''}>
+                    <Refresh />
+                </button>
+                {showAlert && <Alert message="Data updated successfully." type="success" onClose={() => setShowAlert(false)} />}
+            </div>
+            <h2 className="cards-title">Case Data</h2>
+            <div className="cards">
+                {renderCards()}
+            </div>
+            <h2 className="cards-title">Google Ads Data</h2>
+            <div className="cards">
                 <GoogleAdsComponent startDate={startDate} endDate={endDate}/>
+            </div>
+            <h2 className="cards-title">Lead Data</h2>
+            <div className="cards">
                 <LeadStatusComponent startDate={startDate} endDate={endDate} />
-            </Box>
-        </Box>
+            </div>
+        </div>
     );
 };
 

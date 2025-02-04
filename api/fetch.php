@@ -1,0 +1,17 @@
+<?php
+require './db.php';
+require './user_functions.php';
+
+session_start();
+header('Content-Type: application/json');
+
+$startDate = $_GET["startDate"] ?? null;
+$endDate = $_GET["endDate"] ?? null;
+$userId = $_SESSION['id'] ?? 1;
+
+$response = fetchUserData($conn, $userId, $startDate, $endDate);
+
+$conn->close();
+
+echo json_encode($response, JSON_PRETTY_PRINT);
+?>

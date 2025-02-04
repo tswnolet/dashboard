@@ -8,6 +8,7 @@
 }
 
 :root {
+  --theme: light;
   --background-color: #eceff1;
   --secondary-color: #fff;
   --card-color: #F7F8F9;
@@ -27,6 +28,7 @@
 }
 
 .dark {
+  --theme: dark;
   --background-color: #101214;
   --secondary-color: #1d2125;
   --card-color: #2c343b;
