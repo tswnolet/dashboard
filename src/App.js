@@ -20,6 +20,7 @@ const App = () => {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [showAlert, setShowAlert] = useState(false);
+  const [redirectPath, setRedirectPath] = useState('/dashboard');
 
   useEffect(() => {
     checkUserLoggedIn();
@@ -81,7 +82,7 @@ const App = () => {
   return (
     <Router>
         <ConditionalNav loggedIn={loggedIn} changeTheme={changeTheme} theme={theme} logout={logout} data={data} setData={setData} setFilteredData={setFilteredData} />
-        <AppRoutes loggedIn={loggedIn} setLoggedIn={setLoggedIn} changeTheme={changeTheme} theme={theme} data={filteredData} setData={setData} addCard={addCard} logout={logout} setFilteredData={setFilteredData} setShowAlert={setShowAlert} showAlert={showAlert} />
+        <AppRoutes loggedIn={loggedIn} setLoggedIn={setLoggedIn} changeTheme={changeTheme} theme={theme} data={filteredData} setData={setData} addCard={addCard} logout={logout} setFilteredData={setFilteredData} setShowAlert={setShowAlert} showAlert={showAlert} redirectPath={redirectPath} setRedirectPath={setRedirectPath} />
     </Router>
   );
 }
@@ -107,8 +108,14 @@ const ConditionalNav = ({ loggedIn, changeTheme, theme, logout, data, setData, s
   return <Nav title={title || 'Dashboard'} loggedIn={loggedIn} changeTheme={changeTheme} theme={theme} logout={logout} />;
 };
 
-const AppRoutes = ({ loggedIn, setLoggedIn, changeTheme, theme, data, setData, addCard, logout, setFilteredData, setShowAlert, showAlert }) => {
+const AppRoutes = ({ loggedIn, setLoggedIn, changeTheme, theme, data, setData, addCard, logout, setFilteredData, setShowAlert, showAlert, redirectPath, setRedirectPath }) => {
   const location = useLocation();
+
+  useEffect(() => {
+    if (!loggedIn && location.pathname !== '/login' && location.pathname !== '/signup') {
+      setRedirectPath(location.pathname + location.search);
+    }
+  }, [loggedIn, location, setRedirectPath]);
 
   return (
     <Routes>
@@ -118,7 +125,7 @@ const AppRoutes = ({ loggedIn, setLoggedIn, changeTheme, theme, data, setData, a
           <Route path="/weather" element={<Weather />} />
           <Route path="/settings" element={<Settings changeTheme={changeTheme} theme={theme} logout={logout} data={data} setData={setData} setFilteredData={setFilteredData} />} />
           <Route path="/new-data" element={<NewCardForm addCard={addCard} />} />
-          <Route path="*" element={<Navigate to="/dashboard" />} />
+          <Route path="*" element={<Navigate to={redirectPath} />} />
         </>
       ) : (
         <>

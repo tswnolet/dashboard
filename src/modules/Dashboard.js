@@ -182,8 +182,6 @@ const Dashboard = ({ setLoggedIn }) => {
                 };
             });
     
-            console.log(endDate, startDate);
-
         const sortedCards = [];
     
         preferredOrder.forEach((preferredTitle) => {
