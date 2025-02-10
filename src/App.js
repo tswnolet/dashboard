@@ -11,7 +11,7 @@ import './styles/Cookies.css';
 import './styles/Theme.css';
 import './styles/NewCardForm.css';
 import Weather from './modules/Weather';
-import LeadUploader from './modules/LeadUploader';
+import { PrivacyPolicy } from './modules/PrivacyPolicy';
 
 const App = () => {
   const [loading, setLoading] = useState(true);
@@ -108,6 +108,8 @@ const ConditionalNav = ({ loggedIn, changeTheme, theme, logout, data, setData, s
 };
 
 const AppRoutes = ({ loggedIn, setLoggedIn, changeTheme, theme, data, setData, addCard, logout, setFilteredData, setShowAlert, showAlert }) => {
+  const location = useLocation();
+
   return (
     <Routes>
       {loggedIn ? (
@@ -122,9 +124,10 @@ const AppRoutes = ({ loggedIn, setLoggedIn, changeTheme, theme, data, setData, a
         <>
           <Route path="/login" element={<Context setLoggedIn={setLoggedIn} setShowAlert={setShowAlert} showAlert={showAlert} />} />
           <Route path="/signup" element={<Context setLoggedIn={setLoggedIn} setShowAlert={setShowAlert} showAlert={showAlert} />} />
-          <Route path="*" element={<Navigate to="/login" />} />
+          <Route path="*" element={<Navigate to="/login" state={{ from: location.pathname + location.search }} />} />
         </>
       )}
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
     </Routes>
   );
 }

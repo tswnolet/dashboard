@@ -63,7 +63,7 @@ const HBarChart = ({ data, formatNumber }) => {
         <div className='horizontal-graph-container' ref={parentRef}>
             <div className="y-axis">
                 {yAxisLabels.map((label, index) => (
-                    <div key={index} className="y-axis-label">{label}</div>
+                    <div key={index} className="y-axis-label">{typeof label === 'number' ? label >= 1_000_000 ? label / 1_000 : label : label}</div>
                 ))}
             </div>
             <div className="horizontal-graph chart">

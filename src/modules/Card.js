@@ -21,7 +21,10 @@ const Card = ({ data, type = "", secondData, yAxisLabel, format }) => {
         "v-bar": { col: 2, row: 2 }, 
         "pie": { col: 2, row: 2 },
         "line": { col: 2, row: 2},
-        "def": { col: 1, row: 2 }
+        "def": { col: 1, row: 2 },
+        "percentage": { col: 1, row: 1 },
+        "value": { col: 1, row: 1 },
+        "rank": { col: 1, row: 2 }
     };
 
     const { col, row } = defaultGridSize[type] || { col: 1, row: 1 };
@@ -45,9 +48,9 @@ const Card = ({ data, type = "", secondData, yAxisLabel, format }) => {
         }
 
         if (number >= 1_000_000) {
-            return `${dType === "$" ? '$' : ''}${(number / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+            return `${dType === "$" ? '$' : ''}${(number / 1_000_000).toFixed(2).replace(/\.0$/, '')}M`;
         } else if (number >= 1_000) {
-            return `${dType === "$" ? '$' : ''}${(number / 1_000).toFixed(1).replace(/\.0$/, '')}K`;
+            return `${dType === "$" ? '$' : ''}${(number / 1_000).toFixed(2).replace(/\.0$/, '')}K`;
         }
 
         return `${dType === "$" ? '$' : ''}${number.toString()}`;
@@ -59,11 +62,21 @@ const Card = ({ data, type = "", secondData, yAxisLabel, format }) => {
             {type == "" || type == "def" ? (
                 data.title === "Total Settlement"
                     ? (
-                        <div className="settlement">
+                        <div className="value">
                             <h1>{formatNumber(data.data[1], "", "$")}</h1>
                             <h4>/ {formatNumber(data.data[0], "", "$")}</h4>
                         </div>
-                    ) : <h1>{data.data}</h1>
+                    ) : <h1 className='value'>{data.data}</h1>
+            ) : type == 'percentage' ? (
+                <div className="value">
+                    <h1>{formatNumber(data.data[1], "e")}%</h1>
+                    <h4>/ {data.data[0]} suits</h4>
+                </div>
+            ) : type === 'value' ? (
+                <div className="value">
+                    <h1>{formatNumber(data.data[0] || data.data, "a")}</h1>
+                    {data.data[1] && <h4>On pace for {formatNumber(data.data[1], "a")}</h4>}
+                </div>
             ) : type === 'line' ? (
                 <LineGraph data={data.data} title={data.title} formatNumber={formatNumber} secondData={secondData} yAxisLabel={yAxisLabel} />
             ) : type === 'h-bar' ? (

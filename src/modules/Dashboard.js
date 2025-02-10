@@ -47,76 +47,163 @@ const Dashboard = ({ setLoggedIn }) => {
     };
 
     useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const report = urlParams.get('report');
+
+        if (report) {
+            const today = new Date();
+            let start, end;
+
+            switch (report) {
+                case 'today':
+                    start = end = today.toISOString().split('T')[0];
+                    break;
+                case 'week':
+                    start = new Date(today.setDate(today.getDate() - 7)).toISOString().split('T')[0];
+                    end = new Date().toISOString().split('T')[0];
+                    break;
+                case 'workweek':
+                    start = new Date(today.setDate(today.getDate() - (today.getDay() === 0 ? 7 : today.getDay()))).toISOString().split('T')[0];
+                    end = new Date(today.setDate(today.getDate() + (6 - today.getDay()))).toISOString().split('T')[0];
+                    break;
+                case 'thismonth':
+                    start = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+                    end = new Date().toISOString().split('T')[0];
+                    break;
+                case 'lastmonth':
+                    start = new Date(today.getFullYear(), today.getMonth() - 1, 1).toISOString().split('T')[0];
+                    end = new Date(today.getFullYear(), today.getMonth(), 0).toISOString().split('T')[0];
+                    break;
+                case 'thisyear':
+                    start = new Date(today.getFullYear(), 0, 1).toISOString().split('T')[0];
+                    end = new Date().toISOString().split('T')[0];
+                    break;
+                case 'lastyear':
+                    start = new Date(today.getFullYear() - 1, 0, 1).toISOString().split('T')[0];
+                    end = new Date(today.getFullYear() - 1, 11, 31).toISOString().split('T')[0];
+                    break;
+                case 'alltime':
+                    start = null;
+                    end = null;
+                    break;
+                default:
+                    start = end = null;
+            }
+
+            setStartDate(start);
+            setEndDate(end);
+        }
+    }, []);
+
+    useEffect(() => {
         fetchStats();
     }, [startDate, endDate]);
 
     const renderCards = () => {
         const defaultGridSize = {
-            "h-bar": { 
-                col: (typeof stats === "object" && stats !== null) 
-                    ? Object.keys(stats).length > 5 
-                        ? 3
-                        : Object.keys(stats).length === 1 
-                            ? 1
-                            : 2
-                    : 2,
-                row: 2
-            },
-            "v-bar": { col: 2, row: 2 }, 
+            "h-bar": { col: 3, row: 2 },
+            "v-bar": { col: 1, row: 2 },
             "pie": { col: 2, row: 2 },
-            "line": { col: 2, row: 2},
-            "def": { col: 1, row: 2 }
+            "line": { col: 2, row: 2 },
+            "def": { col: 1, row: 2 },
+            "percentage": { col: 1, row: 1 },
+            "value": { col: 1, row: 1 },
+            "rank": { col: 1, row: 2 }
         };
+    
+        const preferredOrder = [
+            "Cases by Location",
+            "Total Settlement",
+            "Cases by Phase",
+            "Average Suit Percentage",
+            "Cases Opened vs Closed",
+            "New Cases",
+            "Average Settlement by Practice Type",
+            "Cases by Practice Type",
+            "Settlements Over Time",
+            "Case Duration",
+            "Open Cases",
+            "Signed Up Cases vs Settled Cases",
+        ];
     
         const orderedCards = [];
         let currentRow = [];
         let availableColumns = 4;
     
-        Object.entries(stats).forEach(([key, value]) => {
-            if (!value || key === "success") return;
+        const cardData = Object.entries(stats)
+            .filter(([_, value]) => value && value.data !== null && Object.keys(value.data).length > 0)
+            .map(([key, value]) => {
+                let cardType = "v-bar";
+                let secondData = null;
+                const { title, data } = value;
+
+                defaultGridSize["v-bar"] = title.includes("Top 5") ? { col: 2, row: 2 } : defaultGridSize["v-bar"];
     
-            let cardType = "v-bar";
-            let secondData = null;
-            let chart = key.toLowerCase();
-    
-            if (chart.includes("location")) cardType = "pie";
-            else if (chart.includes("total")) cardType = "def";
-            else if (chart.includes("over") || chart.includes("openedvsclosed")) {
-                cardType = "line";
-                if (typeof value === "object" && !Array.isArray(value)) {
-                    secondData = Object.fromEntries(
-                        Object.entries(value).map(([subKey, subValue]) => [
-                            subKey, Array.isArray(subValue) ? subValue[1] : 0
-                        ])
-                    );
+                const chart = key.toLowerCase();
+                if (chart.includes("location")) cardType = "pie";
+                else if (chart.includes("total")) cardType = "def";
+                else if (chart.includes("over") || chart.includes("openedvsclosed")) {
+                    cardType = "line";
+                    if (typeof data === "object" && !Array.isArray(data)) {
+                        secondData = Object.fromEntries(
+                            Object.entries(data).map(([subKey, subValue]) => [
+                                subKey, Array.isArray(subValue) ? subValue[1] : 0
+                            ])
+                        );
+                    }
                 }
+                else if (chart.includes("caseoutcome")) cardType = "v-bar";
+                else if (chart.includes("duration") || chart.includes("settlements") && !chart.includes("top")) cardType = "h-bar";
+                else if (chart.includes("percentage")) cardType = "percentage";
+                else if (chart.includes("opencases") || chart.includes("averagecases")) cardType = "value";
+    
+                const gridSize = defaultGridSize[cardType] || { col: 2, row: 2 };
+    
+                return {
+                    key,
+                    cardType,
+                    gridSize,
+                    title,
+                    element: (
+                        <Card 
+                            key={key}
+                            data={{ 
+                                title,
+                                data,
+                                col: !title.toLowerCase().includes("case duration") ? gridSize.col : 2,
+                                row: title === "Cases by Phase" ? 4 : gridSize.row
+                            }}
+                            type={cardType}
+                            format={Object.entries(data).some(([_, value]) => value % 1 !== 0) || title.includes("Top 5") || title.includes("Average Settlement")}
+                            {...(secondData  ? { secondData } : {})}
+                            {...(chart.includes("over") ? { yAxisLabel: "money" } : {})}
+                        />
+                    )
+                };
+            });
+    
+            console.log(endDate, startDate);
+
+        const sortedCards = [];
+    
+        preferredOrder.forEach((preferredTitle) => {
+            const matchedCardIndex = cardData.findIndex((card) => card.title.toLowerCase().includes(preferredTitle.toLowerCase()));
+            if (matchedCardIndex !== -1) {
+                sortedCards.push(cardData[matchedCardIndex]);
+                cardData.splice(matchedCardIndex, 1);
             }
-            else if (chart.includes("caseoutcome")) cardType = "v-bar";
-            else if (chart.includes("duration") || chart.includes("settlements")) cardType = "h-bar";
-
-            const gridSize = defaultGridSize[cardType] || { col: 2, row: 2 };
-
+        });
+    
+        sortedCards.push(...cardData);
+    
+        sortedCards.forEach(({ element, gridSize }) => {
             if (gridSize.col > availableColumns) {
                 orderedCards.push([...currentRow]);
                 currentRow = [];
                 availableColumns = 4;
             }
     
-            currentRow.push(
-                <Card 
-                    key={key}
-                    data={{ 
-                        title: key.replace(/fetch/i, '').replace(/([A-Z])/g, ' $1').trim(), 
-                        data: value,
-                        col: gridSize.col,
-                        row: gridSize.row
-                    }} 
-                    type={cardType}
-                    {...(secondData ? { secondData } : {})}
-                    {...(chart.includes("over") ? { yAxisLabel: "money" } : {})}
-                />
-            );
-    
+            currentRow.push(element);
             availableColumns -= gridSize.col;
         });
     
@@ -125,7 +212,7 @@ const Dashboard = ({ setLoggedIn }) => {
         }
     
         return orderedCards.flat();
-    };    
+    };
 
     return (
         <div id='dashboard' className='page-container'>

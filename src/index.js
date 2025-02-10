@@ -1,10 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App />);
+const Root = () => {
+  const [theme, setTheme] = useState('light');
 
-  {/*<React.StrictMode>*/}
-  {/*</React.StrictMode>*/}
+  const changeTheme = () => {
+    setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
+  };
+
+  return (
+    <App />
+  );
+};
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<Root />);

@@ -17,7 +17,7 @@ const Context = ({ setLoggedIn, setShowAlert, showAlert }) => {
   // Function to handle form submission
   const fetchData = (e) => {
     e.preventDefault();
-    fetch(`/api/${isLogin ? 'user' : 'signup'}.php`, {
+    fetch(`/api/${isLogin ? 'login' : 'signup'}.php`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData)
@@ -30,13 +30,14 @@ const Context = ({ setLoggedIn, setShowAlert, showAlert }) => {
             setClose(true);
             setTimeout(() => {
               setLoggedIn(true);
-              navigate('/dashboard');
+              const redirectTo = location.state?.from || '/dashboard';
+              navigate(redirectTo);
             }, 2000);
           } else {
             navigate('/login');
           }
         } else {
-          setError(`Error: ${data.error}!` || 'An error occurred.');
+          setError(data.error || 'An error occurred.');
         }
       })
       .catch((err) => {

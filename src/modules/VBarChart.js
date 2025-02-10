@@ -10,8 +10,8 @@ const VBarChart = ({ data, formatNumber, format }) => {
 
     let sortedEntries = Object.entries(parsedData).sort((a, b) => b[1] - a[1]);
 
-    const topCategories = sortedEntries.slice(0, 4);
-    const otherSum = sortedEntries.slice(4).reduce((acc, [, value]) => acc + value, 0);
+    const topCategories = sortedEntries.slice(0, 10);
+    const otherSum = sortedEntries.slice(10).reduce((acc, [, value]) => acc + value, 0);
 
     const finalData = [...topCategories];
     if (otherSum > 0) {
@@ -26,7 +26,7 @@ const VBarChart = ({ data, formatNumber, format }) => {
                 const percentage = ((value / totalSum) * 100).toFixed(2);
 
                 return (
-                    <div className='period v' key={category}>
+                    <div className='v' key={category}>
                         <div className='graph-data-labels'>
                             <h4>{category} / {format ? formatNumber(value, "e", "$") : value}</h4>
                             <h4>{percentage}%</h4>

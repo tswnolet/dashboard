@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { handleFileUpload } from "../utils";
-import { Box, Typography, Button, Input } from '@mui/material';
 
 export const Uploader = ({ setFile, setLeads, handleFileChange }) => {
     const [dragging, setDragging] = useState(false);
@@ -31,11 +30,11 @@ export const Uploader = ({ setFile, setLeads, handleFileChange }) => {
     };
 
     return (
-        <Box
+        <div
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
-            sx={{
+            style={{
                 border: '2px dashed grey',
                 padding: '20px',
                 textAlign: 'center',
@@ -43,22 +42,22 @@ export const Uploader = ({ setFile, setLeads, handleFileChange }) => {
                 backgroundColor: dragging ? '#f0f0f0' : 'white'
             }}
         >
-            <Typography variant="body1">
+            <p>
                 {dragging ? "Drop the file here..." : (fileName || "Drag and drop a file here or click to upload")}
-            </Typography>
+            </p>
             <label>
-                <Input 
+                <input 
                     type="file" 
                     onChange={handleChange} 
                     accept=".csv,.xlsx" 
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
-                    sx={{ display: 'none' }}
+                    style={{ display: 'none' }}
                 />
-                <Button variant="contained" component="span">
+                <button>
                     {fileName ? 'Change file' : "Choose a file"}
-                </Button>
+                </button>
             </label>
-        </Box>
+        </div>
     );
 }

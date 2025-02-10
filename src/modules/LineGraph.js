@@ -139,6 +139,17 @@ const LineGraph = ({ data, title, secondData = null, yAxisLabel = "count" }) => 
             for (let i = 1; i < years.length; i++) {
                 ctx.lineTo(scaleX(i), scaleY(secondValues[i]));
             }
+            ctx.lineTo(scaleX(years.length - 1), height - paddingY);
+            ctx.lineTo(scaleX(0), height - paddingY);
+            ctx.closePath();
+            ctx.fillStyle = orangeGradient;
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(scaleX(0), scaleY(secondValues[0]));
+            for (let i = 1; i < years.length; i++) {
+                ctx.lineTo(scaleX(i), scaleY(secondValues[i]));
+            }
             ctx.strokeStyle = "rgb(255, 166, 77)";
             ctx.lineWidth = 2;
             ctx.stroke();

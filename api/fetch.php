@@ -6,7 +6,7 @@ session_start();
 header('Content-Type: application/json');
 
 $startDate = $_GET["startDate"] ?? null;
-$endDate = $_GET["endDate"] ?? null;
+$endDate = $_GET["endDate"] ?? "3000-01-01";
 $userId = $_SESSION['id'] ?? 1;
 
 $response = fetchUserData($conn, $userId, $startDate, $endDate);

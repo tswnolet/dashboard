@@ -4,9 +4,11 @@ import '../Loading.css';
 
 const Loading = () => {
   return (
-    <Box className='loading' sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-      <CircularProgress />
-    </Box>
+    <div className='loading'>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
   )
 }
 

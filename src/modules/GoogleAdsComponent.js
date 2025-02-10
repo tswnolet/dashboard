@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Card from "./Card";
 import "../Dashboard.css";
 
-const GoogleAdsComponent = ({ startDate, endDate}) => {
+const GoogleAdsComponent = ({ startDate, endDate }) => {
     const [loading, setLoading] = useState(true);
     const [totals, setTotals] = useState({ impressions: 0, clicks: 0, conversions: 0, cost: 0 });
 
@@ -32,7 +32,7 @@ const GoogleAdsComponent = ({ startDate, endDate}) => {
             console.error("❌ Fetch Error:", error);
         }
         setLoading(false);
-    };    
+    };
 
     useEffect(() => {
         fetchData();

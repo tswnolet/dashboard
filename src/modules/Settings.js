@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Alert from './Alert';
 import { allCookies, eraseCookie } from '../utils/cookies';
-import { Box, Typography, Button, TextField, List, ListItem, ListItemText, IconButton } from '@mui/material';
-// import DeleteIcon from '@mui/icons-material/Delete';
 import '../styles/Settings.css';
 import '../Alert.css';
 
@@ -102,44 +100,38 @@ const Settings = () => {
   };
 
   return (
-    <Box id='settings' className='page-container'>
+    <div id='settings' className='page-container'>
       {error && <Alert message={error.message} type={error.type} onClose={() => setError(null)} />}
-      <Box className="section">
-        <Typography variant="h4">Manage Cookies</Typography>
-        <List>
+      <div className="section">
+        <h4>Manage Cookies</h4>
+        <ul>
           {cookies.map((cookie, index) => (
-            <ListItem key={index} secondaryAction={
-              <IconButton edge="end" aria-label="delete" onClick={() => handleCookieDelete(cookie.name)}>
-                {/* Placeholder for DeleteIcon */}
-              </IconButton>
-            }>
-              <ListItemText primary={`${cookie.name}: ${cookie.value} (Expires: ${cookie.expires})`} />
-            </ListItem>
+            <li key={index}>
+              <span>{`${cookie.name}: ${cookie.value} (Expires: ${cookie.expires})`}</span>
+              <button onClick={() => handleCookieDelete(cookie.name)}>Delete</button>
+            </li>
           ))}
-        </List>
-      </Box>
-      <Box className="account-section">
-        <Typography variant="h4">Account Information</Typography>
-        <Box className='input-section-container'>
-          <Box className='label-container'>
-            <TextField
-              label="Username"
+        </ul>
+      </div>
+      <div className="account-section">
+        <h4>Account Information</h4>
+        <div className='input-section-container'>
+          <div className='label-container'>
+            <input
+              type="text"
               name="user"
               value={accountInfo.user}
               onChange={handleInputChange}
-              fullWidth
-              margin="normal"
+              placeholder="Username"
             />
-            <TextField
-              label="Email"
+            <input
+              type="email"
               name="email"
               value={accountInfo.email}
               onChange={handleInputChange}
-              fullWidth
-              margin="normal"
+              placeholder="Email"
             />
-            <TextField
-              label="Password"
+            <input
               type="password"
               name="password"
               value={accountInfo.password}
@@ -154,11 +146,9 @@ const Settings = () => {
                 }
               }}
               onChange={handleInputChange}
-              fullWidth
-              margin="normal"
+              placeholder="Password"
             />
-            <TextField
-              label="Confirm Password"
+            <input
               type="password"
               name="confirm_password"
               value={accountInfo.confirm_password}
@@ -173,14 +163,13 @@ const Settings = () => {
                 }
               }}
               onChange={handleInputChange}
-              fullWidth
-              margin="normal"
+              placeholder="Confirm Password"
             />
-          </Box>
-        </Box>
-        <Button variant="contained" onClick={handleAccountUpdate}>Update Account</Button>
-      </Box>
-    </Box>
+          </div>
+        </div>
+        <button onClick={handleAccountUpdate}>Update Account</button>
+      </div>
+    </div>
   );
 };
 
