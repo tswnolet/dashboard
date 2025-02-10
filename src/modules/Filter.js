@@ -32,8 +32,11 @@ const Filter = ({ startDate, endDate, setStartDate, setEndDate, showDateInputs, 
                 end = new Date().toISOString().split('T')[0];
                 break;
             case 'workweek':
-                start = new Date(today.setDate(today.getDate() - (today.getDay() === 0 ? 7 : today.getDay()))).toISOString().split('T')[0];
-                end = new Date(today.setDate(today.getDate() + (6 - today.getDay()))).toISOString().split('T')[0];
+                const lastSunday = new Date(today.setDate(today.getDate() - today.getDay() - 7));
+                const lastSaturday = new Date(lastSunday);
+                lastSaturday.setDate(lastSunday.getDate() + 6);
+                start = lastSunday.toISOString().split('T')[0];
+                end = lastSaturday.toISOString().split('T')[0];
                 break;
             case 'thismonth':
                 start = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];

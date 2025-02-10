@@ -63,8 +63,11 @@ const Dashboard = ({ setLoggedIn }) => {
                     end = new Date().toISOString().split('T')[0];
                     break;
                 case 'workweek':
-                    start = new Date(today.setDate(today.getDate() - (today.getDay() === 0 ? 7 : today.getDay()))).toISOString().split('T')[0];
-                    end = new Date(today.setDate(today.getDate() + (6 - today.getDay()))).toISOString().split('T')[0];
+                    const lastSunday = new Date(today.setDate(today.getDate() - today.getDay() - 7));
+                    const lastSaturday = new Date(lastSunday);
+                    lastSaturday.setDate(lastSunday.getDate() + 6);
+                    start = lastSunday.toISOString().split('T')[0];
+                    end = lastSaturday.toISOString().split('T')[0];
                     break;
                 case 'thismonth':
                     start = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
@@ -101,7 +104,13 @@ const Dashboard = ({ setLoggedIn }) => {
 
     const renderCards = () => {
         const defaultGridSize = {
-            "h-bar": { col: 3, row: 2 },
+            "h-bar": {
+                col: (data) => {
+                    const periods = Object.keys(data).length;
+                    return periods > 5 ? 3 : periods <= 2 ? 1 : 2;
+                },
+                row: 2
+            },
             "v-bar": { col: 1, row: 2 },
             "pie": { col: 2, row: 2 },
             "line": { col: 2, row: 2 },
@@ -158,11 +167,12 @@ const Dashboard = ({ setLoggedIn }) => {
                 else if (chart.includes("opencases") || chart.includes("averagecases")) cardType = "value";
     
                 const gridSize = defaultGridSize[cardType] || { col: 2, row: 2 };
+                const colSpan = typeof gridSize.col === 'function' ? gridSize.col(data) : gridSize.col;
     
                 return {
                     key,
                     cardType,
-                    gridSize,
+                    gridSize: { ...gridSize, col: colSpan },
                     title,
                     element: (
                         <Card 
@@ -170,7 +180,7 @@ const Dashboard = ({ setLoggedIn }) => {
                             data={{ 
                                 title,
                                 data,
-                                col: !title.toLowerCase().includes("case duration") ? gridSize.col : 2,
+                                col: colSpan,
                                 row: title === "Cases by Phase" ? 4 : gridSize.row
                             }}
                             type={cardType}
@@ -226,13 +236,13 @@ const Dashboard = ({ setLoggedIn }) => {
             <div className="cards">
                 {renderCards()}
             </div>
-            <h2 className="cards-title">Google Ads Data</h2>
-            <div className="cards">
-                <GoogleAdsComponent startDate={startDate} endDate={endDate}/>
-            </div>
             <h2 className="cards-title">Lead Data</h2>
             <div className="cards">
                 <LeadStatusComponent startDate={startDate} endDate={endDate} />
+            </div>
+            <h2 className="cards-title">Google Ads Data</h2>
+            <div className="cards">
+                <GoogleAdsComponent startDate={startDate} endDate={endDate}/>
             </div>
         </div>
     );

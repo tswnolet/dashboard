@@ -72,6 +72,7 @@
     color: var(--text-color);
     background-color: var(--secondary-color);
     font-family: 'Inter', 'Poppins', sans-serif;
+    cursor:text;
 }
 
 #filter-items {

@@ -3,14 +3,11 @@ $API_KEY = "f6fb37e9-58c9-418d-95a6-f867f8516850";
 $BASE_URL = "https://dalyblack.leaddocket.com/api";
 $MAX_ITEMS_PER_PAGE = 500;
 
-// Get date filters from the request
 $startDate = isset($_GET['start_date']) ? $_GET['start_date'] : null;
 $endDate = isset($_GET['end_date']) ? $_GET['end_date'] : null;
 
-// If no dates are provided, default to fetching all data
-$filterByDate = ($startDate || $endDate); // Only filter if at least one date is provided
+$filterByDate = ($startDate || $endDate);
 
-/** Convert API's ISO 8601 date format to timestamp */
 function isDateWithinRange($dateISO, $startDate, $endDate) {
     if (!$dateISO) return false;
     $dateTimestamp = strtotime($dateISO);
@@ -20,7 +17,6 @@ function isDateWithinRange($dateISO, $startDate, $endDate) {
     return ($dateTimestamp >= strtotime($startDate) && $dateTimestamp <= strtotime($endDate));
 }
 
-/** Fetch all status IDs */
 function fetchAllStatusIds() {
     global $BASE_URL, $API_KEY;
 
@@ -41,7 +37,6 @@ function fetchAllStatusIds() {
     return is_array($responseData) ? array_map(fn($item) => $item["Data"]["Id"], $responseData) : [];
 }
 
-/** Fetch leads by status and filter if necessary */
 function fetchLeadsByStatus($statusId, $itemsPerPage, $startDate, $endDate, $filterByDate) {
     global $BASE_URL, $API_KEY;
 
@@ -62,7 +57,7 @@ function fetchLeadsByStatus($statusId, $itemsPerPage, $startDate, $endDate, $fil
         curl_close($ch);
 
         if ($status == 429) {
-            sleep(2); // Backoff delay
+            sleep(2);
             continue;
         }
 
@@ -78,7 +73,6 @@ function fetchLeadsByStatus($statusId, $itemsPerPage, $startDate, $endDate, $fil
         foreach ($responseData["Records"] as $lead) {
             $statusName = $lead["StatusName"] ?? "Unknown";
 
-            // If filtering by date, check the LastStatusChangeDate
             if ($filterByDate) {
                 if (!isDateWithinRange($lead["LastStatusChangeDate"] ?? null, $startDate, $endDate)) {
                     continue;
@@ -96,7 +90,6 @@ function fetchLeadsByStatus($statusId, $itemsPerPage, $startDate, $endDate, $fil
     return $statusCounts;
 }
 
-/** Fetch all leads and aggregate results */
 function fetchAllLeads($startDate, $endDate, $filterByDate) {
     $statusIds = fetchAllStatusIds();
     if (!$statusIds) return ["error" => "No status IDs found"];
@@ -126,7 +119,6 @@ function fetchAllLeads($startDate, $endDate, $filterByDate) {
     ];
 }
 
-/** Handle API request */
 if ($_SERVER["REQUEST_METHOD"] === "GET") {
     echo json_encode(fetchAllLeads($startDate, $endDate, $filterByDate), JSON_PRETTY_PRINT);
 } else {

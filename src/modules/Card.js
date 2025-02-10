@@ -1,18 +1,19 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import HBarChart from './HBarChart';
 import VBarChart from './VBarChart';
 import PieChartComponent from './PieChart';
 import LineGraph from './LineGraph';
 import '../Card.css';
 
-const Card = ({ data, type = "", secondData, yAxisLabel, format }) => {
+const Card = ({ data, type = "", secondData, yAxisLabel, format, styling }) => {
+    const [hoveringGoogle, setHoveringGoogle] = useState(null);
 
     const defaultGridSize = {
         "h-bar": { 
             col: typeof data.data === "object" && data.data !== null 
                 ? Object.keys(data.data).length > 5 
                     ? 3
-                    : Object.keys(data.data).length === 1 
+                    : Object.keys(data.data).length <= 2
                         ? 1
                         : 2
                 : 2,
@@ -24,14 +25,16 @@ const Card = ({ data, type = "", secondData, yAxisLabel, format }) => {
         "def": { col: 1, row: 2 },
         "percentage": { col: 1, row: 1 },
         "value": { col: 1, row: 1 },
-        "rank": { col: 1, row: 2 }
+        "rank": { col: 1, row: 2 },
+        "list": { col: 2, row: 2 }
     };
 
     const { col, row } = defaultGridSize[type] || { col: 1, row: 1 };
-
+    
     const cardStyle = {
         gridColumn: `span ${parseInt(data.col) || col}`,
         gridRow: row === "auto" ? "auto" : `span ${parseInt(data.row) || row}`,
+        ...(type === 'list' ? { alignItems: 'start' } : {})
     };
 
     const formatNumber = (num, approx = null, dType = '') => {
@@ -57,7 +60,7 @@ const Card = ({ data, type = "", secondData, yAxisLabel, format }) => {
     };
 
     return (
-        <div className='card' style={cardStyle}>
+        <div className={`card ${type==='list' ? 'list' : ''}`} style={cardStyle}>
             <p>{data.title}</p>
             {type == "" || type == "def" ? (
                 data.title === "Total Settlement"
@@ -85,6 +88,21 @@ const Card = ({ data, type = "", secondData, yAxisLabel, format }) => {
                 <VBarChart data={data.data} title={data.title} formatNumber={formatNumber} format={format} />
             ) : type === 'pie' ? (
                 <PieChartComponent data={data.data} title={data.title} formatNumber={formatNumber} />
+            ) : type === 'list' ? (
+                <div className='card-list'>
+                    {Object.entries(data.data).map(([key, value], index) => (
+                        <div className='card-list-item'
+                            key={index}
+                            onMouseOver={() => setHoveringGoogle(index)}
+                            onMouseOut={() => setHoveringGoogle(null)}
+                            style={hoveringGoogle === index ? { backgroundColor: styling[index] } : {} }
+                        >
+                            <span className={`card-list-item-title ${hoveringGoogle === index ? 'hovering' : ''}`}>{key}</span>
+                            <span className={`card-list-item-value ${hoveringGoogle === index ? 'hovering' : ''}`}>{Array.isArray(value) ? value[0] : value}</span>
+                            {Array.isArray(value) && <span className={`card-list-item-subvalue ${hoveringGoogle === index ? 'hovering' : ''}`}>{value[1]}</span>}
+                        </div>
+                    ))}
+                </div>
             ) : null}
         </div>
     );
