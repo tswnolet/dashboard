@@ -37,8 +37,14 @@ function fetchTotalSettlement($conn, $startDate, $endDate) {
     $row = $result->fetch_assoc();
 
     return [
-        floatval($row['totalUnadjustedSettlement'] ?? 0),
-        floatval($row['totalAdjustedSettlement'] ?? 0)
+        "title" => "Total Settlement",
+        "data" => [
+            floatval($row['totalUnadjustedSettlement'] ?? 0),
+            floatval($row['totalAdjustedSettlement'] ?? 0)
+        ],
+        "type" => "def",
+        "col" => 1,
+        "row" => 2
     ];
 }
 
@@ -55,7 +61,13 @@ function fetchCasesByLocation($conn, $startDate, $endDate) {
         }
         $data[$state] = ($data[$state] ?? 0) + intval($row['count']);
     }
-    return $data;
+    return [
+        "title" => "Cases by Location",
+        "data" => $data,
+        "type" => "pie",
+        "col" => 2,
+        "row" => 2
+    ];
 }
 
 function fetchCasesByPracticeType($conn, $startDate, $endDate) {
@@ -79,7 +91,13 @@ function fetchCasesByPracticeType($conn, $startDate, $endDate) {
         }
         $data[$category] = ($data[$category] ?? 0) + intval($row['count']);
     }
-    return $data;
+    return [
+        "title" => "Cases by Practice Type",
+        "data" => $data,
+        "type" => "v-bar",
+        "col" => 2,
+        "row" => 2
+    ];
 }
 
 function fetchCasesByPhase($conn, $startDate, $endDate) {
@@ -104,7 +122,13 @@ function fetchCasesByPhase($conn, $startDate, $endDate) {
         $data[$row['status']] = intval($row['count']);
     }
 
-    return $data;
+    return [
+        "title" => "Cases by Phase",
+        "data" => $data,
+        "type" => "v-bar",
+        "col" => 1,
+        "row" => 4
+    ];
 }
 
 function fetchSettlementsOverTime($conn, $startDate, $endDate) {
@@ -148,7 +172,14 @@ function fetchSettlementsOverTime($conn, $startDate, $endDate) {
         ];
     }
 
-    return $data;
+    return [
+        "title" => "Settlements Over Time",
+        "data" => $data,
+        "type" => "line",
+        "secondData" => $data,
+        "col" => 2,
+        "row" => 2
+    ];
 }
 
 function fetchCasesOpenedVsClosed($conn, $startDate, $endDate) {
@@ -216,23 +247,15 @@ function fetchCasesOpenedVsClosed($conn, $startDate, $endDate) {
         }
     }
 
-    return $data;
+    return [
+        "title" => "Cases Opened vs Closed",
+        "data" => $data,
+        "type" => "line",
+        "secondData" => $data,
+        "col" => 2,
+        "row" => 2
+    ];
 }
-
-/*function fetchCaseOutcomes($conn, $startDate, $endDate) {
-    $dateFilter = dateFilter("last_activity", $startDate, $endDate);
-    $sql = "SELECT phase AS outcome, COUNT(*) AS total_cases 
-            FROM cases 
-            WHERE phase IS NOT NULL AND phase != '' $dateFilter
-            GROUP BY phase";
-    $result = $conn->query($sql);
-    $data = [];
-
-    while ($row = $result->fetch_assoc()) {
-        $data[$row['outcome']] = intval($row['total_cases']);
-    }
-    return $data;
-}*/
 
 function fetchCaseDuration($conn, $startDate, $endDate) {
     $dateFilter = dateFilter("settlement_date", $startDate, $endDate);
@@ -255,7 +278,13 @@ function fetchCaseDuration($conn, $startDate, $endDate) {
     while ($row = $result->fetch_assoc()) {
         $data[$row['duration_category']] = intval($row['total_cases']);
     }
-    return $data;
+    return [
+        "title" => "Case Duration",
+        "data" => $data,
+        "type" => "h-bar",
+        "col" => 2,
+        "row" => 2
+    ];
 }
 
 function fetchCasesVsSettlements($conn, $startDate, $endDate) {
@@ -268,9 +297,11 @@ function fetchCasesVsSettlements($conn, $startDate, $endDate) {
             ORDER BY MIN(creation_date) ASC";
     $result = $conn->query($sql);
     $data = [];
+    $totalCount = 0;
 
     while ($row = $result->fetch_assoc()) {
-        $data[$row['month']] = [$row['new_cases'], 0];
+        $data[$row['month']] = [intval($row['new_cases']), 0];
+        $totalCount++;
     }
 
     $dateFilter = dateFilter("settlement_date", $startDate, $endDate);
@@ -286,7 +317,17 @@ function fetchCasesVsSettlements($conn, $startDate, $endDate) {
         }
     }
 
-    return $data;
+    $colCount = 2;
+    if ($totalCount >= 6) $colCount = 3;
+    if ($totalCount >= 12) $colCount = 4;
+
+    return [
+        "title" => "Signed Up Cases vs Settled Cases",
+        "data" => $data,
+        "type" => "h-bar",
+        "col" => $colCount,
+        "row" => 2
+    ];
 }
 
 function fetchAverageSettlementByPractice($conn, $startDate, $endDate) {
@@ -309,7 +350,13 @@ function fetchAverageSettlementByPractice($conn, $startDate, $endDate) {
     while ($row = $result->fetch_assoc()) {
         $data[$row['practice_category']] = floatval($row['avg_settlement']);
     }
-    return $data;
+    return [
+        "title" => "Average Settlement by Practice Type",
+        "data" => $data,
+        "type" => "v-bar",
+        "col" => 2,
+        "row" => 2
+    ];
 }
 
 function fetchAverageSuitPercentage($conn, $startDate, $endDate) {
@@ -327,7 +374,16 @@ function fetchAverageSuitPercentage($conn, $startDate, $endDate) {
     $avgSuitPercentage = isset($row['avg_suit_percentage']) ? floatval($row['avg_suit_percentage']) : 40.0;
     $totalCases = isset($row['total_cases']) ? intval($row['total_cases']) : 0;
 
-    return [$totalCases, $avgSuitPercentage];
+    return [
+        "title" => "Average Suit Percentage",
+        "data" => [
+            intval($row['total_cases']),
+            floatval($row['avg_suit_percentage'])
+        ],
+        "type" => "percentage",
+        "col" => 1,
+        "row" => 1
+    ];
 }
 
 function fetchAverageCasesPerPeriod($conn, $startDate, $endDate) {
@@ -339,7 +395,13 @@ function fetchAverageCasesPerPeriod($conn, $startDate, $endDate) {
         $result = $conn->query($sql);
         $row = $result->fetch_assoc();
 
-        return [floatval($row['avg_cases_per_month'])];
+        return [
+            "title" => "Average Cases per Period",
+            "data" => [floatval($row['avg_cases_per_month'])],
+            "type" => "value",
+            "col" => 1,
+            "row" => 1
+        ];
     }
 
     $dateFilter = dateFilter("creation_date", $startDate, $endDate);
@@ -368,8 +430,14 @@ function fetchAverageCasesPerPeriod($conn, $startDate, $endDate) {
     $row = $result->fetch_assoc();
 
     return [
-        floatval($row['avg_cases_per_period']),
-        floatval($row['pace_for_month'])
+        "title" => "Average Cases per Period",
+        "data" => [
+            floatval($row['avg_cases_per_period']),
+            floatval($row['pace_for_month'])
+        ],
+        "type" => "value",
+        "col" => 1,
+        "row" => 1
     ];
 }
 
@@ -387,7 +455,13 @@ function fetchTopAttorneys($conn, $startDate, $endDate) {
     while ($row = $result->fetch_assoc()) {
         $data[$row['first_primary']] = intval($row['total_cases']);
     }
-    return $data;
+    return [
+        "title" => "Top 5 Attorneys by Settlement Amount",
+        "data" => $data,
+        "type" => "v-bar",
+        "col" => 2,
+        "row" => 2
+    ];
 }
 
 function fetchTopSettlements($conn, $startDate, $endDate) {
@@ -401,9 +475,18 @@ function fetchTopSettlements($conn, $startDate, $endDate) {
     $data = [];
 
     while ($row = $result->fetch_assoc()) {
-        $data[$row['first_primary']] = floatval($row['settlement_amount']);
+        $data[] = [
+            $row['first_primary'],
+            floatval($row['settlement_amount'])
+        ];
     }
-    return $data;
+    return [
+        "title" => "Top 5 Settlements",
+        "data" => $data,
+        "type" => "h-bar",
+        "col" => 2,
+        "row" => 2
+    ];
 }
 
 function fetchTopWinningAttorneys($conn, $startDate, $endDate) {
@@ -420,7 +503,13 @@ function fetchTopWinningAttorneys($conn, $startDate, $endDate) {
     while ($row = $result->fetch_assoc()) {
         $data[$row['first_primary']] = intval($row['total_cases']);
     }
-    return $data;
+    return [
+        "title" => "Top 5 Winning Attorneys",
+        "data" => $data,
+        "type" => "v-bar",
+        "col" => 2,
+        "row" => 2
+    ];
 }
 
 function fetchOpenCases($conn, $startDate, $endDate) {
@@ -429,6 +518,350 @@ function fetchOpenCases($conn, $startDate, $endDate) {
             WHERE phase NOT IN ('settlement', 'closing', 'referred out', 'qsf', 'qsf out', 'archived') AND settlement_date IS NULL AND creation_date < '$endDate'";
     $result = $conn->query($sql);
     $row = $result->fetch_assoc();
-    return intval($row['open_cases']);
+    return [
+        "title" => "Open Cases",
+        "data" => intval($row['open_cases']),
+        "type" => "value",
+        "col" => 1,
+        "row" => 1
+    ];
+}
+
+function fetchAttorneyDocket($conn, $startDate, $endDate) {
+    $endDate .= " 23:59:59";
+    $sql = "SELECT first_primary, COUNT(*) AS total_cases 
+            FROM cases 
+            WHERE first_primary IS NOT NULL AND (settlement_date IS NULL OR settlement_date < '$endDate') AND creation_date < '$endDate' AND phase NOT IN ('settlement', 'closing', 'referred out', 'qsf', 'qsf out', 'archived')
+            GROUP BY first_primary 
+            ORDER BY total_cases DESC";
+    $result = $conn->query($sql);
+    $data = [];
+    $totalCount = 0;
+
+    while ($row = $result->fetch_assoc()) {
+        $data[$row['first_primary']] = [
+            'total_cases' => intval($row['total_cases'])
+        ];
+        $totalCount++;
+    }
+
+    $rowCount = 2;
+    if ($totalCount > 8) $rowCount = 3;
+    if ($totalCount > 16) $rowCount = 4;
+    if ($totalCount > 24) $rowCount = 5;
+    if ($totalCount > 30) $rowCount = 6;
+
+    return [
+        "title" => "Attorney Docket Count",
+        "data" => $data,
+        "type" => "table",
+        "headers" => ["Attorney", "Total Cases"],
+        "col" => 2,
+        "row" => $rowCount
+    ];
+}
+
+function fetchDisengagementPercent($conn, $startDate, $endDate) {
+    $dateFilter = dateFilter("creation_date", $startDate, $endDate);
+    $sqlDisengaged = "SELECT COALESCE(NULLIF(referred_by, ''), 'Unknown') AS referred_by, COUNT(*) AS total_disengaged 
+                      FROM cases 
+                      WHERE (referred_by IS NOT NULL OR referred_by = '') AND disengaged = 'TRUE' $dateFilter 
+                      GROUP BY referred_by";
+    $sqlReferred = "SELECT COALESCE(NULLIF(referred_by, ''), 'Unknown') AS referred_by, COUNT(*) AS total_referred 
+                    FROM cases 
+                    WHERE (referred_by IS NOT NULL OR referred_by = '') $dateFilter 
+                    GROUP BY referred_by";
+    
+    $resultDisengaged = $conn->query($sqlDisengaged);
+    $resultReferred = $conn->query($sqlReferred);
+    $data = [];
+    $totalCount = 0;
+
+    while ($row = $resultDisengaged->fetch_assoc()) {
+        $data[$row['referred_by']] = [
+            'total_referred' => 0,
+            'total_disengaged' => intval($row['total_disengaged']),
+            'disengagement_display' => '0 (0.00%)'
+        ];
+    }
+
+    while ($row = $resultReferred->fetch_assoc()) {
+        if (isset($data[$row['referred_by']])) {
+            $data[$row['referred_by']]['total_referred'] = intval($row['total_referred']);
+        } else {
+            $data[$row['referred_by']] = [
+                'total_referred' => intval($row['total_referred']),
+                'total_disengaged' => 0,
+                'disengagement_display' => '0 (0.00%)'
+            ];
+        }
+    }
+
+    foreach ($data as $key => $value) {
+        $percent = ($value['total_referred'] > 0) 
+            ? number_format(($value['total_disengaged'] / $value['total_referred']) * 100, 2) 
+            : "0.00";
+        
+        $data[$key]['disengagement_display'] = "{$value['total_disengaged']} ({$percent}%)";
+        $totalCount++;
+    }
+
+    uasort($data, function($a, $b) {
+        return $b['total_referred'] - $a['total_referred'];
+    });
+
+    $rowCount = 2;
+    if ($totalCount > 8) $rowCount = 3;
+    if ($totalCount > 16) $rowCount = 4;
+    if ($totalCount > 24) $rowCount = 5;
+
+    return [
+        "title" => "Disengagement Percent",
+        "data" => array_slice($data, 0, 20, true),
+        "type" => "table",
+        "headers" => ["Referred By", "Total Referred", "Disengagement (#)"],
+        "col" => 2,
+        "row" => $rowCount
+    ];
+}
+
+function fetchMarketingSource($conn, $startDate, $endDate) {
+    $dateFilter = dateFilter("creation_date", $startDate, $endDate);
+    $sql = "SELECT COALESCE(NULLIF(marketing_source, ''), 'Unknown') AS marketing_source, COUNT(*) AS total_cases 
+            FROM cases 
+            WHERE marketing_source IS NOT NULL $dateFilter 
+            GROUP BY marketing_source 
+            LIMIT 20";
+    $result = $conn->query($sql);
+    $data = [];
+    $totalCount = 0;
+
+    while ($row = $result->fetch_assoc()) {
+        $data[$row['marketing_source']] = intval($row['total_cases']);
+        $totalCount++;
+    }
+
+    $rowCount = 2;
+    if ($totalCount > 10) $rowCount = 3;
+    if ($totalCount > 18) $rowCount = 4;
+
+    return [
+        "title" => "Marketing Source",
+        "data" => $data,
+        "type" => "v-bar",
+        "col" => 2,
+        "row" => $rowCount
+    ];
+}
+
+function fetchAttorneySettlements($conn, $startDate, $endDate) {
+    $dateFilter = dateFilter("settlement_date", $startDate, $endDate);
+
+    $sqlAvg = "SELECT AVG(suit_percentage / 100) AS avgSuitPercentage 
+               FROM cases 
+               WHERE suit_percentage IS NOT NULL";
+    $resultAvg = $conn->query($sqlAvg);
+    $avgSuitPercentage = $resultAvg->fetch_assoc()['avgSuitPercentage'] ?? 0.4;
+
+    $sql = "SELECT first_primary, COUNT(*) AS total_cases, 
+                   SUM(settlement_amount) AS total_settlement, 
+                   SUM(settlement_amount * COALESCE(suit_percentage / 100, $avgSuitPercentage)) AS total_adjusted_settlement
+            FROM cases 
+            WHERE first_primary IS NOT NULL AND settlement_amount IS NOT NULL $dateFilter 
+            GROUP BY first_primary 
+            ORDER BY total_settlement DESC 
+            LIMIT 30";
+    $result = $conn->query($sql);
+    $data = [];
+    $totalCount = 0;
+
+    while ($row = $result->fetch_assoc()) {
+        $data[$row['first_primary']] = [
+            'total_cases' => intval($row['total_cases']),
+            'total_settlement' => '$' . number_format(floatval($row['total_settlement']), 2),
+            'total_adjusted_settlement' => '$' . number_format(floatval($row['total_adjusted_settlement']), 2)
+        ];
+        $totalCount++;
+    }
+
+    $rowCount = 2;
+    if ($totalCount > 8) $rowCount = 3;
+    if ($totalCount > 16) $rowCount = 4;
+    if ($totalCount > 24) $rowCount = 5;
+
+    return [
+        "title" => "Attorney Settlements",
+        "data" => $data,
+        "type" => "table",
+        "headers" => ["Attorney", "Total Cases", "Total Settlement", "Total Adjusted Settlement"],
+        "col" => 2,
+        "row" => $rowCount
+    ];
+}
+
+function fetchMissingPSV($conn, $startDate, $endDate) {
+    $endDate .= " 23:59:59";
+    $sql = "SELECT first_primary, COUNT(*) AS total_cases 
+            FROM cases 
+            WHERE projected_settlement_value IS NULL 
+            AND settlement_date IS NULL
+            AND creation_date < '$endDate' 
+            AND phase NOT IN ('Initial/Contract Sent', 'referred out', 'qsf', 'qsf out', 'archived') 
+            GROUP BY first_primary 
+            ORDER BY total_cases DESC
+            LIMIT 30";
+    $sql2 = "SELECT COUNT(*) AS total_cases 
+             FROM cases 
+             WHERE projected_settlement_value IS NULL 
+             AND settlement_date IS NULL
+             AND creation_date < '$endDate' 
+             AND phase NOT IN ('Initial/Contract Sent', 'referred out', 'qsf', 'qsf out', 'archived')";
+    $result = $conn->query($sql);
+    $result2 = $conn->query($sql2);
+    $data = [];
+    $totalCount = 0;
+
+    while ($row = $result->fetch_assoc()) {
+        $data[$row['first_primary']] = [
+            'total_case' => intval($row['total_cases'])
+        ];
+        $totalCount++;
+    }
+
+    $totalRow = $result2->fetch_assoc();
+    $data['Total'] = [
+        'total_case' => intval($totalRow['total_cases'])
+    ];
+
+    $rowCount = 2;
+    if ($totalCount > 8) $rowCount = 3;
+    if ($totalCount > 16) $rowCount = 4;
+    if ($totalCount > 24) $rowCount = 5;
+
+    return [
+        "title" => "Missing Projected Settlement Value(s)",
+        "data" => $data,
+        "type" => "table",
+        "headers" => ["Attorney", "Missing Values"],
+        "col" => 1,
+        "row" => $rowCount
+    ];
+}
+
+function fetchFeeSplit($conn, $startDate, $endDate) {
+    $dateFilter = dateFilter("settlement_date", $startDate, $endDate);
+    $sql = "SELECT 
+                COALESCE(NULLIF(referred_by, ''), 'Unknown') AS referred_by,
+                AVG(fees_to_other) AS average_fees_to_other,
+                SUM(settlement_amount) AS total_settlement,
+                AVG(fees_to_other) / 100 * SUM(settlement_amount) AS fees_paid,
+                COUNT(*) AS total_cases
+            FROM cases 
+            WHERE referred_by IS NOT NULL 
+                AND fees_to_other IS NOT NULL
+                AND settlement_amount IS NOT NULL $dateFilter
+            GROUP BY referred_by
+            ORDER BY fees_paid DESC 
+            LIMIT 20;";
+    $result = $conn->query($sql);
+    $data = [];
+    $totalCount = 0;
+
+    while ($row = $result->fetch_assoc()) {
+        $data[$row['referred_by']] = [
+            'total_cases' => intval($row['total_cases']),
+            'settlement_amount' => '$' . number_format(floatval($row['total_settlement']), 2),
+            'average_fees_to_other' => number_format(floatval($row['average_fees_to_other']), 2) . "%",
+            'fee_paid' => '$' . number_format(floatval($row['fees_paid']), 2)
+        ];
+        $totalCount++;
+    }
+
+    $rowCount = 2;
+    if ($totalCount >= 8) $rowCount = 3;
+    if ($totalCount >= 16) $rowCount = 4;
+    if ($totalCount >= 24) $rowCount = 5;
+
+    return [
+        "title" => "Fee Split",
+        "data" => $data,
+        "type" => "table",
+        "headers" => ["Referred By", "Total Cases", "Settlement Total", "Average Referral Fee", "Fees Paid"],
+        "col" => 3,
+        "row" => $rowCount
+    ];
+}
+
+$feeCount = 0;
+
+function attorneyFeeSplit($conn, $startDate, $endDate) {
+    global $feeCount;
+    $dateFilter = dateFilter("item_creation_date", $startDate, $endDate);
+    $sql = "SELECT
+                payee AS attorney,
+                AVG(amount_due) AS average_settlement,
+                SUM(amount_due) AS total_settlement,
+                COUNT(*) AS total_cases
+                FROM payees
+                WHERE payment_type IN ('DB Attorney', 'DB Estimated Discretionary') $dateFilter
+                GROUP BY attorney
+                ORDER BY total_settlement DESC
+                LIMIT 30";
+    $result = $conn->query($sql);
+    $data = [];
+
+    while ($row = $result->fetch_assoc()) {
+        $data[$row['attorney']] = [
+            'average_settlement' => '$' . number_format(floatval($row['average_settlement']), 2),
+            'total_settlement' => '$' . number_format(floatval($row['total_settlement']), 2),
+            'total_cases' => intval($row['total_cases'])
+        ];
+        $feeCount++;
+    }
+
+    $rowCount = 2;
+    if ($feeCount >= 8) $rowCount = 3;
+    if ($feeCount >= 16) $rowCount = 4;
+    if ($feeCount >= 24) $rowCount = 5;
+
+    return [
+        "title" => "Attorney Fee Split",
+        "data" => $data,
+        "type" => "table",
+        "headers" => ["Attorney", "Average Fee Paid", "Total Fees Paid", "Total Cases"],
+        "col" => 3,
+        "row" => $rowCount
+    ];
+}
+
+function attorneyFeeSplitPie($conn, $startDate, $endDate) {
+    global $feeCount;
+    $dateFilter = dateFilter("item_creation_date", $startDate, $endDate);
+    $sql = "SELECT
+                payee AS attorney,
+                SUM(amount_due) AS total_settlement
+                FROM payees
+                WHERE amount_due IS NOT NULL AND amount_due > 0 AND payment_type IN ('DB Attorney', 'DB Estimated Discretionary') $dateFilter
+                GROUP BY attorney
+                ORDER BY total_settlement DESC
+                LIMIT 10";
+    $result = $conn->query($sql);
+    $data = [];
+
+    while ($row = $result->fetch_assoc()) {
+        $data[$row['attorney']] = floatval($row['total_settlement']);
+    }
+
+    $rowCount = 2;
+    if ($feeCount >= 8) $rowCount = 3;
+    if ($feeCount >= 16) $rowCount = 4;
+
+    return [
+        "title" => "Attorney Fee Split",
+        "data" => $data,
+        "type" => "piecol",
+        "col" => 1,
+        "row" => $rowCount
+    ];
 }
 ?>

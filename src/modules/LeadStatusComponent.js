@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Card from "./Card";
 import "../Dashboard.css";
 
 const LeadStatusComponent = ({ startDate, endDate }) => {
     const [statusData, setStatusData] = useState({});
     const [loading, setLoading] = useState(true);
+    const timerRef = useRef(null);
 
     const fetchLeadStatuses = async () => {
         setLoading(true);
@@ -32,7 +33,15 @@ const LeadStatusComponent = ({ startDate, endDate }) => {
     };
 
     useEffect(() => {
-        fetchLeadStatuses();
+        if (timerRef.current) {
+            clearTimeout(timerRef.current);
+        }
+
+        timerRef.current = setTimeout(() => {
+            fetchLeadStatuses();
+        }, 2000);
+
+        return () => clearTimeout(timerRef.current);
     }, [startDate, endDate]);
 
     return (

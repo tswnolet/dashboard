@@ -33,6 +33,8 @@
 .section ul {
     list-style: none;
     padding: 0;
+    width: 100%;
+    max-width: 450px;
 }
 
 .section li {
@@ -50,7 +52,7 @@
     padding: 5px 10px;
     border-radius: 30px;
     cursor: pointer;
-    width: 50px;
+    min-width: 50px;
 }
 
 .section button:hover {

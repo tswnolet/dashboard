@@ -23,8 +23,8 @@ const MobileMenu = ({ theme, scrolled, routes, logout}) => {
   const spanStyle = {
     backgroundColor:
       theme === 'dark'
-        ? `var(${scrolled ? '--secondary-color' : '--text-color'})`
-        : `var(${scrolled ? '--text-color' : '--secondary-color'})`
+        ? `var(${scrolled ? '--text-color' : '--secondary-color'})`
+        : `var(${scrolled ? '--secondary-color' : '--text-color'})`
   };
 
   return (

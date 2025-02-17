@@ -13,11 +13,14 @@ const Dashboard = ({ setLoggedIn }) => {
     const [showDateInputs, setShowDateInputs] = useState(false);
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    const [datesSet, setDatesSet] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const [stats, setStats] = useState({});
 
     const fetchStats = async (manual = false) => {
+        if (!datesSet) return;
+        
         setRefreshing(true);
         const startTime = Date.now();
 
@@ -29,7 +32,6 @@ const Dashboard = ({ setLoggedIn }) => {
                 const filteredStats = Object.fromEntries(
                     Object.entries(result).filter(([key, value]) => key !== "success" && value !== null && value !== undefined)
                 );
-
                 setStats(filteredStats);
             } else {
                 console.error("Error fetching data:", result.message);
@@ -52,7 +54,8 @@ const Dashboard = ({ setLoggedIn }) => {
 
         if (report) {
             const today = new Date();
-            let start, end;
+            let start = '';
+            let end = '';
 
             switch (report) {
                 case 'today':
@@ -63,11 +66,13 @@ const Dashboard = ({ setLoggedIn }) => {
                     end = new Date().toISOString().split('T')[0];
                     break;
                 case 'workweek':
-                    const lastSunday = new Date(today.setDate(today.getDate() - today.getDay() - 7));
-                    const lastSaturday = new Date(lastSunday);
-                    lastSaturday.setDate(lastSunday.getDate() + 6);
-                    start = lastSunday.toISOString().split('T')[0];
-                    end = lastSaturday.toISOString().split('T')[0];
+                    const dayOfWeek = today.getDay();
+                    const lastFriday = new Date(today);
+                    lastFriday.setDate(today.getDate() - ((dayOfWeek + 2) % 7));
+                    const lastSaturday = new Date(lastFriday);
+                    lastSaturday.setDate(lastFriday.getDate() - 6);
+                    start = lastSaturday.toISOString().split('T')[0];
+                    end = lastFriday.toISOString().split('T')[0];
                     break;
                 case 'thismonth':
                     start = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
@@ -95,12 +100,15 @@ const Dashboard = ({ setLoggedIn }) => {
 
             setStartDate(start);
             setEndDate(end);
+            setDatesSet(true);
         }
     }, []);
 
     useEffect(() => {
-        fetchStats();
-    }, [startDate, endDate]);
+        if (datesSet) {
+            fetchStats();
+        }
+    }, [datesSet, startDate, endDate]);
 
     const renderCards = () => {
         const defaultGridSize = {
@@ -117,7 +125,9 @@ const Dashboard = ({ setLoggedIn }) => {
             "def": { col: 1, row: 2 },
             "percentage": { col: 1, row: 1 },
             "value": { col: 1, row: 1 },
-            "rank": { col: 1, row: 2 }
+            "rank": { col: 1, row: 2 },
+            "list": { col: 2, row: 2 },
+            "table": { col: 4, row: 4 }
         };
     
         const preferredOrder = [
@@ -126,6 +136,7 @@ const Dashboard = ({ setLoggedIn }) => {
             "Cases by Phase",
             "Average Suit Percentage",
             "Cases Opened vs Closed",
+            "Average Cases per Period",
             "New Cases",
             "Average Settlement by Practice Type",
             "Cases by Practice Type",
@@ -142,29 +153,11 @@ const Dashboard = ({ setLoggedIn }) => {
         const cardData = Object.entries(stats)
             .filter(([_, value]) => value && value.data !== null && Object.keys(value.data).length > 0)
             .map(([key, value]) => {
-                let cardType = "v-bar";
-                let secondData = null;
+                let cardType = value.type;
+                let secondData = value.secondData || null;
                 const { title, data } = value;
-
-                defaultGridSize["v-bar"] = title.includes("Top 5") ? { col: 2, row: 2 } : defaultGridSize["v-bar"];
     
                 const chart = key.toLowerCase();
-                if (chart.includes("location")) cardType = "pie";
-                else if (chart.includes("total")) cardType = "def";
-                else if (chart.includes("over") || chart.includes("openedvsclosed")) {
-                    cardType = "line";
-                    if (typeof data === "object" && !Array.isArray(data)) {
-                        secondData = Object.fromEntries(
-                            Object.entries(data).map(([subKey, subValue]) => [
-                                subKey, Array.isArray(subValue) ? subValue[1] : 0
-                            ])
-                        );
-                    }
-                }
-                else if (chart.includes("caseoutcome")) cardType = "v-bar";
-                else if (chart.includes("duration") || chart.includes("settlements") && !chart.includes("top")) cardType = "h-bar";
-                else if (chart.includes("percentage")) cardType = "percentage";
-                else if (chart.includes("opencases") || chart.includes("averagecases")) cardType = "value";
     
                 const gridSize = defaultGridSize[cardType] || { col: 2, row: 2 };
                 const colSpan = typeof gridSize.col === 'function' ? gridSize.col(data) : gridSize.col;
@@ -178,15 +171,17 @@ const Dashboard = ({ setLoggedIn }) => {
                         <Card 
                             key={key}
                             data={{ 
-                                title,
+                                title: value.title,
                                 data,
-                                col: colSpan,
-                                row: title === "Cases by Phase" ? 4 : gridSize.row
+                                col: value.col || gridSize.col,
+                                row: value.row || gridSize.row
                             }}
+                            headers={value.headers}
                             type={cardType}
-                            format={Object.entries(data).some(([_, value]) => value % 1 !== 0) || title.includes("Top 5") || title.includes("Average Settlement")}
-                            {...(secondData  ? { secondData } : {})}
+                            format={Object.entries(data).some(([_, value]) => value % 1 !== 0) || title.includes("Top 5") && !title.includes("Top 5 Winning Attorneys") || title.includes("Average Settlement")}
+                            secondData={secondData}
                             {...(chart.includes("over") ? { yAxisLabel: "money" } : {})}
+                            {...(title === "Attorney Docket Count" ? { slice: 30 } : {})}
                         />
                     )
                 };

@@ -1,14 +1,13 @@
 <?php
 session_set_cookie_params([
-  'lifetime' => 365 * 24 * 60 * 60, // 1 year
+  'lifetime' => 24 * 60 * 60,
   'path' => '/',
-  'domain' => '', // Your domain, leave empty for default
-  'secure' => true, // For HTTPS
+  'domain' => '',
+  'secure' => true,
   'httponly' => true,
-  'samesite' => 'None', // Required for cross-origin
+  'samesite' => 'None',
 ]);
 session_start();
-include './headers.php';
 
 if(isset($_GET['close'])) {
   if (ini_get("session.use_cookies")) {
@@ -17,22 +16,23 @@ if(isset($_GET['close'])) {
   }
   session_unset();
   session_destroy();
+  echo json_encode(['success' => true]);
   exit;
 }
 
-error_log("Session ID: " . session_id());
-error_log("Session Data: " . print_r($_SESSION, true));
-
-require './headers.php';
-
-$response = ['isLoggedIn' => false];
-
-if (isset($_SESSION['id'])) {
-    $response['isLoggedIn'] = true;
-    $response['id'] = $_SESSION['id'];
-} else {
-    error_log("Session ID not set");
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['isLoggedIn' => false]);
+    exit();
 }
 
-header('Content-Type: application/json');
-echo json_encode($response);
+if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 86400)) {
+    session_unset();
+    session_destroy();
+    echo json_encode(['isLoggedIn' => false]);
+    exit();
+}
+
+$_SESSION['LAST_ACTIVITY'] = time();
+
+echo json_encode(['isLoggedIn' => true, 'user_id' => $_SESSION['user_id']]);
+?>

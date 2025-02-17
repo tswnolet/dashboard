@@ -1,7 +1,7 @@
 import React from 'react';
 import Loading from './Loading';
 
-const VBarChart = ({ data, formatNumber, format }) => {
+const VBarChart = ({ data, formatNumber, format, slice = null }) => {
     const parsedData = data && typeof data === "string" ? JSON.parse(data) : data || {};
 
     if (!parsedData || Object.keys(parsedData).length === 0) {
@@ -10,8 +10,8 @@ const VBarChart = ({ data, formatNumber, format }) => {
 
     let sortedEntries = Object.entries(parsedData).sort((a, b) => b[1] - a[1]);
 
-    const topCategories = sortedEntries.slice(0, 10);
-    const otherSum = sortedEntries.slice(10).reduce((acc, [, value]) => acc + value, 0);
+    const topCategories = sortedEntries.slice(0, slice || 10);
+    const otherSum = sortedEntries.slice(slice || 10).reduce((acc, [, value]) => acc + value, 0);
 
     const finalData = [...topCategories];
     if (otherSum > 0) {

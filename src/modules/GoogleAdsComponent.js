@@ -77,9 +77,11 @@ const GoogleAdsComponent = ({ startDate, endDate }) => {
                                     'Impressions': campaign.impressions.toLocaleString(),
                                     'Clicks': campaign.clicks.toLocaleString(),
                                     'Conversions': campaign.conversions.toFixed(0).toLocaleString(),
-                                    'Cost': [`$${campaign.cost_usd}`, `$${(parseFloat(campaign.cost_usd.replace(/,/g, '')) / campaign.clicks).toFixed(2)} per click`],
-                                    'CTR': `${(campaign.clicks / campaign.impressions * 100).toFixed(2)}%`
+                                    'Cost': [campaign.cost_usd, (parseFloat(campaign.cost_usd.replace(/,/g, '')) / campaign.clicks).toFixed(2)],
+                                    'CTR': (campaign.clicks / campaign.impressions * 100).toFixed(2) + '%',
                                 },
+                                col: 2,
+                                row: 1
                             }}
                             type="list"
                             styling={adsColors}

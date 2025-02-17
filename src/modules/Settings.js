@@ -116,7 +116,13 @@ const Settings = () => {
       <div className="account-section">
         <h4>Account Information</h4>
         <div className='input-section-container'>
-          <div className='label-container'>
+            <div className='label-container'>
+              <label for="user">Username</label>
+              <label for="email">Email</label>
+              <label for="password">Password</label>
+              <label for="confirm_password">Confirm Password</label>
+            </div>
+          <div className='input-container'>
             <input
               type="text"
               name="user"

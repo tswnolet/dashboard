@@ -76,10 +76,7 @@ function fetchUserData($conn, $userId, $startDate, $endDate) {
                 $formattedEndDate = $dateDiff <= 365 ? date('d M', strtotime($endDate)) : $endDate;
                 $title .= " per $timePeriod from $formattedStartDate to $formattedEndDate";
             }
-            $data[$funcName] = [
-                "title" => $title == "New Cases" ? $title .= " per $timePeriod" : $title,
-                "data" => $funcName($conn, $startDate, $endDate)
-            ];
+            $data[$funcName] = $funcName($conn, $startDate, $endDate);
         } else {
             $data[$funcName] = [
                 "title" => $displayName,
@@ -88,6 +85,27 @@ function fetchUserData($conn, $userId, $startDate, $endDate) {
         }
     }
 
+    return $data;
+}
+
+function processFunctionData($data, $funcName) {
+    switch ($funcName) {
+        case 'casesByLocation':
+            return processCasesByLocation($data);
+        case 'totalSettlement':
+            return processTotalSettlement($data);
+        default:
+            return $data;
+    }
+}
+
+function processCasesByLocation($data) {
+    // Process data for cases by location
+    return $data;
+}
+
+function processTotalSettlement($data) {
+    // Process data for total settlement
     return $data;
 }
 ?>

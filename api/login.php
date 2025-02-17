@@ -11,9 +11,8 @@ if (empty($username) || empty($password)) {
     exit;
 }
 
-// Check if the user exists
-$stmt = $conn->prepare('SELECT id, password, access_level FROM users WHERE user = ?');
-$stmt->bind_param('s', $username);
+$stmt = $conn->prepare('SELECT id, password, access_level FROM users WHERE user = ? OR email = ?');
+$stmt->bind_param('ss', $username, $username);
 $stmt->execute();
 $stmt->store_result();
 
@@ -38,12 +37,13 @@ if ($accessLevel === 'no access') {
     exit;
 }
 
-// Generate a token for the session
 $token = bin2hex(random_bytes(16));
 $stmt = $conn->prepare('UPDATE users SET token = ? WHERE id = ?');
 $stmt->bind_param('si', $token, $userId);
 
 if ($stmt->execute()) {
+    session_start();
+    $_SESSION['user_id'] = $userId;
     echo json_encode(['success' => true, 'token' => $token]);
 } else {
     error_log('Failed to update token');

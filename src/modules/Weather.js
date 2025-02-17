@@ -349,7 +349,7 @@ export default function Weather() {
             {/* Results Table */}
             <div id='weather-container'>
                 {currentPageData.length > 0 ? (
-                    <table>
+                    <table id="weather-table">
                         <thead style={{borderBottom: "1px solid white"}}>
                             <tr>
                                 <th onClick={() => handleSort('event_type')}>

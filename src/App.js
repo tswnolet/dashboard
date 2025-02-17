@@ -50,6 +50,7 @@ const App = () => {
       const data = await response.json();
       if (data.isLoggedIn) {
         setLoggedIn(true);
+        setCookie('session', 'active', 1); 
       } else {
         setLoggedIn(false);
       }

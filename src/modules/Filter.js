@@ -18,9 +18,11 @@ const Filter = ({ startDate, endDate, setStartDate, setEndDate, showDateInputs, 
             document.removeEventListener('click', handleClick);
         };
     }, [filterButton, setShowDateInputs]);
+    
+    const today = new Date();
+    const dayOfWeek = today.getDay();
 
     const setPresetDateRange = (preset) => {
-        const today = new Date();
         let start, end;
 
         switch (preset) {
@@ -32,11 +34,12 @@ const Filter = ({ startDate, endDate, setStartDate, setEndDate, showDateInputs, 
                 end = new Date().toISOString().split('T')[0];
                 break;
             case 'workweek':
-                const lastSunday = new Date(today.setDate(today.getDate() - today.getDay() - 7));
-                const lastSaturday = new Date(lastSunday);
-                lastSaturday.setDate(lastSunday.getDate() + 6);
-                start = lastSunday.toISOString().split('T')[0];
-                end = lastSaturday.toISOString().split('T')[0];
+                const lastFriday = new Date(today);
+                lastFriday.setDate(today.getDate() - ((dayOfWeek + 2) % 7));
+                const lastSaturday = new Date(lastFriday);
+                lastSaturday.setDate(lastFriday.getDate() - 6);
+                start = lastSaturday.toISOString().split('T')[0];
+                end = lastFriday.toISOString().split('T')[0];
                 break;
             case 'thismonth':
                 start = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];

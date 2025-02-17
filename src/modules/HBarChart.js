@@ -46,16 +46,15 @@ const HBarChart = ({ data, formatNumber }) => {
     }
 
     const maxTotal = Math.max(
-        ...displayedEntries.flatMap(([_, values]) =>
-            Array.isArray(values) ? values : [values]
+            ...displayedEntries.flatMap(([_, values]) => Array.isArray(values) ? typeof values[0] === 'number' ? values : values[1] : [values]
         )
     ) || 1;
 
     const yAxisLabels = labelsCount === 5
-        ? Array.from({ length: 5 }, (_, i) => `${formatNumber((maxTotal / 4) * i, "a")}`).reverse()
+        ? Array.from({ length: 5 }, (_, i) => `${formatNumber((maxTotal / 4) * i)}`).reverse()
         : [
-            `${formatNumber(maxTotal, "a")}`,
-            `${formatNumber(maxTotal / 2, "a")}`,
+            `${formatNumber(maxTotal)}`,
+            `${formatNumber(maxTotal / 2)}`,
             `0`
         ];
 
@@ -72,40 +71,57 @@ const HBarChart = ({ data, formatNumber }) => {
                         <div key={`${index}-grid-line`} className="y-grid-line"></div>
                     ))}
                 </div>
-                {displayedEntries.map(([name, values]) => {
-                    let firstTotal = 0;
-                    let secondTotal = 0;
+                {displayedEntries.map(([name, values], index) => {
+                    if((Array.isArray(values) && values[1] && typeof values[0] != 'string') || !Array.isArray(values)) {
+                        let firstTotal = 0;
+                        let secondTotal = 0;
 
-                    if (Array.isArray(values)) {
-                        [firstTotal = 0, secondTotal = 0] = values;
-                    } else {
-                        firstTotal = values;
-                    }
+                        if (Array.isArray(values)) {
+                            [firstTotal = 0, secondTotal = 0] = values;
+                        } else {
+                            firstTotal = values;
+                        }
 
-                    const firstHeightPx = (firstTotal / maxTotal) * parentHeight;
-                    const secondHeightPx = (secondTotal / maxTotal) * parentHeight;
+                        const firstHeightPx = (firstTotal / maxTotal) * parentHeight;
+                        const secondHeightPx = (secondTotal / maxTotal) * parentHeight;
 
-                    return (
-                        <div className="period" key={name}>
-                            <div className='graph-bars'>
-                                <div 
-                                    className="ttb-bar first"
-                                    style={{ height: `${firstHeightPx}px` }}
-                                    title={`${name}: ${firstTotal}`}
-                                ></div>
-                                {secondTotal > 0 && (
+                        return (
+                            <div className="period" key={name}>
+                                <div className='graph-bars'>
                                     <div 
-                                        className="ttb-bar second"
-                                        style={{ height: `${secondHeightPx}px` }}
-                                        title={`${name}: ${secondTotal}`}
+                                        className="ttb-bar first"
+                                        style={{ height: `${firstHeightPx}px` }}
+                                        title={`${name}: ${firstTotal}`}
                                     ></div>
-                                )}
+                                    {secondTotal > 0 && (
+                                        <div 
+                                            className="ttb-bar second"
+                                            style={{ height: `${secondHeightPx}px` }}
+                                            title={`${name}: ${secondTotal}`}
+                                        ></div>
+                                    )}
+                                </div>
+                                <div className="graph-titles">
+                                    <h4>{name}</h4>
+                                </div>
                             </div>
-                            <div className="graph-titles">
-                                <h4>{name}</h4>
+                        );
+                    } else {
+                        return (
+                            <div className="period" key={values[0]+ " " + index}>
+                                <div className='graph-bars'>
+                                    <div 
+                                        className="ttb-bar first"
+                                        style={{ height: `${(values[1] / maxTotal) * parentHeight}px` }}
+                                        title={`${name}: ${values[1]}`}
+                                    ></div>
+                                </div>
+                                <div className="graph-titles">
+                                    <h4>{values[0]}</h4>
+                                </div>
                             </div>
-                        </div>
-                    );
+                        );
+                    }
                 })}
             </div>
         </div>
