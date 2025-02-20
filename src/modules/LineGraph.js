@@ -150,7 +150,7 @@ const LineGraph = ({ data, title, secondData = null, yAxisLabel = "count" }) => 
 
         years.forEach((year, i) => {
             if ((i + 1) % 2 === 0) {
-                ctx.fillText(year, scaleX(i), height - 10);
+                ctx.fillText(year, scaleX(i), height - 25);
             }
         });        
 

@@ -2,12 +2,10 @@
     grid-template-columns: repeat(4, calc(25% - 12px));
     grid-auto-rows: 165px;
     width: 100%;
-    padding: 5px 20px 20px;
 }
 
 .cards-title {
     width: 90%;
-    padding: 20px 25px 0 25px;
     margin: 0;
 }
 
@@ -314,6 +312,14 @@ canvas {
 }
 
 @media (min-width: 1025px) {
+    .cards {
+        padding: 5px 20px 20px;
+    }
+
+    .cards-title {
+        padding: 20px 25px 0 25px;
+    }
+    
     .list {
         display:flex;
         flex-direction: column;
@@ -322,8 +328,8 @@ canvas {
 
     .card-list {
         flex-direction: row;
-        width: calc(100% - 60px);
-        flex-grow: 1;
+        width: 80%;
+        height: 75px;
     }
 
     .card-list-item {
@@ -332,13 +338,17 @@ canvas {
 }
 
 @media (max-width: 1024px) {
+    .cards-title {
+        padding: 10px 5px;
+    }
+
     .list {
-        height: 365px;
+        min-height: 365px;
     }
 
     .card-list {
         flex-direction: column;
-        height: 250px;
+        height: 350px;
         width: 100%;
     }
 
@@ -349,7 +359,6 @@ canvas {
 
 .card-list {
     display: flex;
-    flex-grow: 1;
     justify-content: center;
     align-items: center;
     list-style: none;
@@ -402,6 +411,44 @@ canvas {
     transition: color 0.3s;
 }
 
+.keywords-table {
+    border-collapse: collapse;
+    margin: 0;
+    padding: 0;
+    text-align: start;
+
+    th {
+        background-color: var(--border-color);
+        color: var(--text-color);
+        font-weight: bold;
+        font-size: 13px;
+        width: 100%;
+    }
+
+    td {
+        flex-direction: row;
+        position: relative;
+        font-size: 13px;
+        font-weight: 400;
+        gap: 5px;
+        width: 100%;
+    }
+}
+
+.keywords-table:not(.top-10) {
+    width: 80%;
+}
+
+.top-10 {
+    width: 100%;
+}
+
+.table-subvalue {
+    font-size: 0.75rem;
+    color: var(--hover-color);
+    transition: color 0.3s;
+}
+
 .hovering {
     color: var(--secondary-color) !important;
 }
@@ -414,13 +461,30 @@ canvas {
     transition: color 0.3s;
 }
 
-.card p {
-    line-height: 1;
+.card-header {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+    width: 100%;
     padding: 0;
-    font-size: 0.9rem;
+
+    p {
+        line-height: 1;
+        font-size: 0.9rem;
+        color: var(--hover-color);
+        transition: color 0.3s;
+    }
+}
+
+.percentage-change {
+    font-size: 0.8rem;
     color: var(--hover-color);
     transition: color 0.3s;
-    width: 100%;
+
+    svg {
+        margin-right: 3px;
+    }
 }
 
 .tooltip {

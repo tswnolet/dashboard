@@ -2,16 +2,14 @@ import React, { useEffect, useState, useRef } from "react";
 import Card from "./Card";
 import "../Dashboard.css";
 
-const LeadStatusComponent = ({ startDate, endDate }) => {
+const LeadStatusComponent = ({ startDate, endDate, refreshTrigger }) => {
     const [statusData, setStatusData] = useState({});
-    const [loading, setLoading] = useState(true);
+    const [datesSet, setDatesSet] = useState(false);
     const timerRef = useRef(null);
 
     const fetchLeadStatuses = async () => {
-        setLoading(true);
         try {
             let url = "https://dalyblackdata.com/api/leaddocket.php";
-    
             if (startDate && endDate) {
                 url += `?start_date=${startDate}&end_date=${endDate}`;
             }
@@ -29,20 +27,25 @@ const LeadStatusComponent = ({ startDate, endDate }) => {
             console.error("Fetch error:", error);
             setStatusData({});
         }
-        setLoading(false);
     };
+
+    useEffect(() => {
+        setDatesSet(true);
+    }, [startDate, endDate, refreshTrigger]);
 
     useEffect(() => {
         if (timerRef.current) {
             clearTimeout(timerRef.current);
         }
 
-        timerRef.current = setTimeout(() => {
-            fetchLeadStatuses();
-        }, 2000);
+        if (datesSet) {
+            timerRef.current = setTimeout(() => {
+                fetchLeadStatuses();
+            }, 2000);
+        }
 
         return () => clearTimeout(timerRef.current);
-    }, [startDate, endDate]);
+    }, [datesSet, startDate, endDate]);
 
     return (
         <Card

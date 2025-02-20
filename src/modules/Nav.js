@@ -48,6 +48,7 @@ const Nav = ({ user, loggedIn, logout, theme, changeTheme }) => {
       const nav = document.querySelector('nav');
       if (window.scrollY > 0) {
         nav.classList.add('scrolled');
+
         setScrolled(true);
       } else {
         nav.classList.remove('scrolled');
@@ -68,7 +69,7 @@ const Nav = ({ user, loggedIn, logout, theme, changeTheme }) => {
       <div id="scrolled" style={{ opacity: scrolled ? "1" : "0" }}></div>
       <nav>
         <div id='page-title'>
-          {title !== 'Dashboard' && loggedIn && <BackSvg onClick={() => navigate(-1)} />}
+          {title !== 'Dashboard' && loggedIn && <BackSvg onClick={() => navigate(-1)} theme={theme} scrolled={scrolled} />}
           <h3 className='page-title'>{title}</h3>
         </div>
         <img

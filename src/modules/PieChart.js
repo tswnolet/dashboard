@@ -12,7 +12,6 @@ const PieChartComponent = ({ data, title, formatNumber, format = 'row' }) => {
     const colors = ["#7b57ff", "var(--graph-color)", "#b37afa", "#d8a2f8", "#c187f9", "#f1cef9", "#000", "#1100ff", "var(--text-color)", "var(--hover-color)"];
 
     const FIXED_TOTAL = 97000;
-    // Calculate the total sum of all values in parsedData
     const totalSum = Object.values(parsedData).reduce((acc, val) => acc + Number(val), 0);
 
     let cumulativePercentage = 0;

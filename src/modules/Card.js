@@ -4,10 +4,23 @@ import VBarChart from './VBarChart';
 import PieChartComponent from './PieChart';
 import LineGraph from './LineGraph';
 import '../Card.css';
+import { UpTrend } from './UpTrend';
+import { DownTrend } from './DownTrend';
+import { NoTrend } from './NoTrend';
 
-const Card = ({ data, type = "", secondData = null, headers, yAxisLabel, format, styling, slice }) => {
+const Card = ({ data, type = "", secondData = null, headers, yAxisLabel, format, styling, slice, prevData, total }) => {
     const [hoveringGoogle, setHoveringGoogle] = useState(null);
     const [sortConfig, setSortConfig] = useState({ key: 'total_referred', direction: 'descending' });
+    const [smallScreen, setSmallScreen] = useState(window.innerWidth < 1025);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setSmallScreen(window.innerWidth < 1025);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const defaultGridSize = {
         "h-bar": { 
@@ -27,7 +40,7 @@ const Card = ({ data, type = "", secondData = null, headers, yAxisLabel, format,
         "percentage": { col: 1, row: 1 },
         "value": { col: 1, row: 1 },
         "rank": { col: 1, row: 2 },
-        "list": { col: 2, row: 2 },
+        "list": { col: 2, row: 4 },
         "table": { col: 4, row: 4 }
     };
 
@@ -93,6 +106,8 @@ const Card = ({ data, type = "", secondData = null, headers, yAxisLabel, format,
         return sortableData;
     }, [data.data, sortConfig]);
 
+    const exclusions = ["Total Referred", "Settlement Total", "Average Referral Fee"];
+    
     const requestSort = key => {
         let direction = 'ascending';
         if (sortConfig.key === key && sortConfig.direction === 'ascending') {
@@ -102,15 +117,48 @@ const Card = ({ data, type = "", secondData = null, headers, yAxisLabel, format,
     };
 
     return (
-        <div className={`card ${type==='list' ? 'list' : ''}`} style={{ gridRow: `span ${row}`, gridColumn: `span ${col}` }}>
-            <p>{data.title}</p>
+        <div className={`card ${type==='list' ? 'list' : ''}`} style={{ gridRow: `span ${row}`, gridColumn: `span ${col}`, justifyContent: data.data["Impressions"] || type != 'list' ? 'space-between' : 'center' }}>
+            <div className='card-header'>
+                <p>{data.title}</p>
+                {prevData && typeof data.data[1] === 'number' ? (
+                    <span className='percentage-change'>
+                        {(((data.data[1] - prevData[1]) / prevData[1]) * 100) > 0 ? (
+                            <UpTrend />
+                        ) : (((data.data[1] - prevData[1]) / prevData[1]) * 100) < 0 ? (
+                            <DownTrend />
+                        ) : (((data.data[1] - prevData[1]) / prevData[1]) * 100) == 0 && (
+                            <NoTrend />
+                        )}
+                        {Math.abs(formatNumber(((data.data[1] - prevData[1]) / prevData[1]) * 100, "e"))}%
+                    </span>
+                    ) : (
+                        total && (
+                            <span className='percentage-change'>
+                                {((total[0] - total[1]) / total[1] * 100) > 0 ? (
+                                    <>
+                                        <UpTrend />
+                                    </>
+                                    
+                                ) : ((total[0] - total[1]) / total[1] * 100) < 0 ? (
+                                    <DownTrend />
+                                ) : ((total[0] - total[1]) / total[1] * 100) == 0 && (
+                                    <NoTrend />
+                                )}
+                                {Math.abs(formatNumber((parseFloat(total[0]) - parseFloat(total[1])) / parseFloat(total[1]) * 100, "e"))}%
+                            </span>
+                        )
+                    )
+                }
+            </div>
             {type == "" || type == "def" ? (
                 data.title === "Total Settlement"
                     ? (
-                        <div className="value">
-                            <h1>{formatNumber(data.data[1], "", "$")}</h1>
-                            <h4>/ {formatNumber(data.data[0], "", "$")}</h4>
-                        </div>
+                        <>
+                            <div className="value">
+                                <h1>{formatNumber(data.data[1], "", "$")}</h1>
+                                <h4>/ {formatNumber(data.data[0], "", "$")}</h4>
+                            </div>
+                        </>
                     ) : <h1 className='value'>{data.data}</h1>
             ) : type == 'percentage' ? (
                 <div className="value">
@@ -131,36 +179,98 @@ const Card = ({ data, type = "", secondData = null, headers, yAxisLabel, format,
             ) : type === 'pie' || type === 'piecol' ? (
                 <PieChartComponent data={data.data} title={data.title} formatNumber={formatNumber} format={type === 'piecol' ? "column" : "row"}/>
             ) : type === 'list' ? (
-                <div className='card-list'>
-                    {Object.entries(data.data).map(([key, value], index) => (
-                        <div className='card-list-item'
-                            key={index}
-                            onMouseOver={() => setHoveringGoogle(index)}
-                            onMouseOut={() => setHoveringGoogle(null)}
-                            style={hoveringGoogle === index ? { backgroundColor: styling[index] } : {} }
-                        >
-                            <span className={`card-list-item-title ${hoveringGoogle === index ? 'hovering' : ''}`}>{key}</span>
-                            <span className={`card-list-item-value ${hoveringGoogle === index ? 'hovering' : ''}`} title={value}>{Array.isArray(value) ? formatNumber(value[0], null, "$") : !value.includes("%") ? formatNumber(value, "ae") : value}</span>
-                            {Array.isArray(value) && typeof value[1] == 'number' && <span className={`card-list-item-subvalue ${hoveringGoogle === index ? 'hovering' : ''}`}>${value[1]}</span>}
-                        </div>
-                    ))}
-                </div>
+                <>
+                    {data.data["Impressions"] && <div className="card-list">
+                        {Object.entries(data.data).map(([key, value], index) => 
+                            key !== 'keywords' && (
+                                <div className="card-list-item"
+                                    key={index}
+                                    onMouseOver={() => setHoveringGoogle(index)}
+                                    onMouseOut={() => setHoveringGoogle(null)}
+                                    style={hoveringGoogle === index ? { backgroundColor: styling[index] } : {}}
+                                >
+                                    <span className={`card-list-item-title ${hoveringGoogle === index ? 'hovering' : ''}`}>{key}</span>
+                                    <span className={`card-list-item-value ${hoveringGoogle === index ? 'hovering' : ''}`} title={value}>
+                                        {Array.isArray(value) ? formatNumber(value[0], null, "$") : !value.includes("%") ? formatNumber(value, "ae") : value}
+                                    </span>
+                                    {Array.isArray(value) && typeof value[1] === 'number' && (
+                                        <span className={`card-list-item-subvalue ${hoveringGoogle === index ? 'hovering' : ''}`}>${value[1]}</span>
+                                    )}
+                                </div>
+                            )
+                        )}
+                    </div>}
+                    {data.data.keywords && data.data.keywords.length > 0 && (
+                        <table className={`keywords-table ${data.title === "Top 10 Keywords (All Campaigns) - Google Ads" ? 'top-10' : ''}`}>
+                            <thead>
+                                <tr>
+                                    <th style={{minWidth: !smallScreen ? "30%" : "60%"}}>Keyword{!smallScreen && <span className='table-subvalue'>{" "}(Ad Group)</span>}</th>
+                                    {!smallScreen && (
+                                        <>
+                                            <th>Impressions</th>
+                                            <th>Clicks</th>
+                                        </>
+                                    )}
+                                    <th>Conversions</th>
+                                    {!smallScreen && (
+                                        <>
+                                            <th>Cost (CPC)</th>
+                                            <th>CTR</th>
+                                        </>
+                                    )}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {data.data.keywords.map((keyword, index) => (
+                                    <tr key={index} className={index % 2 === 0 ? 'clear' : 'light'}>
+                                        <td style={{minWidth: !smallScreen ? "30%" : "60%"}}>{keyword.keyword_text.replace(/\+/g, '')}{!smallScreen && <span className='table-subvalue'>{keyword.ad_group_name !== "Ad group 1" ? ` (${keyword.ad_group_name})` : ""}</span>}</td>
+                                        {!smallScreen && (
+                                            <>
+                                                <td>{keyword.impressions}</td>
+                                                <td>{keyword.clicks}</td>
+                                            </>
+                                        )}
+                                        <td>{keyword.conversions}</td>
+                                        {!smallScreen && (
+                                            <>
+                                                <td>${keyword.cost_usd }<span className='table-subvalue'>(${keyword.cost_per_conversion})</span></td>
+                                                <td>{(keyword.ctr * 100).toFixed(2)}%</td>
+                                            </>
+                                        )}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                </>
             ) : type === 'table' ? (
                 <table className='card-table'>
                     <thead>
                         <tr>
-                            {Array.isArray(headers) && headers.map((header, index) => (
-                                <th key={index} onClick={() => requestSort(header)}>{header}</th>
-                            ))}
+                            {Array.isArray(data.headers) &&
+                                data.headers.map((header, index) =>
+                                    exclusions.includes(header) ? null : (
+                                        <th key={index} onClick={() => requestSort(header)}>{header}</th>
+                                    )
+                                )}
                         </tr>
                     </thead>
                     <tbody>
                         {sortedData.map(([key, value], index) => (
                             <tr key={index} className={index % 2 === 0 ? 'clear' : 'light'}>
-                                <td style={{width: `${100 / Object.entries(value).reduce((acc, _) => acc = acc + 1, 1)}%`}} title={key}>{key}</td>
-                                {Object.entries(value).map(([_, v], index) => (
-                                    <td style={{width: `${100 / Object.entries(value).reduce((acc, _) => acc = acc + 1, 1)}%`}} key={index} onClick={() => requestSort(v)} title={v}>{v}</td>
-                                ))}
+                                <td style={{ width: `${100 / Object.keys(value).length}%` }} title={key}>{key}</td>
+                                {Object.entries(value)
+                                    .filter(([_, v], index) => !exclusions.includes(data.headers[index]))
+                                    .map(([_, v], index) => (
+                                        <td
+                                            style={{ width: `${100 / Object.keys(value).length}%` }}
+                                            key={index}
+                                            onClick={() => requestSort(v)}
+                                            title={v}
+                                        >
+                                            {v}
+                                        </td>
+                                    ))}
                             </tr>
                         ))}
                     </tbody>

@@ -1,9 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const Filter = ({ startDate, endDate, setStartDate, setEndDate, showDateInputs, setShowDateInputs }) => {
+const Filter = ({ startDate, endDate, setStartDate, setEndDate, showDateInputs, setShowDateInputs, campaignNames, setFilteredCampaigns }) => {
     const filterButton = useRef(null);
     const navigate = useNavigate();
+    const [selectedCampaigns, setSelectedCampaigns] = useState([]);
 
     useEffect(() => {
         const handleClick = (e) => {
@@ -24,7 +25,10 @@ const Filter = ({ startDate, endDate, setStartDate, setEndDate, showDateInputs, 
 
     const setPresetDateRange = (preset) => {
         let start, end;
+        const params = new URLSearchParams(window.location.search);
 
+        params.delete("report");
+    
         switch (preset) {
             case 'today':
                 start = end = today.toISOString().split('T')[0];
@@ -41,9 +45,13 @@ const Filter = ({ startDate, endDate, setStartDate, setEndDate, showDateInputs, 
                 start = lastSaturday.toISOString().split('T')[0];
                 end = lastFriday.toISOString().split('T')[0];
                 break;
+            case 'last4weeks':
+                start = new Date(today.setDate(today.getDate() - 28)).toISOString().split('T')[0];
+                end = new Date().toISOString().split('T')[0];
+                break;
             case 'thismonth':
                 start = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
-                end = new Date().toISOString().split('T')[0];
+                end = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
                 break;
             case 'lastmonth':
                 start = new Date(today.getFullYear(), today.getMonth() - 1, 1).toISOString().split('T')[0];
@@ -64,13 +72,21 @@ const Filter = ({ startDate, endDate, setStartDate, setEndDate, showDateInputs, 
             default:
                 start = end = null;
         }
-
+    
         setStartDate(start);
         setEndDate(end);
-        navigate(`?report=${preset}`);
+    
+        params.set("report", preset);
+        navigate(`?${params.toString()}`);
     };
 
-    const presets = {"today":"Today","week":"Last 7 Days", "workweek":"Last Full Week", "thismonth":"This Month","lastmonth":"Last Month","thisyear":"This Year","lastyear":"Last Year","alltime":"All Time"};
+    const presets = {"today":"Today","week":"Last 7 Days", "workweek":"Last Full Week","last4weeks":"Last 4 Weeks","thismonth":"This Month","lastmonth":"Last Month","thisyear":"This Year","lastyear":"Last Year","alltime":"All Time"};
+
+    const handleCampaignChange = (e) => {
+        const selectedOptions = Array.from(e.target.selectedOptions).map(option => option.value);
+        setSelectedCampaigns(selectedOptions);
+        setFilteredCampaigns(selectedOptions);
+    };
 
     return (
         <div className='filter-container' ref={filterButton}>
@@ -85,35 +101,48 @@ const Filter = ({ startDate, endDate, setStartDate, setEndDate, showDateInputs, 
             </svg>
                 Filter
             </button>
-            {showDateInputs && (
-                <div id='filter-items'>
-                    <input 
-                        type="date" 
-                        className="date-input" 
-                        value={startDate || ''} 
-                        onChange={(e) => setStartDate(e.target.value)} 
-                    />
-                    <h4>to</h4>
-                    <input 
-                        type="date" 
-                        className="date-input" 
-                        value={endDate || ''} 
-                        onChange={(e) => setEndDate(e.target.value)} 
-                    />
-                    <div className="preset-buttons">
-                        {Object.entries(presets).map(([key, value]) => (
-                            <p 
-                                className='report-preset' 
-                                key={key} 
-                                onClick={() => setPresetDateRange(key)}
-                            >
-                                {value}
-                            </p>
-                        ))}
-                    </div>
-                </div>
-            )}
-        </div>
+                {showDateInputs && (
+                    <>
+                        <div id='filter-items'>
+                            <div id='date-filter-items'>
+                                <input 
+                                    type="date" 
+                                    className="date-input" 
+                                    value={startDate || ''} 
+                                    onChange={(e) => setStartDate(e.target.value)} 
+                                />
+                                <h4>to</h4>
+                                <input 
+                                    type="date" 
+                                    className="date-input" 
+                                    value={endDate || ''} 
+                                    onChange={(e) => setEndDate(e.target.value)} 
+                                />
+                                <div className="preset-buttons">
+                                    {Object.entries(presets).map(([key, value]) => (
+                                        <p 
+                                            className='report-preset' 
+                                            key={key} 
+                                            onClick={() => setPresetDateRange(key)}
+                                        >
+                                            {value}
+                                        </p>
+                                    ))}
+                                </div>
+                            </div>
+                            <span className='divider'></span>
+                            <div className='preset-buttons' style={{ height: "80%" }}>
+                                <h4>Select Campaigns:</h4>
+                                <select multiple value={selectedCampaigns} onChange={handleCampaignChange} className="multi-select" style={{minHeight: "100%"}}>
+                                    {campaignNames.map((campaign, index) => (
+                                        <option key={index} value={campaign}>{campaign}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                    </>
+                )}
+            </div>
     );
 };
 

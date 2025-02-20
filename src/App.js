@@ -12,6 +12,7 @@ import './styles/Theme.css';
 import './styles/NewCardForm.css';
 import Weather from './modules/Weather';
 import { PrivacyPolicy } from './modules/PrivacyPolicy';
+import GoogleAdsComponent from './modules/GoogleAdsComponent';
 
 const App = () => {
   const [loading, setLoading] = useState(true);
@@ -122,11 +123,12 @@ const AppRoutes = ({ loggedIn, setLoggedIn, changeTheme, theme, data, setData, a
     <Routes>
       {loggedIn ? (
         <>
-          <Route path="/dashboard" element={<Dashboard setLoggedIn={setLoggedIn} changeTheme={changeTheme} theme={theme} data={data} setData={setData} setFilteredData={setFilteredData} />} />
+          <Route path="/dashboard" element={<Dashboard setLoggedIn={setLoggedIn} />} />
           <Route path="/weather" element={<Weather />} />
           <Route path="/settings" element={<Settings changeTheme={changeTheme} theme={theme} logout={logout} data={data} setData={setData} setFilteredData={setFilteredData} />} />
           <Route path="/new-data" element={<NewCardForm addCard={addCard} />} />
           <Route path="*" element={<Navigate to={redirectPath} />} />
+          <Route path="/google" element={<Dashboard google={true} />} />
         </>
       ) : (
         <>

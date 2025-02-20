@@ -8,7 +8,7 @@ import Alert from './Alert';
 import GoogleAdsComponent from './GoogleAdsComponent';
 import LeadStatusComponent from './LeadStatusComponent';
 
-const Dashboard = ({ setLoggedIn }) => {
+const Dashboard = ({ setLoggedIn, google = false }) => {
     const [loading, setLoading] = useState(true);
     const [showDateInputs, setShowDateInputs] = useState(false);
     const [startDate, setStartDate] = useState('');
@@ -17,6 +17,9 @@ const Dashboard = ({ setLoggedIn }) => {
     const [showAlert, setShowAlert] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const [stats, setStats] = useState({});
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
+    const [campaignNames, setCampaignNames] = useState([]);
+    const [filteredCampaigns, setFilteredCampaigns] = useState([]);
 
     const fetchStats = async (manual = false) => {
         if (!datesSet) return;
@@ -51,12 +54,11 @@ const Dashboard = ({ setLoggedIn }) => {
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const report = urlParams.get('report');
+        const today = new Date();
+        let start = new Date(today.setDate(today.getDate() - 7)).toISOString().split('T')[0];
+        let end = new Date().toISOString().split('T')[0];
 
         if (report) {
-            const today = new Date();
-            let start = '';
-            let end = '';
-
             switch (report) {
                 case 'today':
                     start = end = today.toISOString().split('T')[0];
@@ -74,9 +76,13 @@ const Dashboard = ({ setLoggedIn }) => {
                     start = lastSaturday.toISOString().split('T')[0];
                     end = lastFriday.toISOString().split('T')[0];
                     break;
+                case 'last4weeks':
+                    start = new Date(today.setDate(today.getDate() - 28)).toISOString().split('T')[0];
+                    end = new Date().toISOString().split('T')[0];
+                    break;
                 case 'thismonth':
                     start = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
-                    end = new Date().toISOString().split('T')[0];
+                    end = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
                     break;
                 case 'lastmonth':
                     start = new Date(today.getFullYear(), today.getMonth() - 1, 1).toISOString().split('T')[0];
@@ -95,18 +101,19 @@ const Dashboard = ({ setLoggedIn }) => {
                     end = null;
                     break;
                 default:
-                    start = end = null;
+                    start = end = today.toISOString().split('T')[0];
             }
-
-            setStartDate(start);
-            setEndDate(end);
-            setDatesSet(true);
         }
+
+        setStartDate(start);
+        setEndDate(end);
+        setDatesSet(true);
     }, []);
 
     useEffect(() => {
         if (datesSet) {
             fetchStats();
+            setRefreshTrigger(prev => prev + 1);
         }
     }, [datesSet, startDate, endDate]);
 
@@ -155,6 +162,8 @@ const Dashboard = ({ setLoggedIn }) => {
             .map(([key, value]) => {
                 let cardType = value.type;
                 let secondData = value.secondData || null;
+                let prevData = value.prevData || null;
+                let total = value.total || null;
                 const { title, data } = value;
     
                 const chart = key.toLowerCase();
@@ -174,12 +183,14 @@ const Dashboard = ({ setLoggedIn }) => {
                                 title: value.title,
                                 data,
                                 col: value.col || gridSize.col,
-                                row: value.row || gridSize.row
+                                row: value.row || gridSize.row,
+                                headers: value.headers
                             }}
-                            headers={value.headers}
                             type={cardType}
                             format={Object.entries(data).some(([_, value]) => value % 1 !== 0) || title.includes("Top 5") && !title.includes("Top 5 Winning Attorneys") || title.includes("Average Settlement")}
                             secondData={secondData}
+                            prevData={prevData}
+                            total={total}
                             {...(chart.includes("over") ? { yAxisLabel: "money" } : {})}
                             {...(title === "Attorney Docket Count" ? { slice: 30 } : {})}
                         />
@@ -217,27 +228,44 @@ const Dashboard = ({ setLoggedIn }) => {
         return orderedCards.flat();
     };
 
+    const handleRefresh = () => {
+        fetchStats(true);
+        setRefreshTrigger(prev => prev + 1);
+    }
+
     return (
         <div id='dashboard' className='page-container'>
             <Cookies />
             <div className='data-action-container'>
-                <Filter startDate={startDate} endDate={endDate} setStartDate={setStartDate} setEndDate={setEndDate} showDateInputs={showDateInputs} setShowDateInputs={setShowDateInputs}/>
-                <button title='Refresh data' id='refresh' onClick={fetchStats} className={refreshing ? 'spinning' : ''}>
+                <Filter startDate={startDate} endDate={endDate} setStartDate={setStartDate} setEndDate={setEndDate} 
+                        showDateInputs={showDateInputs} setShowDateInputs={setShowDateInputs}
+                        campaignNames={campaignNames} setFilteredCampaigns={setFilteredCampaigns}/>
+                <button title='Refresh data' id='refresh' onClick={handleRefresh} className={refreshing ? 'spinning' : ''}>
                     <Refresh />
                 </button>
                 {showAlert && <Alert message="Data updated successfully." type="success" onClose={() => setShowAlert(false)} />}
             </div>
-            <h2 className="cards-title">Case Data</h2>
-            <div className="cards">
-                {renderCards()}
-            </div>
-            <h2 className="cards-title">Lead Data</h2>
-            <div className="cards">
-                <LeadStatusComponent startDate={startDate} endDate={endDate} />
-            </div>
+            {!google && 
+                <>
+                    <h2 className="cards-title">Case Data</h2>
+                    <div className="cards">
+                        {renderCards()}
+                    </div>
+                    <h2 className="cards-title">Lead Data</h2>
+                    <div className="cards">
+                        <LeadStatusComponent startDate={startDate} endDate={endDate} refreshTrigger={refreshTrigger} />
+                    </div>
+                </>
+            }
             <h2 className="cards-title">Google Ads Data</h2>
             <div className="cards">
-                <GoogleAdsComponent startDate={startDate} endDate={endDate}/>
+                <GoogleAdsComponent 
+                    startDate={startDate}
+                    endDate={endDate}
+                    refreshTrigger={refreshTrigger}
+                    setCampaignNames={setCampaignNames}
+                    filteredCampaigns={filteredCampaigns}
+                />
             </div>
         </div>
     );

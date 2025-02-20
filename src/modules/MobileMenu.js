@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../Mobile.css';
 
@@ -6,6 +6,7 @@ const MobileMenu = ({ theme, scrolled, routes, logout}) => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const [displayMenu, setDisplayMenu] = useState('none');
+  const menu = useRef(null);
 
   routes["Settings"] = "/settings";
 
@@ -20,15 +21,15 @@ const MobileMenu = ({ theme, scrolled, routes, logout}) => {
     }
   };
 
+  console.log(theme)
+
   const spanStyle = {
     backgroundColor:
-      theme === 'dark'
-        ? `var(${scrolled ? '--text-color' : '--secondary-color'})`
-        : `var(${scrolled ? '--secondary-color' : '--text-color'})`
+        `var(${!scrolled ? '--text-color' : '--secondary-color'})`
   };
 
   return (
-    <div className="mobile-menu-container">
+    <div className="mobile-menu-container" ref={menu}>
       <label className="bar">
         <input type="checkbox" id="check" onChange={handleToggle} checked={isOpen} />
         <span className="top" style={spanStyle}></span>
