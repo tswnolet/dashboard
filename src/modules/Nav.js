@@ -82,7 +82,7 @@ const Nav = ({ user, loggedIn, logout, theme, changeTheme }) => {
           }}
         />
         {isMobile ? (
-          <MobileMenu theme={theme} scrolled={scrolled} routes={routes} logout={logout} />
+          <MobileMenu theme={theme} scrolled={scrolled} routes={routes} logout={logout} changeTheme={changeTheme} />
         ) : (
           loggedIn ? (
             <div id='nav-actions'>

@@ -29,6 +29,9 @@
 }
 
 .mobile-dropdown {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     position: absolute;
     top: 45px;
     right: 0px;
