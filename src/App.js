@@ -22,6 +22,7 @@ const App = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [showAlert, setShowAlert] = useState(false);
   const [redirectPath, setRedirectPath] = useState('/dashboard');
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     checkUserLoggedIn();
@@ -43,6 +44,7 @@ const App = () => {
   const checkUserLoggedIn = async () => {
     if (process.env.NODE_ENV === 'development') {
       setLoggedIn(true);
+      setUser('devuser');
       setLoading(false);
       return;
     }
@@ -52,6 +54,7 @@ const App = () => {
       if (data.isLoggedIn) {
         setLoggedIn(true);
         setCookie('session', 'active', 1); 
+        setUser(data.name.split(' ')[0]);
       } else {
         setLoggedIn(false);
       }
@@ -83,13 +86,13 @@ const App = () => {
 
   return (
     <Router>
-        <ConditionalNav loggedIn={loggedIn} changeTheme={changeTheme} theme={theme} logout={logout} data={data} setData={setData} setFilteredData={setFilteredData} />
-        <AppRoutes loggedIn={loggedIn} setLoggedIn={setLoggedIn} changeTheme={changeTheme} theme={theme} data={filteredData} setData={setData} addCard={addCard} logout={logout} setFilteredData={setFilteredData} setShowAlert={setShowAlert} showAlert={showAlert} redirectPath={redirectPath} setRedirectPath={setRedirectPath} />
+        <ConditionalNav user={user} loggedIn={loggedIn} changeTheme={changeTheme} theme={theme} logout={logout} data={data} setData={setData} setFilteredData={setFilteredData} />
+        <AppRoutes setUser={setUser} loggedIn={loggedIn} setLoggedIn={setLoggedIn} changeTheme={changeTheme} theme={theme} data={filteredData} setData={setData} addCard={addCard} logout={logout} setFilteredData={setFilteredData} setShowAlert={setShowAlert} showAlert={showAlert} redirectPath={redirectPath} setRedirectPath={setRedirectPath} />
     </Router>
   );
 }
 
-const ConditionalNav = ({ loggedIn, changeTheme, theme, logout, data, setData, setFilteredData }) => {
+const ConditionalNav = ({ user, loggedIn, changeTheme, theme, logout, data, setData, setFilteredData }) => {
   const location = useLocation();
   const pathName = location.pathname.substring(1);
 
@@ -107,10 +110,10 @@ const ConditionalNav = ({ loggedIn, changeTheme, theme, logout, data, setData, s
     return null;
   }
 
-  return <Nav title={title || 'Dashboard'} loggedIn={loggedIn} changeTheme={changeTheme} theme={theme} logout={logout} />;
+  return <Nav title={title || 'Dashboard'} user={user} loggedIn={loggedIn} changeTheme={changeTheme} theme={theme} logout={logout} />;
 };
 
-const AppRoutes = ({ loggedIn, setLoggedIn, changeTheme, theme, data, setData, addCard, logout, setFilteredData, setShowAlert, showAlert, redirectPath, setRedirectPath }) => {
+const AppRoutes = ({ setUser, loggedIn, setLoggedIn, changeTheme, theme, data, setData, addCard, logout, setFilteredData, setShowAlert, showAlert, redirectPath, setRedirectPath }) => {
   const location = useLocation();
 
   useEffect(() => {
@@ -132,7 +135,7 @@ const AppRoutes = ({ loggedIn, setLoggedIn, changeTheme, theme, data, setData, a
         </>
       ) : (
         <>
-          <Route path="/login" element={<Context setLoggedIn={setLoggedIn} setShowAlert={setShowAlert} showAlert={showAlert} />} />
+          <Route path="/login" element={<Context setUser={setUser} setLoggedIn={setLoggedIn} setShowAlert={setShowAlert} showAlert={showAlert} />} />
           <Route path="/signup" element={<Context setLoggedIn={setLoggedIn} setShowAlert={setShowAlert} showAlert={showAlert} />} />
           <Route path="*" element={<Navigate to="/login" state={{ from: location.pathname + location.search }} />} />
         </>

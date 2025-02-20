@@ -6,7 +6,7 @@ import Alert from "./Alert";
 import '../Context.css';
 import '../index.css';
 
-const Context = ({ setLoggedIn, setShowAlert, showAlert }) => {
+const Context = ({ setUser, setLoggedIn, setShowAlert, showAlert }) => {
   const [formData, setFormData] = useState({ user: '', password: '', confirm_password: '', email: '' });
   const [close, setClose] = useState(false);
   const [error, setError] = useState(null);
@@ -28,6 +28,7 @@ const Context = ({ setLoggedIn, setShowAlert, showAlert }) => {
           if (isLogin) {
             localStorage.setItem('token', data.token);
             setClose(true);
+            setUser(data.name.split(' ')[0]);
             setTimeout(() => {
               setLoggedIn(true);
               const redirectTo = location.state?.from || '/dashboard';

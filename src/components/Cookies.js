@@ -47,7 +47,6 @@ export default function Cookies() {
             <p className='cookieDescription'>
               We use cookies to ensure you get the best experience on our website.
               <br />
-              <a onClick={() => setReadPolicy(true)}>Read our cookies policy.</a>
             </p>
             <div className="buttonContainer">
               <button className="acceptButton" onClick={handleAccept}>Allow</button>

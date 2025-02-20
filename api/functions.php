@@ -1091,16 +1091,14 @@ function fetchAttorneySettlements($conn, $startDate, $endDate) {
             FROM cases 
             WHERE first_primary IS NOT NULL AND settlement_amount IS NOT NULL $dateFilter 
             GROUP BY first_primary 
-            ORDER BY total_settlement DESC 
-            LIMIT 30";
+            ORDER BY total_settlement DESC";
     $prevSql = "SELECT first_primary, COUNT(*) AS total_cases, 
                        SUM(settlement_amount) AS total_settlement, 
                        SUM(settlement_amount * COALESCE(suit_percentage / 100, $avgSuitPercentage)) AS total_adjusted_settlement
                 FROM cases 
                 WHERE first_primary IS NOT NULL AND settlement_amount IS NOT NULL $prevDateFilter 
                 GROUP BY first_primary 
-                ORDER BY total_settlement DESC 
-                LIMIT 30";
+                ORDER BY total_settlement DESC";
 
     $result = $conn->query($sql);
     $prevResult = $conn->query($prevSql);
@@ -1115,8 +1113,8 @@ function fetchAttorneySettlements($conn, $startDate, $endDate) {
 
         $data[$row['first_primary']] = [
             'total_cases' => intval($row['total_cases']),
-            'total_settlement' => number_format($settlementAmount, 2),
-            'total_adjusted_settlement' => number_format($adjustedSettlementAmount, 2)
+            'total_settlement' => '$' . number_format($settlementAmount, 2),
+            'total_adjusted_settlement' => '$' . number_format($adjustedSettlementAmount, 2)
         ];
         $totalSettlement += $settlementAmount;
     }
@@ -1127,8 +1125,8 @@ function fetchAttorneySettlements($conn, $startDate, $endDate) {
 
         $prevData[$row['first_primary']] = [
             'total_cases' => intval($row['total_cases']),
-            'total_settlement' => number_format($prevSettlementAmount, 2),
-            'total_adjusted_settlement' => number_format($prevAdjustedSettlementAmount, 2)
+            'total_settlement' => '$' . number_format($prevSettlementAmount, 2),
+            'total_adjusted_settlement' => '$' . number_format($prevAdjustedSettlementAmount, 2)
         ];
         $prevTotalSettlement += $prevSettlementAmount;
     }

@@ -332,6 +332,12 @@ button:not(.change-context) {
     font-size: 14px;
 }
 
+.subtext {
+    font-size: 12px;
+    color: var(--subtext-color);
+    line-height: 1;
+}
+
 @media (min-width: 1025px) {
     nav {
         height: auto;
@@ -396,6 +402,7 @@ button:not(.change-context) {
 
     .card {
         min-height: 150px;
+        max-width: 100%;
     }
 
     .chart-wrapper {

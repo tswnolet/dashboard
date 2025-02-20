@@ -22,8 +22,6 @@ const MobileMenu = ({ theme, scrolled, routes, logout, changeTheme }) => {
     }
   };
 
-  console.log(theme)
-
   const spanStyle = {
     backgroundColor:
         `var(${!scrolled ? '--text-color' : '--secondary-color'})`

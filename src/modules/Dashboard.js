@@ -7,6 +7,7 @@ import Refresh from './Refresh';
 import Alert from './Alert';
 import GoogleAdsComponent from './GoogleAdsComponent';
 import LeadStatusComponent from './LeadStatusComponent';
+import { Updates } from './Updates';
 
 const Dashboard = ({ setLoggedIn, google = false }) => {
     const [loading, setLoading] = useState(true);
@@ -20,6 +21,8 @@ const Dashboard = ({ setLoggedIn, google = false }) => {
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [campaignNames, setCampaignNames] = useState([]);
     const [filteredCampaigns, setFilteredCampaigns] = useState([]);
+    const [titles, setTitles] = useState([]);
+    const [filteredTitles, setFilteredTitles] = useState([]);
 
     const fetchStats = async (manual = false) => {
         if (!datesSet) return;
@@ -158,19 +161,19 @@ const Dashboard = ({ setLoggedIn, google = false }) => {
         let availableColumns = 4;
     
         const cardData = Object.entries(stats)
-            .filter(([_, value]) => value && value.data !== null && Object.keys(value.data).length > 0)
-            .map(([key, value]) => {
-                let cardType = value.type;
-                let secondData = value.secondData || null;
-                let prevData = value.prevData || null;
-                let total = value.total || null;
-                const { title, data } = value;
+        .filter(([_, value]) => value && value.data !== null && Object.keys(value.data).length > 0 && value.title)
+        .map(([key, value]) => {
+            let cardType = value.type;
+            let secondData = value.secondData || null;
+            let prevData = value.prevData || null;
+            let total = value.total || "";
+            const { title, data } = value;
     
-                const chart = key.toLowerCase();
+            const chart = key.toLowerCase();
+            const gridSize = defaultGridSize[cardType] || { col: 2, row: 2 };
+            const colSpan = typeof gridSize.col === 'function' ? gridSize.col(data) : gridSize.col;
     
-                const gridSize = defaultGridSize[cardType] || { col: 2, row: 2 };
-                const colSpan = typeof gridSize.col === 'function' ? gridSize.col(data) : gridSize.col;
-    
+            if (filteredTitles.length === 0 || filteredTitles.some(ft => ft.toLowerCase() === title.toLowerCase())) {
                 return {
                     key,
                     cardType,
@@ -187,7 +190,9 @@ const Dashboard = ({ setLoggedIn, google = false }) => {
                                 headers: value.headers
                             }}
                             type={cardType}
-                            format={Object.entries(data).some(([_, value]) => value % 1 !== 0) || title.includes("Top 5") && !title.includes("Top 5 Winning Attorneys") || title.includes("Average Settlement")}
+                            format={Object.entries(data).some(([_, v]) => v % 1 !== 0) || 
+                                    title.includes("Top 5") && !title.includes("Top 5 Winning Attorneys") || 
+                                    title.includes("Average Settlement")}
                             secondData={secondData}
                             prevData={prevData}
                             total={total}
@@ -196,7 +201,10 @@ const Dashboard = ({ setLoggedIn, google = false }) => {
                         />
                     )
                 };
-            });
+            }
+    
+            return null;
+        }).filter(Boolean);
     
         const sortedCards = [];
     
@@ -232,6 +240,13 @@ const Dashboard = ({ setLoggedIn, google = false }) => {
         fetchStats(true);
         setRefreshTrigger(prev => prev + 1);
     }
+    
+    useEffect(() => {
+        const uniqueTitles = [...new Set(Object.values(stats).map(value => value.title).filter(title => title))];
+        
+        setTitles(uniqueTitles.sort());
+    }, [stats]);
+    
 
     return (
         <div id='dashboard' className='page-container'>
@@ -239,7 +254,9 @@ const Dashboard = ({ setLoggedIn, google = false }) => {
             <div className='data-action-container'>
                 <Filter startDate={startDate} endDate={endDate} setStartDate={setStartDate} setEndDate={setEndDate} 
                         showDateInputs={showDateInputs} setShowDateInputs={setShowDateInputs}
-                        campaignNames={campaignNames} setFilteredCampaigns={setFilteredCampaigns}/>
+                        campaignNames={campaignNames} setFilteredCampaigns={setFilteredCampaigns}
+                        titles={titles} setFilteredTitles={setFilteredTitles}
+                />
                 <button title='Refresh data' id='refresh' onClick={handleRefresh} className={refreshing ? 'spinning' : ''}>
                     <Refresh />
                 </button>
@@ -267,6 +284,7 @@ const Dashboard = ({ setLoggedIn, google = false }) => {
                     filteredCampaigns={filteredCampaigns}
                 />
             </div>
+            <Updates />
         </div>
     );
 };

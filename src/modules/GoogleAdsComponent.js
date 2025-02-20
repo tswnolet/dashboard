@@ -57,8 +57,6 @@ const GoogleAdsComponent = ({ startDate, endDate, refreshTrigger, setCampaignNam
                     .sort((a, b) => b.total_conversions - a.total_conversions)
                     .slice(0, 10);
     
-                console.log("Top Keywords:", topKeywordsArray);
-    
                 setTotals({
                     impressions: totalImpressions,
                     clicks: totalClicks,
@@ -85,7 +83,6 @@ const GoogleAdsComponent = ({ startDate, endDate, refreshTrigger, setCampaignNam
     useEffect(() => {
         const uniqueCampaignNames = [...new Set(campaigns.map(campaign => campaign.campaign_name))];
         setCampaignNames(uniqueCampaignNames);
-        console.log(campaigns);
     }, [campaigns, setCampaignNames]);
 
     return (

@@ -12,7 +12,6 @@ export default function LeadUploader() {
     useEffect(() => {
         if (leads.length > 0) {
             fetchLeadDetails(leads, setLeadDetails);
-            console.log("Leads initialized:", leads);
         }
     }, [leads]);
 

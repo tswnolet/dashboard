@@ -34,5 +34,5 @@ if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 
 
 $_SESSION['LAST_ACTIVITY'] = time();
 
-echo json_encode(['isLoggedIn' => true, 'user_id' => $_SESSION['user_id']]);
+echo json_encode(['isLoggedIn' => true, 'user_id' => $_SESSION['user_id'], 'name' => $_SESSION['name']]);
 ?>

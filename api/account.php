@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode(['success' => false, 'message' => 'No changes were made']);
     }
 } else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $sql = "SELECT user, email FROM users WHERE id = {$_SESSION['user_id']}";
+    $sql = "SELECT user, name, email FROM users WHERE id = {$_SESSION['user_id']}";
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {

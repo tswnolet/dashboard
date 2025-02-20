@@ -11,7 +11,7 @@ if (empty($username) || empty($password)) {
     exit;
 }
 
-$stmt = $conn->prepare('SELECT id, password, access_level FROM users WHERE user = ? OR email = ?');
+$stmt = $conn->prepare('SELECT id, name, password, access_level FROM users WHERE user = ? OR email = ?');
 $stmt->bind_param('ss', $username, $username);
 $stmt->execute();
 $stmt->store_result();
@@ -22,7 +22,7 @@ if ($stmt->num_rows === 0) {
     exit;
 }
 
-$stmt->bind_result($userId, $hashedPassword, $accessLevel);
+$stmt->bind_result($userId, $name, $hashedPassword, $accessLevel);
 $stmt->fetch();
 
 if (!password_verify($password, $hashedPassword)) {
@@ -44,7 +44,8 @@ $stmt->bind_param('si', $token, $userId);
 if ($stmt->execute()) {
     session_start();
     $_SESSION['user_id'] = $userId;
-    echo json_encode(['success' => true, 'token' => $token]);
+    $_SESSION['name'] = $name;
+    echo json_encode(['success' => true, 'token' => $token, 'name' => $name]);
 } else {
     error_log('Failed to update token');
     echo json_encode(['success' => false, 'error' => 'Failed to update token']);

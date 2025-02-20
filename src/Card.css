@@ -29,7 +29,9 @@
 
 .card-table {
     width: 100%;
+    max-width: 100%;
     line-height: 1.35;
+    table-layout: fixed;
 
     thead {
         background-color: var(--border-color);
@@ -42,7 +44,7 @@
     }
 
     td {
-        display: block;
+        display: table-cell;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -353,7 +355,7 @@ canvas {
     }
 
     .card-list-item {
-        height: 200px;
+        height: 70px;
     }
 }
 

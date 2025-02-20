@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const Filter = ({ startDate, endDate, setStartDate, setEndDate, showDateInputs, setShowDateInputs, campaignNames, setFilteredCampaigns }) => {
+const Filter = ({ startDate, endDate, setStartDate, setEndDate, showDateInputs, setShowDateInputs, campaignNames, setFilteredCampaigns, titles, setFilteredTitles }) => {
     const filterButton = useRef(null);
     const navigate = useNavigate();
     const [selectedCampaigns, setSelectedCampaigns] = useState([]);
+    const [selectedTitles, setSelectedTitles] = useState([]);
 
     useEffect(() => {
         const handleClick = (e) => {
@@ -88,6 +89,12 @@ const Filter = ({ startDate, endDate, setStartDate, setEndDate, showDateInputs, 
         setFilteredCampaigns(selectedOptions);
     };
 
+    const handleTitleChange = (e) => {
+        const selectedOptions = Array.from(e.target.selectedOptions).map(option => option.value);
+        setSelectedTitles(selectedOptions);
+        setFilteredTitles([...selectedOptions]); 
+    };    
+
     return (
         <div className='filter-container' ref={filterButton}>
             <button 
@@ -136,6 +143,16 @@ const Filter = ({ startDate, endDate, setStartDate, setEndDate, showDateInputs, 
                                 <select multiple value={selectedCampaigns} onChange={handleCampaignChange} className="multi-select" style={{minHeight: "100%"}}>
                                     {campaignNames.map((campaign, index) => (
                                         <option key={index} value={campaign}>{campaign}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <span className='divider'></span>
+                            <div className='preset-buttons' style={{ height: "80%" }}>
+                                <h4>Select Data to Display:</h4>
+                                <span className='subtext'>Hold Ctrl to select multiple</span>
+                                <select multiple value={selectedTitles} onChange={handleTitleChange} className="multi-select" style={{minHeight: "100%"}}>
+                                    {titles.map((card, index) => (
+                                        <option key={index} value={card}>{card}</option>
                                     ))}
                                 </select>
                             </div>

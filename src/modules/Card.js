@@ -8,7 +8,7 @@ import { UpTrend } from './UpTrend';
 import { DownTrend } from './DownTrend';
 import { NoTrend } from './NoTrend';
 
-const Card = ({ data, type = "", secondData = null, headers, yAxisLabel, format, styling, slice, prevData, total }) => {
+const Card = ({ data, type = "", secondData = null, headers, yAxisLabel, format, styling, slice, prevData, total = null}) => {
     const [hoveringGoogle, setHoveringGoogle] = useState(null);
     const [sortConfig, setSortConfig] = useState({ key: 'total_referred', direction: 'descending' });
     const [smallScreen, setSmallScreen] = useState(window.innerWidth < 1025);
@@ -106,7 +106,7 @@ const Card = ({ data, type = "", secondData = null, headers, yAxisLabel, format,
         return sortableData;
     }, [data.data, sortConfig]);
 
-    const exclusions = ["Total Referred", "Settlement Total", "Average Referral Fee"];
+    const exclusions = ["Total Referred", data.title === "Fee Split" || data.title === "Attorney Fee Split" || data.title === "Attorney Settlements" ? "Total Cases" : "", "Average Fee Paid", "Total Settlement", "Settlement Total", "Average Referral Fee"];
     
     const requestSort = key => {
         let direction = 'ascending';
@@ -117,7 +117,13 @@ const Card = ({ data, type = "", secondData = null, headers, yAxisLabel, format,
     };
 
     return (
-        <div className={`card ${type==='list' ? 'list' : ''}`} style={{ gridRow: `span ${row}`, gridColumn: `span ${col}`, justifyContent: data.data["Impressions"] || type != 'list' ? 'space-between' : 'center' }}>
+        <div className={`card ${type==='list' ? 'list' : ''}`}
+            style={{
+                gridRow: `span ${row}`,
+                gridColumn: `span ${col}`,
+                ...((data.data["Impressions"] || type !== 'list') && total == null ? { justifyContent: 'space-between' } : {})
+            }}
+        >
             <div className='card-header'>
                 <p>{data.title}</p>
                 {prevData && typeof data.data[1] === 'number' ? (
@@ -249,7 +255,7 @@ const Card = ({ data, type = "", secondData = null, headers, yAxisLabel, format,
                         <tr>
                             {Array.isArray(data.headers) &&
                                 data.headers.map((header, index) =>
-                                    exclusions.includes(header) ? null : (
+                                    smallScreen && exclusions.includes(header) ? null : (
                                         <th key={index} onClick={() => requestSort(header)}>{header}</th>
                                     )
                                 )}
@@ -258,12 +264,18 @@ const Card = ({ data, type = "", secondData = null, headers, yAxisLabel, format,
                     <tbody>
                         {sortedData.map(([key, value], index) => (
                             <tr key={index} className={index % 2 === 0 ? 'clear' : 'light'}>
-                                <td style={{ width: `${100 / Object.keys(value).length}%` }} title={key}>{key}</td>
+                                <td title={key} style={{ width: smallScreen ? "50%" : `${100 / Object.keys(value).length}%` }}>{key}</td>
                                 {Object.entries(value)
-                                    .filter(([_, v], index) => !exclusions.includes(data.headers[index]))
+                                    .filter(([_, v], index) => {
+                                        if(smallScreen) {
+                                            return !exclusions.includes(data.headers[index + 1])
+                                        } else {
+                                            return data.headers;
+                                        }
+                                    })
                                     .map(([_, v], index) => (
                                         <td
-                                            style={{ width: `${100 / Object.keys(value).length}%` }}
+                                            style={{ width: smallScreen ? "50%" : `${100 / Object.keys(value).length}%` }}
                                             key={index}
                                             onClick={() => requestSort(v)}
                                             title={v}
