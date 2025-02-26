@@ -274,6 +274,7 @@ export default function Weather() {
                     id="pageSize"
                     value={pageSize}
                     onChange={handlePageSizeChange}
+                    className='weather-select'
                 >
                     {[10, 25, 50, 250, 500].map((size) => (
                         <option key={size} value={size}>
@@ -298,6 +299,7 @@ export default function Weather() {
                                         Array.from(e.target.selectedOptions, (option) => option.value)
                                     )
                                 }
+                                className='weather-select'
                             >
                                 {eventTypes.map((eventType, index) => (
                                     <option key={index} value={eventType}>

@@ -396,7 +396,7 @@ const Nav = ({ theme, changeTheme, logout }) => {
       <div id="menu">
         <div id="menu-header" style={{ alignItems: expanded ? "flex-start" : "center" }}>
           <div className="nav-toggle" style={{ justifyContent: expanded ? "space-between" : "center" }}>
-            <button onClick={() => setExpanded(!expanded)}>
+            <button onClick={() => setExpanded(!expanded)} className='nav-toggle-button'>
               {expanded ? <ArrowBack size={25} /> : <Menu size={25} />}
             </button>
             <img

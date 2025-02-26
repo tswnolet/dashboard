@@ -243,7 +243,7 @@ option:checked {
     color: var(--text-color);
 }
 
-select {
+.weather-select, .multi-select {
     border: 1px solid var(--border-color) !important;
     height: auto !important;
     scrollbar-color: var(--hover-color) var(--card-color);
@@ -273,9 +273,7 @@ select {
     gap: 10px;
 }
 
-button, 
-select, 
-.file-upload > label {
+.weather-select, .multi-select {
     font-weight: 800;
     font-size: 16px;
     border: none;
@@ -288,13 +286,16 @@ select,
     transition: background-color 0.3s, border 0.3s, color 0.3s, scale 0.3s ease;
 }
 
-select:not(.multi-select), 
-button:not(.change-context) {
-    height: 32px;
-    border-radius: 15px;
+button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    transition: scale 0.3s ease;
 }
 
-#filter-button {
+#filter-button, #refresh {
     font-weight: 800;
     font-size: 16px;
     height: 32px;
@@ -305,6 +306,10 @@ button:not(.change-context) {
     justify-content: center;
     align-items: center;
     cursor: pointer;
+}
+
+#filter-button:hover, #refresh:hover, .action-btn:hover, .change-context:hover {
+    scale: 1.1;
 }
 
 #nav-actions > button, select {

@@ -228,10 +228,6 @@ input[type='checkbox']:not(:checked) {
   background-color: black;
 }
 
-button:hover, .file-upload > label:hover {
-  scale: 1.1;
-}
-
 .page-container {
   display: flex;
   justify-content: center;
@@ -241,11 +237,6 @@ button:hover, .file-upload > label:hover {
   margin: 0;
   padding: 20px 20px 0 100px;
 
-  > form > input, form > button {
-    width: 55%;
-    max-width: 150px;
-    min-width: 100px;
-  }
 }
 
 tr {
