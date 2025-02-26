@@ -13,6 +13,8 @@ import './styles/NewCardForm.css';
 import Weather from './modules/Weather';
 import { PrivacyPolicy } from './modules/PrivacyPolicy';
 import GoogleAdsComponent from './modules/GoogleAdsComponent';
+import { WIP } from './modules/WIP';
+import { LayoutEditor } from './modules/LayoutEditor';
 
 const App = () => {
   const [loading, setLoading] = useState(true);
@@ -126,12 +128,19 @@ const AppRoutes = ({ setUser, loggedIn, setLoggedIn, changeTheme, theme, data, s
     <Routes>
       {loggedIn ? (
         <>
+          <Route path="/nav" element={<></>} />
           <Route path="/dashboard" element={<Dashboard setLoggedIn={setLoggedIn} />} />
-          <Route path="/weather" element={<Weather />} />
+          <Route path="/cases" element={<WIP />} />
+          <Route path="/intake" element={<WIP />} />
+          <Route path="/contacts" element={<WIP />} />
+          <Route path="/client-portal" element={<WIP />} />
+          <Route path="/firm-settings" element={<WIP />} />
+          <Route path="/dashboard/weather" element={<Weather />} />
           <Route path="/settings" element={<Settings changeTheme={changeTheme} theme={theme} logout={logout} data={data} setData={setData} setFilteredData={setFilteredData} />} />
           <Route path="/new-data" element={<NewCardForm addCard={addCard} />} />
           <Route path="*" element={<Navigate to={redirectPath} />} />
           <Route path="/google" element={<Dashboard google={true} />} />
+          <Route path="/firm-settings/layout-editor" element={<LayoutEditor />} />
         </>
       ) : (
         <>

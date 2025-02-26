@@ -7,7 +7,7 @@ const UpdateCard = ({ title, version, features }) => {
         <div className="update-card">
             <p>{title} <span className='version'>- {version}</span></p>
             <ul className='features'>
-                {Array.isArray(Object.features) && features.map((feature, index) => (
+                {features.map((feature, index) => (
                     <li key={index} className='feature'>{feature}</li>
                 ))}
             </ul>

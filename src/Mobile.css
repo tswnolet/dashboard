@@ -23,8 +23,9 @@
 .bar span {
     width: 30px;
     height: 4px;
-    border-radius: 100px;
+    border-radius: 1px;
     display: inline-block;
+    background-color: var(--text-color);
     transition: background-color 0.3s ease, transform 0.3s ease;
 }
 

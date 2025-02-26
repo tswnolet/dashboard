@@ -50,7 +50,7 @@ export default function Weather() {
         setLoading(true);
         if (all) setLoadingAll(true);
 
-        fetch(`/events.php?offset=${offset}&all=${all}`)
+        fetch(`https://dalyblackdata.com/events.php?offset=${offset}&all=${all}`)
             .then((response) => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
@@ -89,7 +89,6 @@ export default function Weather() {
     const fetchSchoolData = async (schoolIds) => {
         if (!schoolIds || schoolIds.length === 0) return;
     
-        // Limit the number of IDs in each chunk to 204
         const chunkSize = 200;
         const chunks = [];
         
@@ -98,13 +97,11 @@ export default function Weather() {
         }
     
         try {
-            // Fetch data for each chunk sequentially and combine the results
             const schoolDataPromises = chunks.map(async (chunk) => {
-                const response = await fetch(`schools.php?ids=${chunk.join(",")}`);
+                const response = await fetch(`https://dalyblackdata.com/schools.php?ids=${chunk.join(",")}`);
                 return response.json();
             });
-    
-            // Wait for all promises to resolve and concatenate results
+
             const chunkResults = await Promise.all(schoolDataPromises);
             const allSchoolData = chunkResults.flat();
             setSchoolData(allSchoolData);
@@ -365,8 +362,9 @@ export default function Weather() {
                                             width="24"
                                             xmlns="http://www.w3.org/2000/svg"
                                         >
-                                            <path d="M14 20l10 10 10-10z" />
-                                            <path d="M0 0h48v48h-48z" fill="none" />
+                                            <path d="M14 20l10 10 10-10z" 
+                                            fill="var(--text-color)"/>
+                                            <path d="M0 0h48v48h-48z" fill="none"/>
                                         </svg>
                                         ) : (
                                         <img src="./resources/line.png" alt="icon" />
@@ -385,8 +383,9 @@ export default function Weather() {
                                             width="24"
                                             xmlns="http://www.w3.org/2000/svg"
                                         >
-                                            <path d="M14 20l10 10 10-10z" />
-                                            <path d="M0 0h48v48h-48z" fill="none" />
+                                            <path d="M14 20l10 10 10-10z" 
+                                            fill="var(--text-color)"/>
+                                            <path d="M0 0h48v48h-48z" fill="none"/>
                                         </svg>
                                         ) : (
                                         <img src="./resources/line.png" alt="icon" />
@@ -405,8 +404,9 @@ export default function Weather() {
                                             width="24"
                                             xmlns="http://www.w3.org/2000/svg"
                                         >
-                                            <path d="M14 20l10 10 10-10z" />
-                                            <path d="M0 0h48v48h-48z" fill="none" />
+                                            <path d="M14 20l10 10 10-10z" 
+                                            fill="var(--text-color)"/>
+                                            <path d="M0 0h48v48h-48z" fill="none"/>
                                         </svg>
                                         ) : (
                                         <img src="./resources/line.png" alt="icon" />
@@ -425,8 +425,9 @@ export default function Weather() {
                                             width="24"
                                             xmlns="http://www.w3.org/2000/svg"
                                         >
-                                            <path d="M14 20l10 10 10-10z" />
-                                            <path d="M0 0h48v48h-48z" fill="none" />
+                                            <path d="M14 20l10 10 10-10z" 
+                                            fill="var(--text-color)"/>
+                                            <path d="M0 0h48v48h-48z" fill="none"/>
                                         </svg>
                                         ) : (
                                         <img src="./resources/line.png" alt="icon" />
@@ -445,8 +446,9 @@ export default function Weather() {
                                             width="24"
                                             xmlns="http://www.w3.org/2000/svg"
                                         >
-                                            <path d="M14 20l10 10 10-10z" />
-                                            <path d="M0 0h48v48h-48z" fill="none" />
+                                            <path d="M14 20l10 10 10-10z" 
+                                            fill="var(--text-color)"/>
+                                            <path d="M0 0h48v48h-48z" fill="none"/>
                                         </svg>
                                         ) : (
                                         <img src="./resources/line.png" alt="icon" />

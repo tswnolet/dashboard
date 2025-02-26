@@ -101,6 +101,7 @@ const Settings = () => {
 
   return (
     <div id='settings' className='page-container'>
+      <h2>Settings</h2>
       {error && <Alert message={error.message} type={error.type} onClose={() => setError(null)} />}
       <div className="section">
         <h4>Manage Cookies</h4>

@@ -25,6 +25,7 @@
   --slider-offset: 0.3em;
   --dark: 0;
   --graph-color: #624b8f;
+  --fill: rgb(40, 57, 85);
 }
 
 .dark {
@@ -42,6 +43,7 @@
   --context-color: rgb(0, 0, 0);
   --dark: 255;
   --graph-color: #ede8ff;
+  --fill: #f4bc41;
 }
 
 body {
@@ -165,7 +167,7 @@ label, .pages span {
   font-weight: bold;
 }
 
-.page-container > div:not(.file-upload) {
+.page-container > div:not(.file-upload):not(.data-action-container) {
   width: 90%;
 
   > table, tbody {
@@ -235,7 +237,9 @@ button:hover, .file-upload > label:hover {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  padding: 100px 20px 20px;
+  position: relative;
+  margin: 0;
+  padding: 20px 20px 0 100px;
 
   > form > input, form > button {
     width: 55%;
@@ -270,6 +274,9 @@ table:not(.schools) > tbody > tr > td {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
+  margin-bottom: 15px;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .light, .column-active {
@@ -291,13 +298,16 @@ table:not(.schools) > tbody > tr > td {
   }
 }
 
-/* Ensure table has equal column widths */
-.page-container > div:not(.file-upload) {
-  width: 90%;
+.page-container > div:not(.file-upload):not(.data-action-container) {
+  width: 100%;
 }
 
 #weather-table {
   margin: 50px;
+
+  thead, th, td {
+    width: 100%;
+  }
 }
 
 #weather-table {
@@ -309,24 +319,25 @@ table:not(.schools) > tbody > tr > td {
   border-collapse: collapse;
 }
 
-/* Table Headers */
 #weather-table th {
-  padding: 10p;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  gap: 3px;
   font-weight: bold;
   color: var(--text-color);
   background-color: var(--secondary-color);
   text-align: center;
   border-bottom: 2px solid var(--border-color);
-  white-space: nowrap; /* Prevents text wrapping */
+  white-space: nowrap;
 }
 
-/* Convert CamelCase headers to spaced words */
 #weather-table th::before {
   content: attr(data-label);
   display: block;
 }
 
-/* Table Rows */
 #weather-table tr, td {
   display: flex;
   justify-content: center;
@@ -335,12 +346,10 @@ table:not(.schools) > tbody > tr > td {
   height: 100%;
 }
 
-/* Table Cells */
 #weather-table td {
   padding: 8px;
   text-align: center;
   flex-grow: 1;
-  max-width: 150px;
   width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -349,16 +358,27 @@ table:not(.schools) > tbody > tr > td {
   border-left: 1px solid var(--border-color);
 }
 
-/* Show full text on hover */
 #weather-table td:hover {
-  overflow: visible;
-  white-space: normal;
-  text-overflow: unset;
-  word-break: break-word;
-  position: relative;
-  z-index: 10;
   background: var(--card-color);
-  box-shadow: var(--large-box-shadow);
-  padding: 10px;
-  max-width: unset;
+}
+
+.divider {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(var(--dark),var(--dark),var(--dark),0.05);
+  transition: width 0.3s, height 0.3s;
+
+  &.vertical {
+      width: 1px;
+      max-height: 90%;
+      height: 100%;
+      min-height: 225px;
+  }
+
+  &.horizontal {
+      height: 1px;
+      max-width: 100%;
+      width: 100%;
+  }
 }

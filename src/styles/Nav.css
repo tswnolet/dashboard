@@ -1,26 +1,180 @@
-.date-input {
-  position: relative;
-}
-
-input[type='date']::-webkit-calendar-picker-indicator {
-  color-scheme: var(--theme);
-  cursor: pointer;
-}
-
 nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-direction: column;
   position: fixed;
   top: 0;
   left: 0;
-  margin: 10px 0 0 0;
-  width: 100%;
+  width: 75px;
+  height: var(--real-vh, 100vh);
+  padding: 25px 0;
   border-radius: 0;
   color: var(--text-color);
-  background-color: transparent;
+  background-color: var(--secondary-color);
   z-index: 1001;
-  transition: background-color 0.3s, border-radius 0.3s ease, margin 0.3s, color 0.3s, width 0.3s ease-in-out;
+  transition: background-color 0.3s, border-radius 0.3s ease, margin 0.3s, color 0.3s ease, width 0.3s ease;
+}
+
+nav button {
+  background-color: transparent;
+  padding: 0;
+}
+
+.nav-toggle {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  
+  svg {
+    color: var(--text-color);
+  }
+}
+
+#menu {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+  height: 75%;
+  transition: width 0.3s ease;
+  user-select: none;
+}
+
+#menu-header, #menu-footer {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  width: 80%;
+}
+
+#menu-header {
+  gap: 35px;
+}
+
+#menu-footer {
+  gap: 15px;
+}
+
+#menu-navigation {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  flex-grow: 1;
+  width: 100%;
+  height: 100%;
+}
+
+#menu-maininfo, #menu-subinfo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+}
+
+.menu-item-container {
+  display: flex;
+  position: relative;
+  width: 100%;
+}
+
+.menu-item, .submenu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.3s ease-in-out, background-color 0.3s ease-in-out;
+}
+
+.menu-item.active, .submenu-item.active {
+  color: var(--fill);
+}
+
+.main-active svg {
+  fill: var(--fill);
+}
+
+.menu-item:not(.c) {
+  padding: 10px 10%;
+  width: 100%;
+}
+
+.menu-item.c {
+  justify-content: center;
+  width: auto;
+}
+
+.menu-item:not(.c):hover {
+  background-color: var(--card-color);
+  color: var(--fill);
+
+  svg {
+    fill: var(--fill);
+  }
+}
+
+.menu-item svg {
+  min-width: 25px;
+  width: 25px;
+  height: 25px;
+  transition: transform 0.3s ease-in-out, fill 0.3s ease-in-out;
+}
+
+.menu-item span {
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.menu-dropdown {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 20px;
+  margin-left: auto;
+  transition: transform 0.3s ease-in-out;
+}
+
+.menu-dropdown svg {
+  transition: transform 0.3s ease-in-out;
+}
+
+.menu-dropdown:hover {
+  cursor: pointer;
+  background-color: var(--card-color);
+  border-radius: 3px;
+}
+
+nav.expanded .menu-item span {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.submenu {
+  display: flex;
+  flex-direction: column;
+  margin: -15px 0 0 0;
+  width: 100%;
+  transition: width 0.3s ease-in-out;
+}
+
+.submenu-item {
+  padding: 10px 35px;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--text-color);
+}
+
+.submenu-item:hover {
+  color: var(--fill);
+  background-color: var(--card-color);
 }
 
 #page-title {
@@ -66,10 +220,8 @@ nav.scrolled {
 }
 
 #nav-logo {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  width: 35px;
+  height: 35px;
 
   &:hover {
     cursor: pointer;
@@ -80,4 +232,49 @@ nav.scrolled {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  background: transparent;
+  height: 40px;
+  border-radius: 3px;
+  transition: width 0.3s ease-in-out, background 0.3s ease-in-out;
+  width: 40px;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+}
+
+.search-container.expanded {
+  width: 100%;
+  background: var(--card-color);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.search-icon {
+  font-size: 22px;
+  transition: margin-left 0.3s ease-in-out;
+  position: relative;
+  z-index: 2;
+}
+
+.search-input {
+  position: absolute;
+  left: 35px;
+  width: 0;
+  height: 100%;
+  opacity: 0;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: var(--text-color);
+  background: transparent;
+  transition: width 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+.search-container.expanded .search-input {
+  width: calc(100% - 40px);
+  opacity: 1;
 }

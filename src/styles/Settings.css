@@ -7,6 +7,14 @@
 
 }
 
+#settings button {
+    min-width: 65px;
+}
+
+#settingsli {
+    max-width: 350px;
+}
+
 #settings h1 {
     font-size: 1.5em;
     font-weight: 800;

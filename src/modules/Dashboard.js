@@ -23,6 +23,16 @@ const Dashboard = ({ setLoggedIn, google = false }) => {
     const [filteredCampaigns, setFilteredCampaigns] = useState([]);
     const [titles, setTitles] = useState([]);
     const [filteredTitles, setFilteredTitles] = useState([]);
+    const [smallScreen, setSmallScreen] = useState(window.innerWidth < 1025);
+    
+    useEffect(() => {
+        const handleResize = () => {
+            setSmallScreen(window.innerWidth < 1025);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const fetchStats = async (manual = false) => {
         if (!datesSet) return;
@@ -256,6 +266,7 @@ const Dashboard = ({ setLoggedIn, google = false }) => {
                         showDateInputs={showDateInputs} setShowDateInputs={setShowDateInputs}
                         campaignNames={campaignNames} setFilteredCampaigns={setFilteredCampaigns}
                         titles={titles} setFilteredTitles={setFilteredTitles}
+                        smallScreen={smallScreen}
                 />
                 <button title='Refresh data' id='refresh' onClick={handleRefresh} className={refreshing ? 'spinning' : ''}>
                     <Refresh />
