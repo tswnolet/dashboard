@@ -92,11 +92,11 @@ nav button {
 .menu-item, .submenu-item {
   display: flex;
   align-items: center;
-  gap: 10px;
   white-space: nowrap;
   overflow: hidden;
   cursor: pointer;
   position: relative;
+  gap: 10px;
   transition: color 0.3s ease-in-out, background-color 0.3s ease-in-out;
 }
 
@@ -173,10 +173,17 @@ nav.expanded .menu-item span {
 }
 
 .submenu-item {
-  padding: 10px 35px;
   font-size: 14px;
   cursor: pointer;
   color: var(--text-color);
+}
+
+.submenu-item.expanded {
+  padding: 10px 35px;
+}
+
+.submenu-item:not(.expanded) {
+  padding: 10px;
 }
 
 .submenu-item:hover {

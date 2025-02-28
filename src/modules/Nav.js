@@ -12,8 +12,8 @@ import {
   RiLogoutCircleLine,
   RiBillLine,
 } from "react-icons/ri";
-import { Contact2, Hash, Menu, Search } from "lucide-react";
-import { ArrowBack, MoreHorizOutlined, ChangeCircleOutlined } from "@mui/icons-material";
+import { Cloud, Contact2, Hash, Menu, Search } from "lucide-react";
+import { ArrowBack, MoreHorizOutlined, ChangeCircleOutlined, CloudDoneOutlined, CloudOutlined } from "@mui/icons-material";
 import Logo from "../resources/logo.png";
 import "../styles/Nav.css";
 import { Theme } from "./Theme";
@@ -90,8 +90,12 @@ const Dropdown = ({
       <div className="menu-item-container">
         <div
           className={`menu-item ${parentClass}`}
-          onClick={onItemClick}
+          onClick={() => {
+            if (!expanded) toggle();
+            else onItemClick();
+          }}
           style={{ justifyContent: expanded ? "flex-start" : "center" }}
+          title={label}
         >
           <Icon size={25} />
           <span style={{ display: expanded ? "block" : "none" }}>{label}</span>
@@ -108,12 +112,13 @@ const Dropdown = ({
           />
         </div>
       </div>
-      {isOpen && expanded && (
-        <div className="submenu">
+      {isOpen && (
+        <div className='submenu'>
           {submenuItems.map((item, index) => (
             <div
               key={index}
-              className={`submenu-item ${isActive(item.route) ? "active" : ""}`}
+              className={`submenu-item${isActive(item.route) ? " active" : ""}${expanded ? " expanded" : ""}`}
+              style={{ justifyContent: expanded ? "flex-start" : "center" }}
               onClick={() => {
                 navigate(item.route);
                 if (activeBase !== "/dashboard") {
@@ -122,7 +127,7 @@ const Dropdown = ({
               }}
             >
               {item.Icon && <item.Icon size={20} />}
-              <span>{item.label}</span>
+              {expanded && <span>{item.label}</span>}
             </div>
           ))}
         </div>
@@ -153,6 +158,7 @@ const MainOptions = ({
           className="menu-item"
           style={{ justifyContent: expanded ? "flex-start" : "center" }}
           onClick={() => setLowerOption(null)}
+          title="More"
         >
           <MoreHorizOutlined size={25} />
           <span style={{ display: expanded ? "block" : "none" }}>More</span>
@@ -172,6 +178,7 @@ const MainOptions = ({
               {
                 label: "Weather Events",
                 route: "/dashboard/weather",
+                Icon: Cloud,
                 onClick: () => {
                   if (!isActive("/dashboard/weather")) navigate("/dashboard/weather");
                 },
@@ -188,10 +195,11 @@ const MainOptions = ({
             onClick={() => {
               if (!isActive("/cases")) navigate("/cases");
             }}
+            title="Cases"
           >
             <RiSuitcaseLine size={25} />
             <span style={{ display: expanded ? "block" : "none" }}>
-              Case Management
+              Cases
             </span>
           </div>
           <div
@@ -200,6 +208,7 @@ const MainOptions = ({
             onClick={() => {
               if (!isActive("/intake")) navigate("/intake");
             }}
+            title="Intake"
           >
             <RiAddBoxLine size={25} />
             <span style={{ display: expanded ? "block" : "none" }}>
@@ -212,6 +221,7 @@ const MainOptions = ({
             onClick={() => {
               if (!isActive("/contacts")) navigate("/contacts");
             }}
+            title="Contacts"
           >
             <RiProfileLine size={25} />
             <span style={{ display: expanded ? "block" : "none" }}>

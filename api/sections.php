@@ -18,12 +18,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $stmt->execute();
         $result = $stmt->get_result();
 
+        $sql2 = "SELECT * FROM phases WHERE template_id = ? ORDER BY order_id ASC";
+        $stmt2 = $conn->prepare($sql2);
+        $stmt2->bind_param("i", $template_id);
+        $stmt2->execute();
+        $result2 = $stmt2->get_result();
+
         $sections = [];
         while ($row = $result->fetch_assoc()) {
             $sections[] = $row;
         }
 
-        echo json_encode(['success' => true, 'sections' => $sections]);
+        $phases = [];
+        while ($row = $result2->fetch_assoc()) {
+            $phases[] = $row;
+        }
+
+        echo json_encode(['success' => true, 'sections' => $sections, 'phases' => $phases]);
     } else {
         echo json_encode(['success' => false, 'message' => 'No template_id provided']);
         exit;
@@ -31,11 +42,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['add_field'])) {
     $input = json_decode(file_get_contents('php://input'), true);
 
-    if (isset($input['section_id'], $input['field_id'], $input['order_id'])) {
-        $sql = "INSERT INTO section_fields (section_id, field_id, order_id) 
-                VALUES (?, ?, ?)";
+    if (isset($input['name'], $input['section_id'], $input['field_id'], $input['order_id'], $input['rules'])) {
+        $rules = json_encode($input['rules']);
+        $sql = "INSERT INTO field_map (name, section_id, field_id, order_id, rules) 
+                VALUES (?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("iii", $input['section_id'], $input['field_id'], $input['order_id']);
+        $stmt->bind_param("siiis", $input['name'], $input['section_id'], $input['field_id'], $input['order_id'], $rules);
         $stmt->execute();
 
         if ($stmt->affected_rows > 0) {
@@ -58,16 +70,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         } else {
             echo json_encode(['success' => false, 'message' => 'Error creating section', 'error' => $conn->error]);
         }
+    } elseif (isset($input['phase'], $input['description'], $input['template_id'], $input['order_id'])) {
+        $sql = "INSERT INTO phases (phase, description, template_id, order_id) VALUES (?, ?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ssii", $input['phase'], $input['description'], $input['template_id'], $input['order_id']);
+        $stmt->execute();
+
+        if ($stmt->affected_rows > 0) {
+            echo json_encode(['success' => true, 'message' => 'Phase created successfully']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Error creating phase', 'error' => $conn->error]);
+        }
     } else {
         echo json_encode(['success' => false, 'message' => 'Missing required fields']);
     }
 } elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $input = json_decode(file_get_contents('php://input'), true);
 
-    if (isset($input['id'], $input['name'], $input['order_id'])) {
-        $sql = "UPDATE sections SET name = ?, order_id = ? WHERE id = ?";
+    if (isset($input['id'], $input['name'], $input['description'], $input['order_id'], $input['icon'])) {
+        $sql = "UPDATE sections SET name = ?, description = ?, order_id = ?, icon = ? WHERE id = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sii", $input['name'], $input['order_id'], $input['id']);
+        $stmt->bind_param("ssisi", $input['name'], $input['description'], $input['order_id'], $input['icon'], $input['id']);
         $stmt->execute();
 
         if ($stmt->affected_rows > 0) {

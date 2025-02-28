@@ -14,13 +14,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $stmt->bind_param("i", $template_id);
         $stmt->execute();
         $result = $stmt->get_result();
-
+        
         $sections = [];
         while ($row = $result->fetch_assoc()) {
             $sections[] = $row;
         }
 
-        echo json_encode(['success' => true, 'sections' => $sections]);
+        echo json_encode(['success' => true, 'sections' => $sections, 'phases' => $phases]);
     } else {
         $sql = "SELECT * FROM templates";
         $result = $conn->query($sql);

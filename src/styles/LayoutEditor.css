@@ -9,10 +9,35 @@
 }
 
 @media (max-width: 768px) {
-    .editor-header, .section-container-header {
+    .editor-header, .template-container-header {
         flex-direction: column;
         gap: 10px;
     }
+}
+
+#template-header {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    width: 100%;
+    gap: 25px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+
+    h4 {
+        margin: 0;
+        padding: 2px;
+        cursor: pointer;
+    }
+
+    h4:not(.active) {
+        border-bottom: 3px solid transparent;
+    }
+}
+
+#template-header .active {
+    color: var(--fill);
+    border-bottom: 3px solid var(--fill);
 }
 
 .default-select, .action, .section-properties input, .section-properties textarea {
@@ -86,7 +111,8 @@
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 5px;
+    margin: 10px;
 }
 
 .form-group label {
@@ -157,10 +183,9 @@
     transition: fill 0.3s ease-in-out;
 }
 
-.section-container {
+.section-container, .phase-container, .phase-list {
     display: flex;
     flex-direction: column;
-    width: 100%;
     gap: 15px;
 
     p {
@@ -170,18 +195,27 @@
     }
 }
 
-.section-container-header {
+.section-container, .phase-container {
+    width: 100%;
+}
+
+.phase-list {
+    width: 45%;
+    min-width: 200px;
+}
+
+.template-container-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 15px;
 
-    h3 {
+    h4 {
         margin: 0;
     }
 }
 
-.section-header {
+.section-header, .template-phase {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -196,8 +230,25 @@
     justify-content: start;
 }
 
-.section-header.far {
+.section-header.far, .template-phase.far {
     justify-content: space-between;
+}
+
+.template-phase {
+    padding: 15px;
+    border-radius: 3px;
+    background-color: var(--secondary-color);
+}
+
+.template-phase h4 {
+    margin: 0;
+}
+
+.phase-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
 }
 
 .template-section {
@@ -228,9 +279,10 @@
 .section-label {
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     gap: 15px;
     width: 100%;
+    max-width: 500px;
 }
 
 .section-label label {
@@ -240,7 +292,7 @@
     text-align: right;
 }
 
-.section-label input, 
+.section-label input, .form-group input, 
 .section-label textarea {
     flex: 1;
     padding: 8px;
@@ -250,7 +302,7 @@
     color: var(--text-color);
 }
 
-.section-label input {
+.form-group input {
     min-height: 36px;
 }
 
@@ -272,4 +324,33 @@
     align-items: center;
     gap: 5px;
     cursor: pointer;
+}
+
+.icon-selection {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.icon-option {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.icon-option.selected {
+    background-color: var(--hover-color);
+    border-color: var(--hover-color);
+}
+
+.icon-option:hover {
+    background-color: var(--hover-color);
+    border-color: var(--hover-color);
 }
