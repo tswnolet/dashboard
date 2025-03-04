@@ -1,0 +1,184 @@
+.folder-tree-manager {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 25px;
+    position: relative;
+}
+
+.folder-tree {
+    list-style: none;
+    position: relative;
+    
+}
+
+.folder-tree:not(.main) {
+    padding-left: 30px;
+}
+
+.folder-tree.main, .replacement-legend {
+    padding: 15px;
+    height:   500px;
+    overflow-y: auto;
+    background-color: var(--secondary-color);
+    color: var(--subtext-color);
+    border-radius: 3px;
+    scrollbar-color: var(--hover-color) var(--card-color);
+
+    svg {
+        color: var(--fill);
+    }
+
+    input {
+        color: var(--text-color);
+    }
+}
+
+.folder-tree.main {
+    margin: 0;
+}
+
+.folder-tree li {
+    position: relative;
+    padding-left: 10px;
+    cursor: pointer;
+}
+
+.folder-tree li::before {
+    content: "";
+    position: absolute;
+    top: 12px;
+    left: -20px;
+    width: 20px;
+    height: 1px;
+    background: var(--subtext-color);
+}
+
+.folder-tree li::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -20px;
+    bottom: 0;
+    width: 1px;
+    background: var(--subtext-color);
+}
+
+.folder-tree li:last-child::after {
+    bottom: 50%;
+}
+
+.folder-tree > li::before,
+.folder-tree > li::after {
+    display: none;
+}
+
+.folder-tree > li > ul > li::before,
+.folder-tree > li > ul > li::after {
+    display: block;
+}
+
+.folder-tree span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    position: relative;
+}
+
+.replacement-legend {
+    height: 500px;
+}
+
+.folder-legend {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin: 15px 0;
+    gap: 10px;
+    font-size: 14px;
+}
+
+.folder-legend-folders, .folder-legend-folder, .folder-legend-instruction {
+    display: flex;
+    justify-content: start;
+    gap: 4px;
+}
+
+.folder-legend-folders {
+    gap: 10px;
+}
+
+.folder-legend-folder svg {
+    color: var(--fill);
+}
+
+
+.replace-fields-title {
+    margin-bottom: 15px;
+
+    h4, p {
+        margin: 5px 0;
+    }
+
+    p {
+        font-size: 12.8px;
+    }
+}
+
+.replace-fields-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    p {
+        margin: 0;
+    }
+}
+
+.replace-field {
+    display: flex;
+    justify-content: start;
+}
+
+.replace-field p:first-child {
+    color: var(--fill);
+    width: 30%;
+    max-width: 200px;
+    font-size: 12.8px;
+}
+
+.replace-field p:not(:first-child) {
+    font-size: 14px;
+}
+
+@media (min-width: 769px) {
+    .folder-tree.main, .folder-legend, .replacement-legend {
+        width: 50%;
+    }
+
+    .folder-legend {
+        position: absolute;
+        top: 100%;
+    }
+
+    .folder-legend-folders, .folder-legend-folder, .folder-legend-instruction {
+        align-items: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .folder-tree-manager, .folder-legend-folders {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .folder-tree.main, .folder-legend {
+        width: 100%;
+    }
+
+    .replace-field {
+        flex-direction: column;
+    }
+}

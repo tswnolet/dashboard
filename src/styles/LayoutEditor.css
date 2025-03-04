@@ -1,11 +1,7 @@
 /* Header */
-.editor-header {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
+header {
     width: 100%;
-    gap: 25px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 @media (max-width: 768px) {
@@ -13,6 +9,10 @@
         flex-direction: column;
         gap: 10px;
     }
+}
+
+#template-container {
+    margin-bottom: 50px;
 }
 
 #template-header {
@@ -23,6 +23,7 @@
     gap: 25px;
     margin-bottom: 20px;
     border-bottom: 1px solid var(--border-color);
+    user-select: none;
 
     h4 {
         margin: 0;
@@ -40,53 +41,11 @@
     border-bottom: 3px solid var(--fill);
 }
 
-.default-select, .action, .section-properties input, .section-properties textarea {
-    outline: none;
-    border-radius: 3px;
-    max-width: 400px;
-}
-
-.default-select, .action, .section-properties input {
-    padding: 0 10px;
-    min-height: 36px;
-}
-
-.default-select, .section-properties input, .section-properties textarea {
-    color: var(--text-color);
-    border: 1px solid var(--border-color);
-    background: var(--secondary-color);
-
-    option {
-        color: var(--text-color);
-    }
-}
-
-.action {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    color: var(--secondary-color);
-    border: none;
-    font-weight: 800;
-    cursor: pointer;
-    padding: 0 18px;
-    transition: background 0.3s ease-in-out, transform 0.2s;
-}
-
-.action:not(.alt) {
-    background-color: var(--fill);
-}
-
-.action.alt {
-    background-color: var(--text-color);
-}
-
-.action:hover {
-    transform: scale(1.05);
-}
-
 .new-template {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
     background-color: var(--secondary-color);
     padding: 25px;
     border-radius: 10px;
@@ -103,6 +62,8 @@
 
 .new-template form {
     display: flex;
+    justify-content: center;
+    align-items: center;
     flex-direction: column;
     gap: 15px;
     width: 100%;
@@ -112,7 +73,8 @@
     display: flex;
     flex-direction: column;
     gap: 5px;
-    margin: 10px;
+    margin: 10px 0;
+    width: 100%;
 }
 
 .form-group label {
@@ -197,11 +159,23 @@
 
 .section-container, .phase-container {
     width: 100%;
+    position: relative;
 }
 
 .phase-list {
     width: 45%;
     min-width: 200px;
+}
+
+.phase-title {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 7.5px;
+
+    h4 {
+        line-height: 1;
+    }
 }
 
 .template-container-header {
@@ -279,17 +253,16 @@
 .section-label {
     display: flex;
     justify-content: center;
-    align-items: center;
     gap: 15px;
     width: 100%;
-    max-width: 500px;
+    max-width: 400px;
+    position: relative;
 }
 
 .section-label label {
     width: 150px;
     font-size: 12.8px;
     color: var(--text-color);
-    text-align: right;
 }
 
 .section-label input, .form-group input, 
@@ -302,7 +275,14 @@
     color: var(--text-color);
 }
 
-.form-group input {
+.section-fields {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.form-group input:not([type='checkbox']) {
     min-height: 36px;
 }
 
@@ -353,4 +333,44 @@
 .icon-option:hover {
     background-color: var(--hover-color);
     border-color: var(--hover-color);
+}
+
+@media (min-width: 769px) {
+    .section-floating-label {
+        position: absolute;
+        left: -175px;
+        width: 100%;
+    }
+
+    .section-label {
+        align-items: center;
+    }
+
+    .section-label label {
+        text-align: right;
+    }
+}
+
+@media (max-width: 768px) {
+    .phase-container, .phase-list {
+        width: 100%;
+    }
+
+    .section-label {
+        align-items: flex-start;
+    }
+
+    .section-label {
+        flex-direction: column;
+    }
+
+    .section-label {
+        input, textarea {
+            width: 100%;
+        }
+    }
+
+    .section-floating-label {
+        position: relative;
+    }
 }

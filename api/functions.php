@@ -51,7 +51,7 @@ function fetchTotalSettlement($conn, $startDate, $endDate) {
     $prevDateFilter = dateFilter("COALESCE(settlement_date, last_activity)", $prevStartDate, $prevEndDate);
 
     $sqlAvg = "SELECT AVG(suit_percentage / 100) AS avgSuitPercentage 
-               FROM cases 
+               FROM filevine 
                WHERE suit_percentage / 100 IS NOT NULL";
     $resultAvg = $conn->query($sqlAvg);
     $avgSuitPercentage = $resultAvg->fetch_assoc()['avgSuitPercentage'] ?? 0.4;
@@ -59,13 +59,13 @@ function fetchTotalSettlement($conn, $startDate, $endDate) {
     $sql = "SELECT 
                 SUM(settlement_amount) AS totalUnadjustedSettlement,
                 SUM(settlement_amount * COALESCE(suit_percentage / 100, $avgSuitPercentage)) AS totalAdjustedSettlement
-            FROM cases 
+            FROM filevine 
             WHERE settlement_amount IS NOT NULL $dateFilter";
 
     $prevSql = "SELECT 
                     SUM(settlement_amount) AS totalUnadjustedSettlement,
                     SUM(settlement_amount * COALESCE(suit_percentage / 100, $avgSuitPercentage)) AS totalAdjustedSettlement
-                FROM cases 
+                FROM filevine 
                 WHERE settlement_amount IS NOT NULL $prevDateFilter";
 
     $result = $conn->query($sql);
@@ -95,8 +95,8 @@ function fetchCasesByLocation($conn, $startDate, $endDate) {
     list($prevStartDate, $prevEndDate) = getPreviousPeriod($startDate, $endDate);
     $prevDateFilter = dateFilter("creation_date", $prevStartDate, $prevEndDate);
 
-    $sql = "SELECT location, COUNT(*) AS count FROM cases WHERE 1=1 $dateFilter GROUP BY location";
-    $sqlPrev = "SELECT location, COUNT(*) AS count FROM cases WHERE 1=1 $prevDateFilter GROUP BY location";
+    $sql = "SELECT location, COUNT(*) AS count FROM filevine WHERE 1=1 $dateFilter GROUP BY location";
+    $sqlPrev = "SELECT location, COUNT(*) AS count FROM filevine WHERE 1=1 $prevDateFilter GROUP BY location";
     $result = $conn->query($sql);
     $prevResult = $conn->query($sqlPrev);
     $data = [];
@@ -134,8 +134,8 @@ function fetchCasesByPracticeType($conn, $startDate, $endDate) {
     list($prevStartDate, $prevEndDate) = getPreviousPeriod($startDate, $endDate);
     $prevDateFilter = dateFilter("creation_date", $prevStartDate, $prevEndDate);
 
-    $sql = "SELECT practice_type, COUNT(*) AS count FROM cases WHERE 1=1 $dateFilter GROUP BY practice_type";
-    $sqlPrev = "SELECT practice_type, COUNT(*) AS count FROM cases WHERE 1=1 $prevDateFilter GROUP BY practice_type";
+    $sql = "SELECT practice_type, COUNT(*) AS count FROM filevine WHERE 1=1 $dateFilter GROUP BY practice_type";
+    $sqlPrev = "SELECT practice_type, COUNT(*) AS count FROM filevine WHERE 1=1 $prevDateFilter GROUP BY practice_type";
     $result = $conn->query($sql);
     $prevResult = $conn->query($sqlPrev);
     $data = [];
@@ -196,7 +196,7 @@ function fetchCasesByPhase($conn, $startDate, $endDate) {
                 ELSE phase 
             END AS status,
             COUNT(*) AS count 
-        FROM cases 
+        FROM filevine 
         WHERE 1=1 $dateFilter 
         GROUP BY status
     ";
@@ -208,7 +208,7 @@ function fetchCasesByPhase($conn, $startDate, $endDate) {
                 ELSE phase 
             END AS status,
             COUNT(*) AS count 
-        FROM cases 
+        FROM filevine 
         WHERE 1=1 $prevDateFilter 
         GROUP BY status
     ";
@@ -257,7 +257,7 @@ function fetchSettlementsOverTime($conn, $startDate, $endDate) {
     }
 
     $sqlAvg = "SELECT AVG(suit_percentage / 100) AS avgSuitPercentage 
-               FROM cases 
+               FROM filevine 
                WHERE suit_percentage IS NOT NULL $dateFilter";
     $resultAvg = $conn->query($sqlAvg);
     $avgSuitPercentage = $resultAvg->fetch_assoc()['avgSuitPercentage'] ?? 0.4; 
@@ -265,7 +265,7 @@ function fetchSettlementsOverTime($conn, $startDate, $endDate) {
     $sql = "SELECT $groupBy AS time_period, 
                    SUM(settlement_amount) AS total_settlement,
                    SUM(settlement_amount * COALESCE(suit_percentage / 100, $avgSuitPercentage)) AS adjusted_settlement
-            FROM cases 
+            FROM filevine 
             WHERE settlement_amount IS NOT NULL $dateFilter 
             GROUP BY time_period
             ORDER BY MIN(settlement_date) ASC";
@@ -273,7 +273,7 @@ function fetchSettlementsOverTime($conn, $startDate, $endDate) {
     $sqlPrev = "SELECT $groupBy AS time_period, 
                        SUM(settlement_amount) AS total_settlement,
                        SUM(settlement_amount * COALESCE(suit_percentage / 100, $avgSuitPercentage)) AS adjusted_settlement
-                FROM cases 
+                FROM filevine 
                 WHERE settlement_amount IS NOT NULL $prevDateFilter 
                 GROUP BY time_period
                 ORDER BY MIN(settlement_date) ASC";
@@ -334,14 +334,14 @@ function fetchCasesOpenedVsClosed($conn, $startDate, $endDate) {
     $sqlNewCases = "SELECT 
                         $groupBy AS time_period, 
                         COUNT(*) AS new_cases 
-                    FROM cases 
+                    FROM filevine 
                     WHERE creation_date IS NOT NULL $dateFilterCreated
                     GROUP BY time_period 
                     ORDER BY time_period ASC";
     $prevSqlNewCases = "SELECT 
                             $groupBy AS time_period, 
                             COUNT(*) AS new_cases 
-                        FROM cases 
+                        FROM filevine 
                         WHERE creation_date IS NOT NULL $prevDateFilterCreated
                         GROUP BY time_period 
                         ORDER BY time_period ASC";
@@ -372,7 +372,7 @@ function fetchCasesOpenedVsClosed($conn, $startDate, $endDate) {
     $sqlClosed = "SELECT 
                     $groupBy AS time_period, 
                     COUNT(*) AS closed_cases
-                FROM cases 
+                FROM filevine 
                 WHERE (settlement_date IS NOT NULL 
                     OR settlement_amount IS NOT NULL 
                     OR phase IN ('closing', 'referred out', 'qsf', 'qsf out', 'archived'))
@@ -383,7 +383,7 @@ function fetchCasesOpenedVsClosed($conn, $startDate, $endDate) {
     $prevSqlClosed = "SELECT 
                         $groupBy AS time_period, 
                         COUNT(*) AS closed_cases
-                    FROM cases 
+                    FROM filevine 
                     WHERE (settlement_date IS NOT NULL 
                         OR settlement_amount IS NOT NULL 
                         OR phase IN ('closing', 'referred out', 'qsf', 'qsf out', 'archived'))
@@ -437,7 +437,7 @@ function fetchCaseDuration($conn, $startDate, $endDate) {
                     ELSE '1+ Year'
                 END AS duration_category,
                 COUNT(*) AS total_cases
-            FROM cases 
+            FROM filevine 
             WHERE settlement_date IS NOT NULL $dateFilter
             GROUP BY duration_category
             ORDER BY MIN(DATEDIFF(settlement_date, creation_date)) ASC";
@@ -450,7 +450,7 @@ function fetchCaseDuration($conn, $startDate, $endDate) {
                         ELSE '1+ Year'
                     END AS duration_category,
                     COUNT(*) AS total_cases
-                FROM cases 
+                FROM filevine 
                 WHERE settlement_date IS NOT NULL $prevDateFilter
                 GROUP BY duration_category
                 ORDER BY MIN(DATEDIFF(settlement_date, creation_date)) ASC";
@@ -486,13 +486,13 @@ function fetchCasesVsSettlements($conn, $startDate, $endDate) {
     $sql = "SELECT 
                 DATE_FORMAT(creation_date, '%b') AS month, 
                 COUNT(*) AS new_cases 
-            FROM cases WHERE 1=1 $dateFilter
+            FROM filevine WHERE 1=1 $dateFilter
             GROUP BY DATE_FORMAT(creation_date, '%b') 
             ORDER BY MIN(creation_date) ASC";
     $prevSql = "SELECT 
                     DATE_FORMAT(creation_date, '%b') AS month, 
                     COUNT(*) AS new_cases 
-                FROM cases WHERE 1=1 $prevDateFilter
+                FROM filevine WHERE 1=1 $prevDateFilter
                 GROUP BY DATE_FORMAT(creation_date, '%b') 
                 ORDER BY MIN(creation_date) ASC";
     $result = $conn->query($sql);
@@ -513,11 +513,11 @@ function fetchCasesVsSettlements($conn, $startDate, $endDate) {
     $dateFilter = dateFilter("settlement_date", $startDate, $endDate);
     $prevDateFilter = dateFilter("settlement_date", $prevStartDate, $prevEndDate);
     $sqlSettlements = "SELECT DATE_FORMAT(settlement_date, '%b') AS month, COUNT(*) AS settlements
-                       FROM cases 
+                       FROM filevine 
                        WHERE settlement_date IS NOT NULL $dateFilter
                        GROUP BY DATE_FORMAT(settlement_date, '%b')";
     $prevSqlSettlements = "SELECT DATE_FORMAT(settlement_date, '%b') AS month, COUNT(*) AS settlements
-                           FROM cases 
+                           FROM filevine 
                            WHERE settlement_date IS NOT NULL $prevDateFilter
                            GROUP BY DATE_FORMAT(settlement_date, '%b')";
     $resultSettlements = $conn->query($sqlSettlements);
@@ -563,7 +563,7 @@ function fetchAverageSettlementByPractice($conn, $startDate, $endDate) {
                     ELSE 'Other' 
                 END AS practice_category,
                 AVG(settlement_amount) AS avg_settlement
-            FROM cases 
+            FROM filevine 
             WHERE settlement_amount IS NOT NULL $dateFilter
             GROUP BY practice_category";
     $sqlPrev = "SELECT 
@@ -574,7 +574,7 @@ function fetchAverageSettlementByPractice($conn, $startDate, $endDate) {
                         ELSE 'Other' 
                     END AS practice_category,
                     AVG(settlement_amount) AS avg_settlement
-                FROM cases 
+                FROM filevine 
                 WHERE settlement_amount IS NOT NULL $prevDateFilter
                 GROUP BY practice_category";
     $result = $conn->query($sql);
@@ -609,12 +609,12 @@ function fetchAverageSuitPercentage($conn, $startDate, $endDate) {
     $sql = "SELECT 
                 AVG(suit_percentage) AS avg_suit_percentage, 
                 COUNT(suit_percentage) AS total_cases 
-            FROM cases 
+            FROM filevine 
             WHERE suit_percentage IS NOT NULL $dateFilter";
     $sqlPrev = "SELECT 
                     AVG(suit_percentage) AS avg_suit_percentage, 
                     COUNT(suit_percentage) AS total_cases 
-                FROM cases 
+                FROM filevine 
                 WHERE suit_percentage IS NOT NULL $prevDateFilter";
 
     $result = $conn->query($sql);
@@ -649,7 +649,7 @@ function fetchAverageCasesPerPeriod($conn, $startDate, $endDate) {
     if (empty($startDate) && $endDate === "3000-01-01") {
         $sql = "SELECT 
                     COUNT(*) / COUNT(DISTINCT DATE_FORMAT(creation_date, '%Y-%m')) AS avg_cases_per_month
-                FROM cases 
+                FROM filevine 
                 WHERE creation_date IS NOT NULL";
         $result = $conn->query($sql);
         $row = $result->fetch_assoc();
@@ -685,12 +685,12 @@ function fetchAverageCasesPerPeriod($conn, $startDate, $endDate) {
     $sql = "SELECT 
                 COUNT(*) / COUNT(DISTINCT $groupBy) AS avg_cases_per_period,
                 (COUNT(*) / $date) * $daysInMonth AS pace_for_month
-            FROM cases 
+            FROM filevine 
             WHERE creation_date IS NOT NULL $dateFilter";
     $sqlPrev = "SELECT 
                     COUNT(*) / COUNT(DISTINCT $groupBy) AS avg_cases_per_period,
                     (COUNT(*) / $date) * $daysInMonth AS pace_for_month
-                FROM cases 
+                FROM filevine 
                 WHERE creation_date IS NOT NULL $prevDateFilter";
     $result = $conn->query($sql);
     $resultPrev = $conn->query($sqlPrev);
@@ -720,13 +720,13 @@ function fetchTopAttorneys($conn, $startDate, $endDate) {
     $prevDateFilter = dateFilter("settlement_date", $prevStartDate, $prevEndDate);
 
     $sql = "SELECT first_primary, COUNT(*), SUM(settlement_amount) AS total_cases 
-            FROM cases 
+            FROM filevine 
             WHERE first_primary IS NOT NULL AND settlement_amount IS NOT NULL $dateFilter
             GROUP BY first_primary 
             ORDER BY total_cases DESC 
             LIMIT 5";
     $sqlPrev = "SELECT first_primary, COUNT(*), SUM(settlement_amount) AS total_cases 
-                FROM cases 
+                FROM filevine 
                 WHERE first_primary IS NOT NULL AND settlement_amount IS NOT NULL $prevDateFilter
                 GROUP BY first_primary 
                 ORDER BY total_cases DESC 
@@ -761,12 +761,12 @@ function fetchTopSettlements($conn, $startDate, $endDate) {
     $prevDateFilter = dateFilter("settlement_date", $prevStartDate, $prevEndDate);
 
     $sql = "SELECT first_primary, settlement_amount 
-            FROM cases 
+            FROM filevine 
             WHERE settlement_amount IS NOT NULL $dateFilter
             ORDER BY settlement_amount DESC 
             LIMIT 5";
     $prevSql = "SELECT first_primary, settlement_amount 
-                FROM cases 
+                FROM filevine 
                 WHERE settlement_amount IS NOT NULL $prevDateFilter
                 ORDER BY settlement_amount DESC 
                 LIMIT 5";
@@ -806,13 +806,13 @@ function fetchTopWinningAttorneys($conn, $startDate, $endDate) {
     $prevDateFilter = dateFilter("settlement_date", $prevStartDate, $prevEndDate);
 
     $sql = "SELECT first_primary, COUNT(*) AS total_cases 
-            FROM cases 
+            FROM filevine 
             WHERE settlement_amount IS NOT NULL $dateFilter
             GROUP BY first_primary 
             ORDER BY total_cases DESC 
             LIMIT 5";
     $sqlPrev = "SELECT first_primary, COUNT(*) AS total_cases 
-                FROM cases 
+                FROM filevine 
                 WHERE settlement_amount IS NOT NULL $prevDateFilter
                 GROUP BY first_primary 
                 ORDER BY total_cases DESC 
@@ -844,10 +844,10 @@ function fetchTopWinningAttorneys($conn, $startDate, $endDate) {
 function fetchOpenCases($conn, $startDate, $endDate) {
     list($prevStartDate, $prevEndDate) = getPreviousPeriod($startDate, $endDate);
     $sql = "SELECT COUNT(*) AS open_cases 
-            FROM cases 
+            FROM filevine 
             WHERE phase NOT IN ('settlement', 'closing', 'referred out', 'qsf', 'qsf out', 'archived') AND settlement_date IS NULL AND creation_date < '$endDate'";
     $prevSql = "SELECT COUNT(*) AS open_cases 
-                FROM cases 
+                FROM filevine 
                 WHERE phase NOT IN ('settlement', 'closing', 'referred out', 'qsf', 'qsf out', 'archived') AND settlement_date IS NULL AND creation_date < '$prevEndDate'";
     $result = $conn->query($sql);
     $prevResult = $conn->query($prevSql);
@@ -869,12 +869,12 @@ function fetchAttorneyDocket($conn, $startDate, $endDate) {
     list($prevStartDate, $prevEndDate) = getPreviousPeriod($startDate, $endDate);
     $endDate .= " 23:59:59";
     $sql = "SELECT first_primary, COUNT(*) AS total_cases 
-            FROM cases 
+            FROM filevine 
             WHERE first_primary IS NOT NULL AND (settlement_date IS NULL OR settlement_date < '$endDate') AND creation_date < '$endDate' AND phase NOT IN ('settlement', 'closing', 'referred out', 'qsf', 'qsf out', 'archived')
             GROUP BY first_primary 
             ORDER BY total_cases DESC";
     $prevSql = "SELECT first_primary, COUNT(*) AS total_cases 
-                FROM cases 
+                FROM filevine 
                 WHERE first_primary IS NOT NULL AND (settlement_date IS NULL OR settlement_date < '$prevEndDate') AND creation_date < '$prevEndDate' AND phase NOT IN ('settlement', 'closing', 'referred out', 'qsf', 'qsf out', 'archived')
                 GROUP BY first_primary 
                 ORDER BY total_cases DESC";
@@ -921,19 +921,19 @@ function fetchDisengagementPercent($conn, $startDate, $endDate) {
     $prevDateFilter = dateFilter("creation_date", $prevStartDate, $prevEndDate);
 
     $sqlDisengaged = "SELECT COALESCE(NULLIF(referred_by, ''), 'Unknown') AS referred_by, COUNT(*) AS total_disengaged 
-                      FROM cases 
+                      FROM filevine 
                       WHERE disengaged = 'TRUE' $dateFilter 
                       GROUP BY referred_by";
     $sqlReferred = "SELECT COALESCE(NULLIF(referred_by, ''), 'Unknown') AS referred_by, COUNT(*) AS total_referred 
-                    FROM cases 
+                    FROM filevine 
                     WHERE referred_by IS NOT NULL $dateFilter 
                     GROUP BY referred_by";
     $prevDisengaged = "SELECT COALESCE(NULLIF(referred_by, ''), 'Unknown') AS referred_by, COUNT(*) AS total_disengaged 
-                       FROM cases 
+                       FROM filevine 
                        WHERE disengaged = 'TRUE' $prevDateFilter 
                        GROUP BY referred_by";
     $prevReferred = "SELECT COALESCE(NULLIF(referred_by, ''), 'Unknown') AS referred_by, COUNT(*) AS total_referred 
-                     FROM cases 
+                     FROM filevine 
                      WHERE referred_by IS NOT NULL $prevDateFilter 
                      GROUP BY referred_by";
     
@@ -1035,12 +1035,12 @@ function fetchMarketingSource($conn, $startDate, $endDate) {
     $prevDateFilter = dateFilter("creation_date", $prevStartDate, $prevEndDate);
 
     $sql = "SELECT COALESCE(NULLIF(marketing_source, ''), 'Unknown') AS marketing_source, COUNT(*) AS total_cases 
-            FROM cases 
+            FROM filevine 
             WHERE marketing_source IS NOT NULL $dateFilter 
             GROUP BY marketing_source 
             LIMIT 20";
     $sqlPrev = "SELECT COALESCE(NULLIF(marketing_source, ''), 'Unknown') AS marketing_source, COUNT(*) AS total_cases 
-                FROM cases 
+                FROM filevine 
                 WHERE marketing_source IS NOT NULL $prevDateFilter 
                 GROUP BY marketing_source 
                 LIMIT 20";
@@ -1080,7 +1080,7 @@ function fetchAttorneySettlements($conn, $startDate, $endDate) {
     $prevDateFilter = dateFilter("settlement_date", $prevStartDate, $prevEndDate);
 
     $sqlAvg = "SELECT AVG(suit_percentage / 100) AS avgSuitPercentage 
-               FROM cases 
+               FROM filevine 
                WHERE suit_percentage IS NOT NULL";
     $resultAvg = $conn->query($sqlAvg);
     $avgSuitPercentage = $resultAvg->fetch_assoc()['avgSuitPercentage'] ?? 0.4;
@@ -1088,14 +1088,14 @@ function fetchAttorneySettlements($conn, $startDate, $endDate) {
     $sql = "SELECT first_primary, COUNT(*) AS total_cases, 
                    SUM(settlement_amount) AS total_settlement, 
                    SUM(settlement_amount * COALESCE(suit_percentage / 100, $avgSuitPercentage)) AS total_adjusted_settlement
-            FROM cases 
+            FROM filevine 
             WHERE first_primary IS NOT NULL AND settlement_amount IS NOT NULL $dateFilter 
             GROUP BY first_primary 
             ORDER BY total_settlement DESC";
     $prevSql = "SELECT first_primary, COUNT(*) AS total_cases, 
                        SUM(settlement_amount) AS total_settlement, 
                        SUM(settlement_amount * COALESCE(suit_percentage / 100, $avgSuitPercentage)) AS total_adjusted_settlement
-                FROM cases 
+                FROM filevine 
                 WHERE first_primary IS NOT NULL AND settlement_amount IS NOT NULL $prevDateFilter 
                 GROUP BY first_primary 
                 ORDER BY total_settlement DESC";
@@ -1155,7 +1155,7 @@ function fetchMissingPSV($conn, $startDate, $endDate) {
     list($prevStartDate, $prevEndDate) = getPreviousPeriod($startDate, $endDate);
     $endDate .= " 23:59:59";
     $sql = "SELECT first_primary, COUNT(*) AS total_cases 
-            FROM cases 
+            FROM filevine 
             WHERE projected_settlement_value IS NULL 
             AND settlement_date IS NULL
             AND creation_date < '$endDate' 
@@ -1164,13 +1164,13 @@ function fetchMissingPSV($conn, $startDate, $endDate) {
             ORDER BY total_cases DESC
             LIMIT 30";
     $sql2 = "SELECT COUNT(*) AS total_cases 
-             FROM cases 
+             FROM filevine 
              WHERE projected_settlement_value IS NULL 
              AND settlement_date IS NULL
              AND creation_date < '$endDate' 
              AND phase NOT IN ('Initial/Contract Sent', 'referred out', 'qsf', 'qsf out', 'archived')";
     $prevSql = "SELECT first_primary, COUNT(*) AS total_cases 
-                FROM cases 
+                FROM filevine 
                 WHERE projected_settlement_value IS NULL 
                 AND (settlement_date IS NULL OR settlement_date < '$prevEndDate') 
                 AND creation_date < '$prevEndDate' 
@@ -1179,7 +1179,7 @@ function fetchMissingPSV($conn, $startDate, $endDate) {
                 ORDER BY total_cases DESC
                 LIMIT 30";
     $prevSql2 = "SELECT COUNT(*) AS total_cases 
-                 FROM cases 
+                 FROM filevine 
                  WHERE projected_settlement_value IS NULL 
                  AND (settlement_date IS NULL OR settlement_date < '$prevEndDate') 
                  AND creation_date < '$prevEndDate' 
@@ -1242,7 +1242,7 @@ function fetchFeeSplit($conn, $startDate, $endDate) {
                 SUM(settlement_amount) AS total_settlement,
                 AVG(fees_to_other) / 100 * SUM(settlement_amount) AS fees_paid,
                 COUNT(*) AS total_cases
-            FROM cases 
+            FROM filevine 
             WHERE referred_by IS NOT NULL 
                 AND fees_to_other IS NOT NULL
                 AND settlement_amount IS NOT NULL $dateFilter
@@ -1255,7 +1255,7 @@ function fetchFeeSplit($conn, $startDate, $endDate) {
                     SUM(settlement_amount) AS total_settlement,
                     AVG(fees_to_other) / 100 * SUM(settlement_amount) AS fees_paid,
                     COUNT(*) AS total_cases
-                FROM cases 
+                FROM filevine 
                 WHERE referred_by IS NOT NULL 
                     AND fees_to_other IS NOT NULL
                     AND settlement_amount IS NOT NULL $prevDateFilter

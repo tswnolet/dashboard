@@ -62,6 +62,7 @@ nav button {
 }
 
 #menu-footer {
+  position: relative;
   gap: 15px;
 }
 
@@ -97,7 +98,6 @@ nav button {
   cursor: pointer;
   position: relative;
   gap: 10px;
-  transition: color 0.3s ease-in-out, background-color 0.3s ease-in-out;
 }
 
 .menu-item.active, .submenu-item.active {
@@ -291,4 +291,29 @@ nav.scrolled {
 .search-container.expanded .search-input {
   width: calc(100% - 40px);
   opacity: 1;
+}
+
+.create-new {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-direction: column;
+  position: absolute;
+  left: 125%;
+  top: 0;
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+  cursor: pointer;
+  min-width: 250px;
+  box-shadow: var(--large-box-shadow);
+}
+
+.create-new-item {
+  padding: 10px 20px;
+  width: 100%;
+}
+
+.create-new-item:hover {
+  background-color: var(--card-color);
+  color: var(--fill);
 }

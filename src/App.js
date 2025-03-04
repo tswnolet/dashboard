@@ -15,6 +15,7 @@ import { PrivacyPolicy } from './modules/PrivacyPolicy';
 import GoogleAdsComponent from './modules/GoogleAdsComponent';
 import { WIP } from './modules/WIP';
 import { LayoutEditor } from './modules/LayoutEditor';
+import { Contacts } from './modules/Contacts';
 
 const App = () => {
   const [loading, setLoading] = useState(true);
@@ -132,10 +133,10 @@ const AppRoutes = ({ setUser, loggedIn, setLoggedIn, changeTheme, theme, data, s
           <Route path="/dashboard" element={<Dashboard setLoggedIn={setLoggedIn} />} />
           <Route path="/cases" element={<WIP />} />
           <Route path="/intake" element={<WIP />} />
-          <Route path="/contacts" element={<WIP />} />
+          <Route path="/contacts" element={<Contacts />} />
           <Route path="/client-portal" element={<WIP />} />
           <Route path="/firm-settings" element={<WIP />} />
-          <Route path="/dashboard/weather" element={<Weather />} />
+          <Route path="/dashboard/weather" element={<Weather theme={theme} />} />
           <Route path="/settings" element={<Settings changeTheme={changeTheme} theme={theme} logout={logout} data={data} setData={setData} setFilteredData={setFilteredData} />} />
           <Route path="/new-data" element={<NewCardForm addCard={addCard} />} />
           <Route path="*" element={<Navigate to={redirectPath} />} />

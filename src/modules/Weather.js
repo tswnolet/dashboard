@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Loading from './Loading';
+import Line from '../resources/image.png';
 
 function Pages({ data, pageSize, currentPage, totalPages, handlePageChange, set }) {
     return (
@@ -17,7 +18,7 @@ function Pages({ data, pageSize, currentPage, totalPages, handlePageChange, set 
     );
 }
 
-export default function Weather() {
+export default function Weather({ theme }) {
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
     const [loadingAll, setLoadingAll] = useState(false);
@@ -369,8 +370,17 @@ export default function Weather() {
                                             <path d="M0 0h48v48h-48z" fill="none"/>
                                         </svg>
                                         ) : (
-                                        <img src="./resources/line.png" alt="icon" />
-                                    )}
+                                            <img 
+                                            src={Line} 
+                                            alt="icon" 
+                                            fill="var(--text-color)" 
+                                            style={{
+                                                height: "15px",
+                                                width: "15px",
+                                                objectFit: "cover",
+                                                filter: theme === 'dark' ? 'invert(1)' : 'invert(0)'
+                                            }} 
+                                            />                                    )}
                                 </th>
                                 <th onClick={() => handleSort('event_magnitude')}>
                                     Event Magnitude
@@ -390,8 +400,18 @@ export default function Weather() {
                                             <path d="M0 0h48v48h-48z" fill="none"/>
                                         </svg>
                                         ) : (
-                                        <img src="./resources/line.png" alt="icon" />
-                                    )}
+                                            <img 
+                                            src={Line} 
+                                            alt="icon" 
+                                            fill="var(--text-color)" 
+                                            style={{
+                                                height: "15px",
+                                                width: "15px",
+                                                objectFit: "cover",
+                                                filter: theme === 'dark' ? 'invert(1)' : 'invert(0)'
+                                            }} 
+                                            />
+                                        )}
                                 </th>
                                 <th onClick={() => handleSort('event_date')}>
                                     Event Date
@@ -411,8 +431,17 @@ export default function Weather() {
                                             <path d="M0 0h48v48h-48z" fill="none"/>
                                         </svg>
                                         ) : (
-                                        <img src="./resources/line.png" alt="icon" />
-                                    )}
+                                            <img 
+                                            src={Line} 
+                                            alt="icon" 
+                                            fill="var(--text-color)" 
+                                            style={{
+                                                height: "15px",
+                                                width: "15px",
+                                                objectFit: "cover",
+                                                filter: theme === 'dark' ? 'invert(1)' : 'invert(0)'
+                                            }} 
+                                            />                                    )}
                                 </th>
                                 <th onClick={() => handleSort('event_property_damage')}>
                                     Property Damage
@@ -432,8 +461,17 @@ export default function Weather() {
                                             <path d="M0 0h48v48h-48z" fill="none"/>
                                         </svg>
                                         ) : (
-                                        <img src="./resources/line.png" alt="icon" />
-                                    )}
+                                            <img 
+                                            src={Line} 
+                                            alt="icon" 
+                                            fill="var(--text-color)" 
+                                            style={{
+                                                height: "15px",
+                                                width: "15px",
+                                                objectFit: "cover",
+                                                filter: theme === 'dark' ? 'invert(1)' : 'invert(0)'
+                                            }} 
+                                            />                                    )}
                                 </th>
                                 <th onClick={() => handleSort('address_count')}>
                                     Locations Hit
@@ -453,8 +491,17 @@ export default function Weather() {
                                             <path d="M0 0h48v48h-48z" fill="none"/>
                                         </svg>
                                         ) : (
-                                        <img src="./resources/line.png" alt="icon" />
-                                    )}
+                                            <img 
+                                            src={Line} 
+                                            alt="icon" 
+                                            fill="var(--text-color)" 
+                                            style={{
+                                                height: "15px",
+                                                width: "15px",
+                                                objectFit: "cover",
+                                                filter: theme === 'dark' ? 'invert(1)' : 'invert(0)'
+                                            }} 
+                                            />                                    )}
                                 </th>
                             </tr>
                         </thead>

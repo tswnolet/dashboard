@@ -98,13 +98,119 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         } else {
             echo json_encode(['success' => false, 'message' => 'Error updating section', 'error' => $conn->error]);
         }
+    } elseif (isset($input['id'], $input['phase'], $input['description'], $input['order_id'])) {
+        $sql = "UPDATE phases SET phase = ?, description = ?, order_id = ? WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ssii", $input['phase'], $input['description'], $input['order_id'], $input['id']);
+        $stmt->execute();
+
+        if ($stmt->affected_rows > 0) {
+            echo json_encode(['success' => true, 'message' => 'Phase updated successfully']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Error updating phase', 'error' => $conn->error]);
+        }
+    } elseif (isset($input['phases'])) {
+        $conn->begin_transaction();
+        try {
+            $movedPhaseId = $input['moved_phase_id'];
+            $sqlTemp = "UPDATE phases SET order_id = NULL WHERE id = ?";
+            $stmtTemp = $conn->prepare($sqlTemp);
+            $stmtTemp->bind_param("i", $movedPhaseId);
+            $stmtTemp->execute();
+
+            $originalOrderId = $input['original_order_id'];
+            $targetOrderId = $input['target_order_id'];
+            $templateId = $input['template_id'];
+
+            if ($targetOrderId < $originalOrderId) {
+                for ($i = $originalOrderId - 1; $i >= $targetOrderId; $i--) {
+                    $newOrderId = $i + 1;
+                    $sql = "UPDATE phases SET order_id = ? WHERE template_id = ? AND order_id = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("iii", $newOrderId, $templateId, $i);
+                    $stmt->execute();
+                }
+            } else {
+                for ($i = $originalOrderId + 1; $i <= $targetOrderId; $i++) {
+                    $newOrderId = $i - 1;
+                    $sql = "UPDATE phases SET order_id = ? WHERE template_id = ? AND order_id = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("iii", $newOrderId, $templateId, $i);
+                    $stmt->execute();
+                }
+            }
+
+            $sql = "UPDATE phases SET order_id = ? WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("ii", $targetOrderId, $movedPhaseId);
+            $stmt->execute();
+
+            $conn->commit();
+            echo json_encode(['success' => true, 'message' => 'Phases reordered successfully']);
+        } catch (Exception $e) {
+            $conn->rollback();
+            echo json_encode(['success' => false, 'message' => 'Error reordering phases', 'error' => $e->getMessage()]);
+        }
+    } elseif (isset($input['sections'])) {
+        $conn->begin_transaction();
+        try {
+            $movedSectionId = $input['moved_section_id'];
+            $sqlTemp = "UPDATE sections SET order_id = NULL WHERE id = ?";
+            $stmtTemp = $conn->prepare($sqlTemp);
+            $stmtTemp->bind_param("i", $movedSectionId);
+            $stmtTemp->execute();
+
+            $originalOrderId = $input['original_order_id'];
+            $targetOrderId = $input['target_order_id'];
+            $templateId = $input['template_id'];
+
+            if ($targetOrderId < $originalOrderId) {
+                for ($i = $originalOrderId - 1; $i >= $targetOrderId; $i--) {
+                    $newOrderId = $i + 1;
+                    $sql = "UPDATE sections SET order_id = ? WHERE template_id = ? AND order_id = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("iii", $newOrderId, $templateId, $i);
+                    $stmt->execute();
+                }
+            } else {
+                for ($i = $originalOrderId + 1; $i <= $targetOrderId; $i++) {
+                    $newOrderId = $i - 1;
+                    $sql = "UPDATE sections SET order_id = ? WHERE template_id = ? AND order_id = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("iii", $newOrderId, $templateId, $i);
+                    $stmt->execute();
+                }
+            }
+
+            $sql = "UPDATE sections SET order_id = ? WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("ii", $targetOrderId, $movedSectionId);
+            $stmt->execute();
+
+            $conn->commit();
+            echo json_encode(['success' => true, 'message' => 'Sections reordered successfully']);
+        } catch (Exception $e) {
+            $conn->rollback();
+            echo json_encode(['success' => false, 'message' => 'Error reordering sections', 'error' => $e->getMessage()]);
+        }
     } else {
         echo json_encode(['success' => false, 'message' => 'Missing required fields']);
     }
 } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     $input = json_decode(file_get_contents('php://input'), true);
 
-    if (isset($input['id'])) {
+    if(isset($_GET['phase_id'])) {
+        $sql = "DELETE FROM phases WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $_GET['phase_id']);
+        $stmt->execute();
+
+        if ($stmt->affected_rows > 0) {
+            echo json_encode(['success' => true, 'message' => 'Phase deleted successfully']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Error deleting phase', 'error' => $conn->error]);
+        }
+    } elseif (isset($input['id'])) {
         $sql = "DELETE FROM sections WHERE id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $input['id']);

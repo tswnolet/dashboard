@@ -13,12 +13,13 @@ import {
   RiBillLine,
 } from "react-icons/ri";
 import { Cloud, Contact2, Hash, Menu, Search } from "lucide-react";
-import { ArrowBack, MoreHorizOutlined, ChangeCircleOutlined, CloudDoneOutlined, CloudOutlined } from "@mui/icons-material";
+import { ArrowBack, MoreHorizOutlined, ChangeCircleOutlined, CloudDoneOutlined, CloudOutlined, Create, CreateOutlined, Add, AddOutlined, AddCircleOutline } from "@mui/icons-material";
 import Logo from "../resources/logo.png";
 import "../styles/Nav.css";
 import { Theme } from "./Theme";
+import { CreateContact } from "./CreateContact";
 
-/* Hook to detect clicks outside a given ref */
+/* Hook to deect clicks outside a given ref */
 function useOutsideClick(ref, callback) {
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -91,8 +92,8 @@ const Dropdown = ({
         <div
           className={`menu-item ${parentClass}`}
           onClick={() => {
-            if (!expanded) toggle();
-            else onItemClick();
+            toggle();
+            onItemClick();
           }}
           style={{ justifyContent: expanded ? "flex-start" : "center" }}
           title={label}
@@ -307,22 +308,63 @@ const SubInfo = ({
 
 /* Footer Component */
 const Footer = ({ expanded, navigate, logout, theme, changeTheme, location }) => {
+  const [createNew, setCreateNew] = useState(false);
+  const createNewRef = useRef(null);
+
   const isActive = (route) => location.pathname.startsWith(route);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (createNewRef.current && !createNewRef.current.contains(e.target)) {
+        setCreateNew(false);
+      }
+    };
+
+    if (createNew) {
+      window.addEventListener("click", handleClickOutside);
+    }
+
+    return () => {
+      window.removeEventListener("click", handleClickOutside);
+    };
+  }, [createNew]);
+
   return (
     <div id="menu-footer" style={{ alignItems: expanded ? "flex-start" : "center" }}>
+      <div className="create-new-wrapper" ref={createNewRef}>
+        <button className="action nav-toggle-button" onClick={() => setCreateNew(!createNew)}>
+          <AddCircleOutline />
+          <span style={{ display: expanded ? "block" : "none" }}>Create New...</span>
+        </button>
+
+        {createNew && (
+          <div className="create-new">
+            <div className="create-new-item" onClick={() => navigate("/cases")}>
+              <span>Case</span>
+            </div>
+            <div className="create-new-item" onClick={() => navigate("/intake")}>
+              <span>Lead</span>
+            </div>
+            <div className="create-new-item" onClick={() => navigate("/contacts?new=true")}>
+              <span>Contact</span>
+            </div>
+          </div>
+        )}
+      </div>
+
       <div
         className={`menu-item c ${isActive("/settings") ? "active" : ""}`}
-        onClick={() => {
-          if (!isActive("/settings")) navigate("/settings");
-        }}
+        onClick={() => !isActive("/settings") && navigate("/settings")}
       >
         <RiSettings3Line size={25} />
         <span style={{ display: expanded ? "block" : "none" }}>Settings</span>
       </div>
+
       <div className="menu-item c" onClick={logout}>
         <RiLogoutCircleLine size={25} />
         <span style={{ display: expanded ? "block" : "none" }}>Logout</span>
       </div>
+
       <Theme theme={theme} changeTheme={changeTheme} />
     </div>
   );
@@ -372,7 +414,6 @@ const Nav = ({ theme, changeTheme, logout }) => {
     });
   };  
 
-  // Check if the current route starts with one of the lower option bases.
   const isLowerOptionPage = useCallback(() => {
     return (
       location.pathname.startsWith("/client-portal") ||
@@ -382,7 +423,6 @@ const Nav = ({ theme, changeTheme, logout }) => {
 
   useEffect(() => {
     if (isLowerOptionPage()) {
-      // Set lowerOption to the base of the lower option.
       if (location.pathname.startsWith("/client-portal"))
         setLowerOption("client-portal");
       else if (location.pathname.startsWith("/firm-settings"))

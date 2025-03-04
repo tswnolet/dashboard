@@ -98,14 +98,4 @@ function processFunctionData($data, $funcName) {
             return $data;
     }
 }
-
-function processCasesByLocation($data) {
-    // Process data for cases by location
-    return $data;
-}
-
-function processTotalSettlement($data) {
-    // Process data for total settlement
-    return $data;
-}
 ?>

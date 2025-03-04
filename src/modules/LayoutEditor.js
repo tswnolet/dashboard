@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import "../styles/LayoutEditor.css";
 import { Check, StarOutlineSharp, StarSharp, Add, Close, Dashboard } from "@mui/icons-material";
 import Modal from "./Modal";
-import { Activity, FileText, Folder, Home, User, Settings, Bell, Calendar, Clipboard, Cloud, Code, DollarSign, Edit, Eye, File, Heart, Image, Lock, Mail, MapPin, MessageCircle, Phone, Shield, ShoppingCart, Star, Tag, Trash, Truck, Users, Video, Section, SectionIcon, LucideSection, TrashIcon, Eraser, Edit2, Trash2 } from "lucide-react";
+import { Activity, FileText, Folder, Home, User, Settings, Bell, Calendar, Clipboard, Cloud, Code, DollarSign, Edit, Eye, File, Heart, Image, Lock, Mail, MapPin, MessageCircle, Phone, Shield, ShoppingCart, Star, Tag, Trash, Truck, Users, Video, Section, SectionIcon, LucideSection, TrashIcon, Eraser, Edit2, Trash2, Archive } from "lucide-react";
+import FolderTreeManager from "./FolderTreeManager";
 
 const IconMap = {
     "Activity": Activity,
@@ -62,6 +63,50 @@ export const LayoutEditor = () => {
     const [showIconModal, setShowIconModal] = useState(false);
     const [selectedTemplateHeader, setSelectedTemplateHeader] = useState(0);
     const [phaseData, setPhaseData] = useState({ phase: "", description: "", template_id: 0, order_id: 0 });
+    const [editPhase, setEditPhase] = useState(null);
+    const [dragging, setDragging] = useState(null);
+    const [folderData, setFolderData] = useState({ name: "", parent_folder_id: 0, folder_access: "Standard" });
+    const [folders, setFolders] = useState([]);
+
+    const fetchFolderStructure = async (templateId) => {
+        try {
+            const response = await fetch(`https://dalyblackdata.com/api/folder-templates.php?template_id=${templateId}&time=${new Date().getTime()}`);
+            const data = await response.json();
+            setFolders(data.folders || []);
+        } catch (error) {
+            console.error("Error fetching folder structure:", error);
+        }
+    };
+
+    const createFolder = async () => {
+        if (!folderData.name) return;
+    
+        const newFolder = {
+            template_id: defaultTemplate.id,
+            parent_folder_id: folderData.parent_folder_id || null,
+            name: folderData.name,
+            folder_access: folderData.folder_access,
+        };
+    
+        try {
+            const response = await fetch("https://dalyblackdata.com/api/folder-templates.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newFolder),
+            });
+    
+            const data = await response.json();
+            if (data.success) {
+                fetchFolderStructure(defaultTemplate.id);
+                setCreateNew(null);
+                setFolderData({ name: "", parent_folder_id: null, folder_access: "Standard" });
+            } else {
+                alert("Failed to create folder");
+            }
+        } catch (error) {
+            console.error("Error creating folder:", error);
+        }
+    };
 
     useEffect(() => {
         fetchTemplates();
@@ -90,6 +135,7 @@ export const LayoutEditor = () => {
             const data = await response.json();
             setSections(data.sections || []);
             setPhases(data.phases || []);
+            fetchFolderStructure(templateId);
         } catch (error) {
             console.error("Error fetching sections:", error);
         }
@@ -196,6 +242,44 @@ export const LayoutEditor = () => {
             }
         } catch (error) {
             console.error("Error creating phase:", error);
+        }
+    };
+
+    const updatePhase = async () => {
+        if (!phaseData.phase) return;
+
+        console.log(phaseData);
+
+        try {
+            const response = await fetch("https://dalyblackdata.com/api/sections.php", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ ...phaseData, id: editPhase }),
+            });
+            const data = await response.json();
+            if (data.success) {
+                fetchTemplateLayout(defaultTemplate.id);
+                setEditPhase(null);
+                setPhaseData({ phase: "", description: "", template_id: 0, order_id: 0 });
+            }
+        } catch (error) {
+            console.error("Error updating phase:", error);
+        }
+    };
+
+    const deletePhase = async (phaseId) => {
+        try {
+            const response = await fetch(`https://dalyblackdata.com/api/sections.php?phase_id=${phaseId}`, {
+                method: "DELETE",
+            });
+            const data = await response.json();
+            if (data.success) {
+                fetchTemplateLayout(defaultTemplate.id);
+            } else {
+                console.error("Error deleting phase:", data.message);
+            }
+        } catch (error) {
+            console.error("Error deleting phase:", error);
         }
     };
 
@@ -321,19 +405,132 @@ export const LayoutEditor = () => {
         }
     };
 
+    const handleDragStart = (index) => {
+        setDragging(index);
+    };
+
+    const handleDragEnter = (index) => {
+        if (dragging === null) return;
+        const newPhases = [...phases];
+        const draggedPhase = newPhases[dragging];
+        newPhases.splice(dragging, 1);
+        newPhases.splice(index, 0, draggedPhase);
+        setDragging(index);
+        setPhases(newPhases);
+    };
+
+    const handleDragEnd = async () => {
+        setDragging(null);
+        const updatedPhases = phases.map((phase, index) => ({
+            ...phase,
+            order_id: index
+        }));
+        setPhases(updatedPhases);
+
+        const movedPhase = phases[dragging];
+        const originalOrderId = movedPhase.order_id;
+        const targetOrderId = updatedPhases.findIndex(phase => phase.id === movedPhase.id);
+
+        try {
+            const response = await fetch("https://dalyblackdata.com/api/sections.php", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    phases: updatedPhases,
+                    moved_phase_id: movedPhase.id,
+                    original_order_id: originalOrderId,
+                    target_order_id: targetOrderId,
+                    template_id: defaultTemplate.id
+                }),
+            });
+            const data = await response.json();
+            if (!data.success) {
+                console.error("Error updating phase order:", data.message);
+            }
+        } catch (error) {
+            console.error("Error updating phase order:", error);
+        }
+    };
+
+    const handleSectionDragStart = (index) => {
+        setDragging(index);
+    };
+
+    const handleSectionDragEnter = (index) => {
+        if (dragging === null) return;
+        const newSections = [...sections];
+        const draggedSection = newSections[dragging];
+        newSections.splice(dragging, 1);
+        newSections.splice(index, 0, draggedSection);
+        setDragging(index);
+        setSections(newSections);
+    };
+
+    const handleSectionDragEnd = async () => {
+        setDragging(null);
+        const updatedSections = sections.map((section, index) => ({
+            ...section,
+            order_id: index
+        }));
+        setSections(updatedSections);
+
+        const movedSection = sections[dragging];
+        const originalOrderId = movedSection.order_id;
+        const targetOrderId = updatedSections.findIndex(section => section.id === movedSection.id);
+
+        try {
+            const response = await fetch("https://dalyblackdata.com/api/sections.php", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    sections: updatedSections,
+                    moved_section_id: movedSection.id,
+                    original_order_id: originalOrderId,
+                    target_order_id: targetOrderId,
+                    template_id: defaultTemplate.id
+                }),
+            });
+            const data = await response.json();
+            if (!data.success) {
+                console.error("Error updating section order:", data.message);
+            }
+        } catch (error) {
+            console.error("Error updating section order:", error);
+        }
+    };
+
     return (
         <div className="page-container">
-            <header className="editor-header">
-                <h2>Layout Editor</h2>
-                <select className="default-select" value={defaultTemplate?.id || ""} onChange={handleTemplateChange}>
-                    <option value="" disabled>Select a template</option>
-                    {templates.map((template) => (
-                        <option key={template.id} value={template.id}>
-                            {template.name} [{template.aka}]
-                        </option>
-                    ))}
-                </select>
-                <button className="action" onClick={() => setCreateTemplate(true)}>New Template</button>
+            <header>
+                <div id='page-header'>
+                    <h2>Layout Editor</h2>
+                    <select className="default-select" value={defaultTemplate?.id || ""} onChange={handleTemplateChange}>
+                        <option value="" disabled>Select a template</option>
+                        {templates.map((template) => (
+                            <option key={template.id} value={template.id}>
+                                {template.name} [{template.aka}]
+                            </option>
+                        ))}
+                    </select>
+                    <button className="action" onClick={() => setCreateTemplate(true)}>New Template</button>
+                </div>
+                <div id='template-header'>
+                    <h4 onClick={() => setSelectedTemplateHeader(0)} className={selectedTemplateHeader === 0 ? 'active' : ''}>Sections</h4>
+                    <h4 onClick={() => setSelectedTemplateHeader(1)} className={selectedTemplateHeader === 1 ? 'active' : ''}>Phases</h4>
+                    <h4 onClick={() => setSelectedTemplateHeader(2)} className={selectedTemplateHeader === 2 ? 'active' : ''}>Folder Structure</h4>
+                </div>
+                <div className='template-container-header'>
+                    <h4>{defaultTemplate?.name} {selectedTemplateHeader === 0 ? 'Sections' : selectedTemplateHeader === 1 ? 'Phases' : 'Folder Structure'}</h4>
+                    <button className="action alt" onClick={() => {
+                        if (selectedTemplateHeader === 0) {
+                            setCreateNew('section')
+                        } else if (selectedTemplateHeader === 1) {
+                            setCreateNew('phase')
+                        } else {
+                            setCreateNew('folder')
+                        }
+                    }}>Add {selectedTemplateHeader === 0 ? 'Section' : selectedTemplateHeader === 1 ? 'Phase' : 'Folder'}</button>
+                </div>
             </header>
             {createTemplate && (
                 <Modal onClose={() => setCreateTemplate(false)}>
@@ -358,86 +555,107 @@ export const LayoutEditor = () => {
                 </Modal>
             )}
             <div id='template-container'>
-                <div id='template-header'>
-                    <h4 onClick={() => setSelectedTemplateHeader(0)} className={selectedTemplateHeader === 0 ? 'active' : ''}>Sections</h4>
-                    <h4 onClick={() => setSelectedTemplateHeader(1)} className={selectedTemplateHeader === 1 ? 'active' : ''}>Phases</h4>
-                </div>
-                {selectedTemplateHeader === 0 && <div className="section-container">
-                    <div className='template-container-header'>
-                        <h4>{defaultTemplate?.name} Sections</h4>
-                        <button className="action alt" onClick={() => setCreateNew('section')}>Add Section</button>
-                    </div>
-                    {sections.map((section, index) => (
-                        <div key={index} className="template-section" onClick={() => toggleSection(section)}>
-                            {sectionExpanded !== section.id ? (
-                                <>
-                                    <div className='section-header'>
-                                        {IconMap[section.icon] ? React.createElement(IconMap[section.icon]) : <StarOutlineSharp />}
-                                        <h4>{section.name}</h4>
-                                        {section.built_in === 1  && <p>(Built In)</p>}
-                                    </div>
-                                    <p>{section.description}</p>
-                                </>
-                            ) : (
-                                <>
-                                    <div className='section-header far'>
-                                        <h4>{section.name} Properties</h4>
-                                        <Close onClick={closeSection} />
-                                    </div>
-                                    <div className='section-properties'>
-                                        <div className='section-label'>
-                                            <label htmlFor="name" >Name & Icon</label>
-                                            <div className="icon-option" onClick={handleIconClick}>
-                                                {IconMap[editingSection?.icon] ? React.createElement(IconMap[editingSection?.icon]) : <StarOutlineSharp />}
+                {selectedTemplateHeader === 0 ? (
+                    <div className="section-container">
+                        {sections.map((section, index) => (
+                            <div 
+                                key={index} 
+                                className="template-section" 
+                                onClick={() => toggleSection(section)}
+                                onDragStart={() => handleSectionDragStart(index)}
+                                onDragEnter={() => handleSectionDragEnter(index)}
+                                onDragEnd={handleSectionDragEnd}
+                                draggable
+                            >
+                                {sectionExpanded !== section.id ? (
+                                    <>
+                                        <div className='section-header'>
+                                            {IconMap[section.icon] ? React.createElement(IconMap[section.icon]) : <StarOutlineSharp />}
+                                            <h4>{section.name}</h4>
+                                            {section.built_in === 1  && <p>(Built In)</p>}
+                                        </div>
+                                        <p>{section.description}</p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className='section-header far'>
+                                            <h4>{section.name} Properties</h4>
+                                            <Close onClick={closeSection} />
+                                        </div>
+                                        <div className='section-properties'>
+                                            <div className='section-label'>
+                                                <label htmlFor="name" className='section-floating-label'>Name & Icon</label>
+                                                <div className="icon-option" onClick={handleIconClick}>
+                                                    {IconMap[editingSection?.icon] ? React.createElement(IconMap[editingSection?.icon]) : <StarOutlineSharp />}
+                                                </div>
+                                                <input id='name' type="text" value={editingSection?.name} onChange={handleSectionPropertyChange} name="name" onBlur={handleSectionUpdate} />
                                             </div>
-                                            <input id='name' type="text" value={editingSection?.name} onChange={handleSectionPropertyChange} name="name" onBlur={handleSectionUpdate} />
+                                            <div className='section-label'>
+                                                <label htmlFor="description" className='section-floating-label'>
+                                                    Description
+                                                </label>
+                                                <textarea id='description' className="description-text" onChange={handleSectionPropertyChange} value={editingSection?.description} name='description' onBlur={handleSectionUpdate} />
+                                            </div>
+                                            <div className='section-label'>
+                                                <label htmlFor='order_id' className='section-floating-label'>
+                                                    Order
+                                                </label>
+                                                <input id='order_id' type='number' onChange={handleSectionPropertyChange} value={editingSection?.order_id} name='order_id' onBlur={handleSectionUpdate} />
+                                            </div>
                                         </div>
-                                        <div className='section-label'>
-                                            <label htmlFor="description">
-                                                Description
-                                            </label>
-                                            <textarea id='description' className="description-text" onChange={handleSectionPropertyChange} value={editingSection?.description} name='description' onBlur={handleSectionUpdate} />
+                                        <div className='section-fields'>
+                                            <button className="action small" onClick={() => setAddingField(section.id)}>+ Field</button>
+                                            {currentFields && currentFields.length > 0 && (
+                                                <ul>
+                                                    {currentFields.map(field => (
+                                                        <li key={field.id}>{field.name} ({field.type}) {field.order_id}</li>
+                                                    ))}
+                                                </ul>
+                                            )}
                                         </div>
-                                        <div className='section-label'>
-                                            <label htmlFor='order_id'>
-                                                Order
-                                            </label>
-                                            <input id='order_id' type='number' onChange={handleSectionPropertyChange} value={editingSection?.order_id} name='order_id' onBlur={handleSectionUpdate} />
-                                        </div>
-                                    </div>
-                                    <div className='section-fields'>
-                                        <button className="action small" onClick={() => setAddingField(section.id)}>+ Field</button>
-                                        {currentFields && currentFields.length > 0 && (
-                                            <ul>
-                                                {currentFields.map(field => (
-                                                    <li key={field.id}>{field.name} ({field.type}) {field.order_id}</li>
-                                                ))}
-                                            </ul>
-                                        )}
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    ))}
-                </div>}
-                {selectedTemplateHeader === 1 && (
-                    <div className="phase-container">
-                        <div className='template-container-header'>
-                            <h4>{defaultTemplate.name} Phases</h4>
-                            <button className="action alt" onClick={() => setCreateNew('phase')}>Add Phase</button>
-                        </div>
-                        <div className='phase-list'>
-                            {phases.map((phase, index) => (
-                                <div key={index} className="template-phase far" onClick={() => toggleSection(phase)}>
-                                    <h4 title={phase.description}>{phase.phase}</h4>
-                                    <div className='phase-actions'>
-                                        <Edit />
-                                        <Trash2 />
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                                    </>
+                                )}
+                            </div>
+                        ))}
                     </div>
+                ) : (selectedTemplateHeader === 1 ? (
+                        <div className="phase-container">
+                            <div className='phase-list'>
+                                {phases.map((phase, index) => (
+                                    <div 
+                                        key={index} 
+                                        className="template-phase far" 
+                                        onDragStart={() => handleDragStart(index)}
+                                        onDragEnter={() => handleDragEnter(index)}
+                                        onDragEnd={handleDragEnd}
+                                        draggable
+                                    >
+                                        <div className='phase-title' title={phase.description}>
+                                            <h4>{phase.phase}</h4>
+                                            {phase.phase === "Archived" ? <Archive size="15" color="var(--hover-color)"/> : <></>}
+                                        </div>
+                                        <div className='phase-actions'>
+                                            <Edit onClick={() => {
+                                                    setEditPhase(phase.id)
+                                                    setPhaseData({ phase: phase.phase, description: phase.description, order_id: phase.order_id })
+                                                }
+                                            }/>
+                                            <Trash2 onClick={() => {
+                                                if (window.confirm(`Are you sure you want to delete the ${phase.phase} phase?`)) {
+                                                    deletePhase(phase.id);
+                                                }
+                                            }}/>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ) : (selectedTemplateHeader === 2 && (
+                        <FolderTreeManager 
+                            templateId={defaultTemplate?.id} 
+                            folders={folders}
+                        />
+                    ))
                 )}
             </div>
             {addingField && (
@@ -524,7 +742,7 @@ export const LayoutEditor = () => {
                             </div>
                             <button className="action" onClick={createNewSection}>Save Section</button>
                         </div>
-                    ) : (
+                    ) : createNew === 'phase' ? (
                         <div className='new-template'>
                             <h4>Create New Phase</h4>
                             <div className='form-group'>
@@ -540,6 +758,39 @@ export const LayoutEditor = () => {
                                 <input type='number' placeholder='Order' value={phaseData.order_id} onChange={(e) => setPhaseData({ ...phaseData, order_id: e.target.value })}/>
                             </div>
                             <button className="action" onClick={createNewPhase}>Save Phase</button>
+                        </div>
+                    ) : (
+                        <div className='new-template'>
+                            <h4>Create New Folder</h4>
+                            <div className='form-group'>
+                                <label htmlFor='name'>Folder Name</label>
+                                <input type="text" placeholder="Folder Name" value={folderData.name} onChange={(e) => setFolderData({ ...folderData, name: e.target.value })}/>
+                            </div>
+                            <div className='form-group'>
+                                <label htmlFor='parent_folder_id'>Parent Folder</label>
+                                <select
+                                    className="default-select"
+                                    value={folderData.parent_folder_id || ""}
+                                    onChange={(e) => setFolderData({ ...folderData, parent_folder_id: e.target.value })}
+                                >
+                                    <option value={0}>Root Folder</option>
+                                    {folders.map(folder => (
+                                        <option key={folder.id} value={folder.id}>{folder.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className='form-group'>
+                                <label htmlFor='folder_access'>Folder Access</label>
+                                <select
+                                    className="default-select"
+                                    value={folderData.folder_access}
+                                    onChange={(e) => setFolderData({ ...folderData, folder_access: e.target.value })}
+                                >
+                                    <option value="Standard">Standard</option>
+                                    <option value="Protected">Protected</option>
+                                </select>
+                            </div>
+                            <button className="action" onClick={createFolder}>Save Folder</button>
                         </div>
                     )}
                 </Modal>
@@ -558,6 +809,26 @@ export const LayoutEditor = () => {
                         ))}
                     </div>
                 </Modal>
+            )}
+            {editPhase !== null && (
+                <Modal onClose={() => {setEditPhase(null); setPhaseData({ phase: "", description: "", template_id: 0, order_id: 0 })}}>
+                    <div className="new-template">
+                        <h4>Edit Phase</h4>
+                        <div className='form-group'>
+                            <label htmlFor='phase'>Phase Name</label>
+                            <input type="text" placeholder="Phase Name" value={phaseData.phase} onChange={(e) => setPhaseData({ ...phaseData, phase: e.target.value })}/>
+                        </div>
+                        <div className='form-group'>
+                            <label htmlFor='description'>Description</label>
+                            <textarea placeholder="Phase Description" name='description' value={phaseData.description} onChange={(e) => setPhaseData({ ...phaseData, description: e.target.value })}/>
+                        </div>
+                        <div className='form-group'>
+                            <label htmlFor='order_id'>Order</label>
+                            <input type='number' placeholder='Order' value={phaseData.order_id} onChange={(e) => setPhaseData({ ...phaseData, order_id: e.target.value })}/>
+                        </div>
+                        <button className="action" onClick={updatePhase}>Save Phase</button>
+                    </div>
+                </Modal>  
             )}
         </div>
     );
