@@ -122,6 +122,10 @@
         margin: 5px 0;
     }
 
+    h4 {
+        color: var(--text-color);
+    }
+
     p {
         font-size: 12.8px;
     }

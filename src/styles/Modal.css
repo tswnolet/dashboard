@@ -11,13 +11,31 @@
     z-index: 1002;
 }
 
+.modal-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.modal-header-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
 .modal-content {
     background: var(--secondary-color);
     padding: 20px;
-    border-radius: 8px;
+    border-radius: 3px;
     box-shadow: var(--large-box-shadow);
     position: relative;
     width: 80%;
+}
+
+.modal-content h2, .modal-content h4 {
+    margin: 15px;
 }
 
 .modal-content:not(.wide) {
@@ -26,32 +44,46 @@
 
 .modal-content.wide {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-start;
+    align-items: flex-start;
     flex-direction: column;
     max-width: 800px;
     height: 80%;
 
     .form-group {
         display: flex;
-        justify-content: flex-end;
+        justify-content: center;
         align-items: center;
-        flex-direction: row;
-        max-width: 50%;
-    }
+        max-width: 47.5%;
+        margin: 2px;
 
-    input {
-        max-width: 50%;
+        label {
+            width: 100%;
+            text-align: left;
+        }
     }
 }
 
 .modal-content-wrapper {
     display: flex;
-    justify-content: space-evenly;
-    align-items: center;
+    justify-content: center;
+    align-items: flex-start;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.modal-content-wrapper form {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
     flex-wrap: wrap;
     flex-direction: row;
     height: 75%;
+    margin: 0 15px;
+
+    input:not([type="checkbox"]) {
+        width: 100%;
+    }
 }
 
 .modal-close {
@@ -64,4 +96,44 @@
     font-size: 24px;
     cursor: pointer;
     color: var(--text-color);
+}
+
+.modal-content .sub-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    h4 {
+        text-wrap: nowrap;
+    }
+}
+
+.person-or-company {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+}
+
+.poc {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 5px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.poc.active {
+    color: var(--fill);
+    background-color: var(--border-color)
+}
+
+.poc:hover {
+    cursor: pointer;
+    background-color: var(--hover-color);
+    border-radius: 3px;
 }
