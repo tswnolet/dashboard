@@ -12,7 +12,7 @@ import {
   RiLogoutCircleLine,
   RiBillLine,
 } from "react-icons/ri";
-import { Cloud, Contact2, Hash, Menu, Search } from "lucide-react";
+import { Cloud, Contact2, FileEditIcon, Hash, Menu, Search } from "lucide-react";
 import { ArrowBack, MoreHorizOutlined, ChangeCircleOutlined, CloudDoneOutlined, CloudOutlined, Create, CreateOutlined, Add, AddOutlined, AddCircleOutline } from "@mui/icons-material";
 import Logo from "../resources/logo.png";
 import "../styles/Nav.css";
@@ -290,6 +290,11 @@ const SubInfo = ({
             label: "Contacts Setup",
             Icon: Contact2,
             route: "/firm-settings/contacts",
+          },
+          {
+            label: "Custom Fields",
+            Icon: FileEditIcon,
+            route: "/firm-settings/custom-fields",
           },
           {
             label: "Layout Editor",

@@ -389,7 +389,7 @@ table:not(.schools) > tbody > tr > td {
 .default-select, .action, .section-properties input, .section-properties textarea {
   outline: none;
   border-radius: 3px;
-  max-width: 400px;
+  max-width: 500px;
 }
 
 .default-select, .action, .section-properties input {
@@ -434,4 +434,22 @@ table:not(.schools) > tbody > tr > td {
 
 .action:hover {
   transform: scale(1.05);
+}
+
+.sub-title {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  width: 100%;
+  gap: 15px;
+  margin: 25px 0;
+
+  h4 {
+      text-wrap: nowrap;
+      margin: 0;
+  }
+}
+
+.sub-title.alt {
+  color: var(--subtext-color);
 }

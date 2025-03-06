@@ -16,6 +16,7 @@ import GoogleAdsComponent from './modules/GoogleAdsComponent';
 import { WIP } from './modules/WIP';
 import { LayoutEditor } from './modules/LayoutEditor';
 import { Contacts } from './modules/Contacts';
+import { CustomFields } from './modules/Customs';
 
 const App = () => {
   const [loading, setLoading] = useState(true);
@@ -141,6 +142,7 @@ const AppRoutes = ({ setUser, loggedIn, setLoggedIn, changeTheme, theme, data, s
           <Route path="/new-data" element={<NewCardForm addCard={addCard} />} />
           <Route path="*" element={<Navigate to={redirectPath} />} />
           <Route path="/google" element={<Dashboard google={true} />} />
+          <Route path="/firm-settings/custom-fields" element={<CustomFields />} />
           <Route path="/firm-settings/layout-editor" element={<LayoutEditor />} />
         </>
       ) : (

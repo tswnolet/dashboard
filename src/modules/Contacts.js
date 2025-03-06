@@ -6,7 +6,9 @@ import { Person2Outlined } from "@mui/icons-material";
 export const Contacts = () => {
     const [createContact, setCreateContact] = useState(false);
     const [contacts, setContacts] = useState([]);
+    const [renderMobile, setRenderMobile] = useState(false);
     const url = new URLSearchParams(window.location.search);
+    const windowWidth = window.innerWidth;
 
     useEffect(() => {
         if(url.get("new") === "true") {
@@ -14,6 +16,27 @@ export const Contacts = () => {
         } else {
             fetchContacts();
         }
+    }, []);
+
+    useEffect(() => {
+        function handleResize() {
+            if (window.innerWidth < 768) {
+                setRenderMobile(true);
+            } else {
+                setRenderMobile(false);
+            }
+            console.log(window.innerWidth);
+        }
+
+        window.addEventListener('resize', () => {
+            handleResize();
+        });
+
+        return () => {
+            window.removeEventListener('resize', () => {
+                handleResize();
+            });
+        };
     }, []);
 
     const fetchContacts = async () => {
@@ -38,9 +61,13 @@ export const Contacts = () => {
                         <tr>
                             <th className="contact-picture td">*</th>
                             <th>Name</th>
-                            <th>Address</th>
-                            <th>Email</th>
-                            <th>Phone</th>
+                            {!renderMobile && (
+                                <>
+                                    <th style={{width: "150%"}}>Address</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                </>
+                            )}
                         </tr>
                     </thead>
                     <tbody>
@@ -55,10 +82,20 @@ export const Contacts = () => {
                                         </div>
                                     )}
                                 </td>
-                                <td>{contact.contact_type === 'Company' ? contact.company_name : contact.full_name}<span className='tag'>#{contact.contact_type}</span></td>
-                                <td>{contact.address}</td>
-                                <td>{contact.email}</td>
-                                <td>{contact.phone}</td>
+                                <td>{contact.contact_type === 'Company' ? contact.company_name : contact.full_name}{!renderMobile && <span className='tag'>#{contact.contact_type}</span>}</td>
+                                {!renderMobile && (
+                                    <>
+                                        <td style={{width: "150%"}}>
+                                            {contact.addresses[0]?.line1}
+                                            {contact.addresses[0]?.line2 ? `, ${contact.addresses[0]?.line2}` : ''}
+                                            {contact.addresses[0]?.city ? `, ${contact.addresses[0]?.city}` : ''}
+                                            {contact.addresses[0]?.state ? `, ${contact.addresses[0]?.state} ` : ''}
+                                            {contact.addresses[0]?.postal_code}
+                                        </td>
+                                        <td>{contact.emails[0]?.email}</td>
+                                        <td>{contact.phones[0]?.number}</td>
+                                    </>
+                                )}
                             </tr>
                         ))}
                     </tbody>

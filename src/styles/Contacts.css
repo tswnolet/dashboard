@@ -14,7 +14,7 @@
     border-bottom: 1px solid var(--border-color);
 }
 
-.contact-picture {
+.contact-picture, .form-box {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -22,9 +22,19 @@
     height: 45px;
 }
 
-.contact-picture:not(.td) {
+.form-box {
     border-radius: 3px;
     border: 1px solid var(--border-color);
+    font-size: 20px;
+    font-weight: bolder;
+    cursor: pointer;
+}
+
+.form-box.alt {
+    background-color: var(--text-color);
+    color: var(--secondary-color);
+    height: 36px;
+    width: 36px;
 }
 
 .contacts-table th:not(.td) {
@@ -37,16 +47,37 @@ th.td {
     min-width: 34px;
 }
 
-.contact-name-container {
+.contact-name-container, .contact-detail-container {
     display: flex;
     justify-content: space-between;
-    align-items: center;
     flex-wrap: wrap;
     width: 100%;
+    margin-bottom: 15px;
+}
+
+.contact-name-container {
+    align-items: center;
+}
+
+.contact-detail-container {
+    align-items: end;
+    gap: 15px;
 }
 
 .fname, .mname, .lname {
     width: 30%;
+}
+
+.prefix, .suffix {
+    width: 25%;
+}
+
+.phone-type, .phone-input, .email-type, .email-input {
+    width: 45%;
+}
+
+.phone-input input, .email-input input {
+    width: 100%;
 }
 
 .contact-picture-listed {
@@ -75,7 +106,7 @@ th.td {
 .contacts-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    margin-bottom: 50px;
 }
 
 .contacts-table thead tr {

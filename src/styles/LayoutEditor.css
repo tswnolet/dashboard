@@ -72,9 +72,11 @@ header {
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 2.5px;
     margin: 10px 0;
     width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
 }
 
 .form-group label {
