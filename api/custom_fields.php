@@ -23,6 +23,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $field_id = $input['field_id'] ?? null;
     $name = $input['name'] ?? null;
     $required = !empty($input['required']) ? 1 : 0;
+    $obsolete = !empty($input['obsolete']) ? $input['obsolete'] : 1;
+    $hidden = !empty($input['hidden']) ? $input['hidden'] : 1;
+    $default_value = $input['default_value'] ?? null;
+    $display_when = !empty($input['display_when']) ? $input['display_when'] : null;
+    $is_answered = $input['is_answered'] ?? null;
 
     if (empty($case_type_id) || empty($field_id) || empty($name)) {
         echo json_encode(['success' => false, 'message' => 'Case type, field type, and name are required']);
@@ -40,10 +45,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $options = !empty($input['options']) ? json_encode($input['options']) : null;
 
     $stmt = $conn->prepare("
-        INSERT INTO custom_fields (case_type_id, field_id, name, order_id, required, options)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO custom_fields (
+            case_type_id, field_id, name, order_id, required, options, 
+            obsolete, hidden, default_value, display_when, is_answered
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
-    $stmt->bind_param('iisiss', $case_type_id, $field_id, $name, $order_id, $required, $options);    
+
+    $stmt->bind_param(
+        'iisissiiisi',
+        $case_type_id, $field_id, $name, $order_id, $required, $options,
+        $obsolete, $hidden, $default_value, $display_when, $is_answered
+    );
 
     if ($stmt->execute()) {
         echo json_encode(['success' => true, 'message' => 'Custom field created successfully']);
@@ -69,7 +82,7 @@ function fetchCaseTypes($conn) {
 
 function fetchCustomFields($conn) {
     $query = "
-        SELECT cf.id, cf.case_type_id, cf.name, cf.options, ct.name as case_type, cf.field_id, f.name as field_name, f.type as field_type, 
+        SELECT cf.id, cf.case_type_id, cf.name, cf.options, cf.default_value, cf.obsolete, cf.display_when, cf.is_answered, ct.name as case_type, cf.field_id, f.name as field_name, f.type as field_type, 
                cf.order_id, cf.required
         FROM custom_fields cf
         JOIN case_types ct ON cf.case_type_id = ct.id

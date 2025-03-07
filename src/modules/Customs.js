@@ -17,9 +17,24 @@ export const CustomFields = () => {
         field_id: 0,
         case_type_id: 0,
         required: false,
-        options: []
-    });
+        options: [],
+        obsolete: 1,
+        hidden: 1,
+        default_value: "",
+        display_when: null,
+        is_answered: ""
+    });    
     const [selectedFieldType, setSelectedFieldType] = useState(null);
+    const filteredFields = field.filter(f => f.case_type_id === newField.case_type_id);
+    const selectedDisplayField = field.find(f => String(f.id) === String(newField.display_when));
+    const displayFieldOptions = Array.isArray(selectedDisplayField?.options) 
+        ? selectedDisplayField.options 
+        : [];
+    
+    useEffect(() => {
+        console.log('selectedDisplayField:', selectedDisplayField);
+        console.log('displayFieldOptions:', displayFieldOptions);
+    }, [selectedDisplayField, displayFieldOptions]);
 
     useEffect(() => {
         const foundType = fieldTypes.find(ft => Number(ft.id) === Number(newField.field_id));
@@ -75,9 +90,15 @@ export const CustomFields = () => {
         try {
             const response = await fetch(`https://dalyblackdata.com/api/custom_fields.php?time=${new Date().getTime()}`);
             const data = await response.json();
+    
             if (data.success) {
+                const parsedFields = data.custom_fields.map(field => ({
+                    ...field,
+                    options: field.options ? JSON.parse(field.options) : []
+                }));
+    
                 setCaseTypes(data.case_types);
-                setFields(data.custom_fields);
+                setFields(parsedFields);
                 setFieldTypes(data.field_types);
             } else {
                 console.error("Error fetching data:", data.message);
@@ -85,7 +106,7 @@ export const CustomFields = () => {
         } catch (error) {
             console.error("Error fetching data:", error);
         }
-    };
+    };    
     
     useEffect(() => {
         fetchAllData();
@@ -130,11 +151,17 @@ export const CustomFields = () => {
 
     const handleFieldSubmit = async () => {
         try {
+            const payload = {
+                ...newField,
+                options: newField.options.length > 0 ? newField.options : null,
+            };
+    
             const response = await fetch(`https://dalyblackdata.com/api/custom_fields.php`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(newField)
+                body: JSON.stringify(payload)
             });
+    
             const data = await response.json();
             if (data.success) {
                 fetchAllData();
@@ -145,7 +172,7 @@ export const CustomFields = () => {
         } catch (error) {
             console.error("Error creating custom field:", error);
         }
-    };
+    };    
 
     return (
         <div className="page-container">
@@ -174,9 +201,9 @@ export const CustomFields = () => {
                                 )})
                             </span>
                         </p>
-                        <div className='form-group alt' style={{maxWidth: '250px'}}>
-                            {field.id === 1 && <Text type='text' placeholder={field.name}/>}
-                            {field.id != 10 && <Dropdown options={field.options} placeholder={field.name}/>}
+                        <div className='form-group alt mid' style={{maxWidth: '250px'}}>
+                            {field.field_id === "1" && <Text type='text' placeholder={field.name}/>}
+                            {field.field_id === "10" && <Dropdown options={field.options} placeholder={field.name}/>}
                         </div>
                         <p className="subtext">{caseTypes.map((caseTypes, index) =>
                             field.case_type_id === caseTypes.id ? caseTypes.name : null
@@ -304,7 +331,12 @@ export const CustomFields = () => {
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor='default_value'>Default Value</label>
-                                    <select name='default_value' className='default-select'>
+                                    <select
+                                        name='default_value'
+                                        value={newField.default_value}
+                                        onChange={handleInputChange}
+                                        className='default-select'
+                                    >
                                         <option value=''>Select Default Value</option>
                                         {newField.options.map((option, index) => (
                                             <option key={index} value={option}>{option}</option>
@@ -313,19 +345,29 @@ export const CustomFields = () => {
                                 </div>
                                 <div className='form-group'>
                                     <label htmlFor='description'>Display This Field When</label>
-                                    <select className='default-select'>
-                                        <option value=''>Select Field</option>
-                                    {field.map((f) => (
-                                            <option key={f.id} value={f.name}>{f.name}</option>
-                                    ))}
+                                    <select
+                                        name="display_when"
+                                        value={newField.display_when}
+                                        onChange={handleInputChange}
+                                        className="default-select"
+                                    >
+                                        <option value="">Select Field</option>
+                                        {filteredFields.map((f) => (
+                                            <option key={f.id} value={f.id}>{f.name}</option>
+                                        ))}
                                     </select>
                                 </div>
                                 <div className='form-group'>
                                     <label htmlFor='is_answered'>Is Answered As</label>
-                                    <select className='default-select'>
-                                        <option value=''>Select Field</option>
-                                        {field.map((f) => (
-                                                <option key={f.id} value={f.name}>{f.options}</option>
+                                    <select
+                                        name="is_answered"
+                                        value={newField.is_answered}
+                                        onChange={handleInputChange}
+                                        className="default-select"
+                                    >
+                                        <option value="">Select Answer</option>
+                                        {displayFieldOptions.map((option, index) => (
+                                            <option key={index} value={option}>{option}</option>
                                         ))}
                                     </select>
                                 </div>

@@ -11,8 +11,7 @@ export const Text = ({ type, placeholder, value }) => {
 }
 
 export const Dropdown = ({ options, value }) => {
-    console.log(options);
-    options = options ? JSON.parse(options) : [];
+    options = Array.isArray(options) ? options : options ? JSON.parse(options) : [];
     return (
         <select className='default-select' value={value}>
             {options.map((option) => (
