@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Modal from "./Modal";
 import '../styles/Customs.css';
-import { Dropdown, Text } from "./FieldComponents";
+import { Boolean, Contact, Dropdown, Text, NumberInput, DateInput } from "./FieldComponents";
 import { ArrowDown } from "@mynaui/icons-react";
 import { ArrowDown01, ArrowDownIcon, ArrowDownToDot, ChevronDown, ChevronUp, MoveDownIcon } from "lucide-react";
 import { ArrowDownward } from "@mui/icons-material";
@@ -9,7 +9,7 @@ import { ArrowDownward } from "@mui/icons-material";
 export const CustomFields = () => {
     const [createNew, setCreateNew] = useState(null);
     const [advancedOpen, setAdvancedOpen] = useState(false);
-    const [field, setFields] = useState([]);
+    const [fields, setFields] = useState([]);
     const [caseTypes, setCaseTypes] = useState([]);
     const [fieldTypes, setFieldTypes] = useState([]);
     const [newField, setNewField] = useState({
@@ -25,16 +25,11 @@ export const CustomFields = () => {
         is_answered: ""
     });    
     const [selectedFieldType, setSelectedFieldType] = useState(null);
-    const filteredFields = field.filter(f => f.case_type_id === newField.case_type_id);
-    const selectedDisplayField = field.find(f => String(f.id) === String(newField.display_when));
+    const filteredFields = fields.filter(f => f.case_type_id === newField.case_type_id);
+    const selectedDisplayField = fields.find(f => String(f.id) === String(newField.display_when));
     const displayFieldOptions = Array.isArray(selectedDisplayField?.options) 
-        ? selectedDisplayField.options 
+        ? selectedDisplayField.options
         : [];
-    
-    useEffect(() => {
-        console.log('selectedDisplayField:', selectedDisplayField);
-        console.log('displayFieldOptions:', displayFieldOptions);
-    }, [selectedDisplayField, displayFieldOptions]);
 
     useEffect(() => {
         const foundType = fieldTypes.find(ft => Number(ft.id) === Number(newField.field_id));
@@ -92,9 +87,9 @@ export const CustomFields = () => {
             const data = await response.json();
     
             if (data.success) {
-                const parsedFields = data.custom_fields.map(field => ({
-                    ...field,
-                    options: field.options ? JSON.parse(field.options) : []
+                const parsedFields = data.custom_fields.map(fields => ({
+                    ...fields,
+                    options: fields.options ? JSON.parse(fields.options) : []
                 }));
     
                 setCaseTypes(data.case_types);
@@ -106,11 +101,11 @@ export const CustomFields = () => {
         } catch (error) {
             console.error("Error fetching data:", error);
         }
-    };    
+    };
     
     useEffect(() => {
         fetchAllData();
-    }, []);    
+    }, []);
 
     const createCaseType = async () => {
         try {
@@ -137,7 +132,7 @@ export const CustomFields = () => {
         const { name, value } = e.target;
         setNewField(prevState => ({
             ...prevState,
-            [name]: value
+            [name]: value === "" ? "" : value
         }));
     };
 
@@ -166,13 +161,25 @@ export const CustomFields = () => {
             if (data.success) {
                 fetchAllData();
                 setCreateNew(false);
+                setNewField({
+                    name: "",
+                    field_id: 0,
+                    case_type_id: 0,
+                    required: false,
+                    options: [],
+                    obsolete: 1,
+                    hidden: 1,
+                    default_value: "",
+                    display_when: null,
+                    is_answered: ""
+                });
             } else {
                 console.error("Error creating custom field:", data.message);
             }
         } catch (error) {
             console.error("Error creating custom field:", error);
         }
-    };    
+    };
 
     return (
         <div className="page-container">
@@ -186,15 +193,15 @@ export const CustomFields = () => {
                 {caseTypes.map((type) => (
                     <div key={type.id} className='case-type'>
                         <p>{type.name} ({type.aka})</p>
-                        <p className='subtext'>{type.description}</p>
+                        {type.description && <p className='subtext'>{type.description}</p>}
                     </div>
                 ))}
             </div>
             <h4 className='sub-title alt'>Custom Fields</h4>
             <div className="fields-list">
-                {field?.map((field) => (
+                {fields?.map((field) => (
                     <div key={field.id} className="field">
-                        <p>{field.name}{" "}
+                        <p className='field-name'>{field.name}{" "}
                             <span className='subtext'>
                             ({fieldTypes.map((fieldType, index) => 
                                     field.field_id === fieldType.id ? fieldType.name : null
@@ -202,12 +209,30 @@ export const CustomFields = () => {
                             </span>
                         </p>
                         <div className='form-group alt mid' style={{maxWidth: '250px'}}>
-                            {field.field_id === "1" && <Text type='text' placeholder={field.name}/>}
+                            {(field.field_id === "1" || field.field_id === "2") && <Text type={field.field_id === '2' ? 'textarea' : 'text'} placeholder={field.name}/>}
+                            {(field.field_id === "3" || field.field_id === "4" || field.field_id === '5') && <NumberInput type={field.field_id === '3' ? 'currency' : field.field_id === '4' ? 'percent' : 'text'}/>}
+                            {field.field_id === "6"  && <DateInput />}
+                            {field.field_id === "8" && <Contact />}
                             {field.field_id === "10" && <Dropdown options={field.options} placeholder={field.name}/>}
+                            {field.field_id === "12" && <Boolean options={field.options} />}
                         </div>
-                        <p className="subtext">{caseTypes.map((caseTypes, index) =>
-                            field.case_type_id === caseTypes.id ? caseTypes.name : null
-                        )}</p>
+                        <div className='field-info'>
+                            <p className='subtext'>
+                                {field.display_when ? `(Display when ${
+                                    fields.find(f => 
+                                        f.id === field.display_when && f.case_type_id === field.case_type_id
+                                    ).name
+                                    } is ${field.is_answered !== "" && fields.find(f => 
+                                        f.id === field.display_when && f.case_type_id === field.case_type_id
+                                    ).options[parseFloat(field.is_answered)] || "Anything"})` : null
+                                }
+                            </p>
+                            <p className="subtext">
+                                {caseTypes.map((caseTypes, index) =>
+                                    field.case_type_id === caseTypes.id ? caseTypes.name : null
+                                )}
+                            </p>
+                        </div>
                     </div>
                 ))}
             </div>
@@ -331,17 +356,27 @@ export const CustomFields = () => {
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor='default_value'>Default Value</label>
-                                    <select
-                                        name='default_value'
-                                        value={newField.default_value}
-                                        onChange={handleInputChange}
-                                        className='default-select'
-                                    >
-                                        <option value=''>Select Default Value</option>
-                                        {newField.options.map((option, index) => (
-                                            <option key={index} value={option}>{option}</option>
-                                        ))}
-                                    </select>
+                                    {newField.options.length > 0 ? (
+                                        <select
+                                            name='default_value'
+                                            value={newField.default_value}
+                                            onChange={handleInputChange}
+                                            className='default-select'
+                                        >
+                                            <option value=''>Select Default Value</option>
+                                            {newField.options.map((option, index) => (
+                                                <option key={index} value={option}>{option}</option>
+                                            ))}
+                                        </select>
+                                    ) : (
+                                        <input
+                                            type='text'
+                                            name='default_value'
+                                            placeholder='Default value...'
+                                            value={newField.default_value}
+                                            onChange={handleInputChange}
+                                        />
+                                    )}
                                 </div>
                                 <div className='form-group'>
                                     <label htmlFor='description'>Display This Field When</label>
@@ -367,7 +402,7 @@ export const CustomFields = () => {
                                     >
                                         <option value="">Select Answer</option>
                                         {displayFieldOptions.map((option, index) => (
-                                            <option key={index} value={option}>{option}</option>
+                                            <option key={index} value={index}>{option}</option>
                                         ))}
                                     </select>
                                 </div>

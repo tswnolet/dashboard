@@ -146,3 +146,33 @@ th.td {
     font-size: 12.8px;
     text-transform: lowercase;
 }
+
+.person-or-company {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 80px;
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+}
+
+.poc {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 5px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.poc.active {
+    color: var(--fill);
+    background-color: var(--border-color)
+}
+
+.poc:hover {
+    cursor: pointer;
+    background-color: var(--hover-color);
+    border-radius: 3px;
+}

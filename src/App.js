@@ -17,6 +17,7 @@ import { WIP } from './modules/WIP';
 import { LayoutEditor } from './modules/LayoutEditor';
 import { Contacts } from './modules/Contacts';
 import { CustomFields } from './modules/Customs';
+import { Leads } from './modules/CreateLead';
 
 const App = () => {
   const [loading, setLoading] = useState(true);
@@ -91,7 +92,7 @@ const App = () => {
   return (
     <Router>
         <ConditionalNav user={user} loggedIn={loggedIn} changeTheme={changeTheme} theme={theme} logout={logout} data={data} setData={setData} setFilteredData={setFilteredData} />
-        <AppRoutes setUser={setUser} loggedIn={loggedIn} setLoggedIn={setLoggedIn} changeTheme={changeTheme} theme={theme} data={filteredData} setData={setData} addCard={addCard} logout={logout} setFilteredData={setFilteredData} setShowAlert={setShowAlert} showAlert={showAlert} redirectPath={redirectPath} setRedirectPath={setRedirectPath} />
+        <AppRoutes setUser={setUser} user={user} loggedIn={loggedIn} setLoggedIn={setLoggedIn} changeTheme={changeTheme} theme={theme} data={filteredData} setData={setData} addCard={addCard} logout={logout} setFilteredData={setFilteredData} setShowAlert={setShowAlert} showAlert={showAlert} redirectPath={redirectPath} setRedirectPath={setRedirectPath} />
     </Router>
   );
 }
@@ -117,7 +118,7 @@ const ConditionalNav = ({ user, loggedIn, changeTheme, theme, logout, data, setD
   return <Nav title={title || 'Dashboard'} user={user} loggedIn={loggedIn} changeTheme={changeTheme} theme={theme} logout={logout} />;
 };
 
-const AppRoutes = ({ setUser, loggedIn, setLoggedIn, changeTheme, theme, data, setData, addCard, logout, setFilteredData, setShowAlert, showAlert, redirectPath, setRedirectPath }) => {
+const AppRoutes = ({ setUser, user, loggedIn, setLoggedIn, changeTheme, theme, data, setData, addCard, logout, setFilteredData, setShowAlert, showAlert, redirectPath, setRedirectPath }) => {
   const location = useLocation();
 
   useEffect(() => {
@@ -133,7 +134,7 @@ const AppRoutes = ({ setUser, loggedIn, setLoggedIn, changeTheme, theme, data, s
           <Route path="/nav" element={<></>} />
           <Route path="/dashboard" element={<Dashboard setLoggedIn={setLoggedIn} />} />
           <Route path="/cases" element={<WIP />} />
-          <Route path="/intake" element={<WIP />} />
+          <Route path="/intake" element={<Leads user={user} />} />
           <Route path="/contacts" element={<Contacts />} />
           <Route path="/client-portal" element={<WIP />} />
           <Route path="/firm-settings" element={<WIP />} />

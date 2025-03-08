@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
 
-    $case_type_id = $input['case_type_id'] ?? null;
+    $case_type_id = $input['case_type_id'] ?? 0;
     $field_id = $input['field_id'] ?? null;
     $name = $input['name'] ?? null;
     $required = !empty($input['required']) ? 1 : 0;
@@ -27,10 +27,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $hidden = !empty($input['hidden']) ? $input['hidden'] : 1;
     $default_value = $input['default_value'] ?? null;
     $display_when = !empty($input['display_when']) ? $input['display_when'] : null;
-    $is_answered = $input['is_answered'] ?? null;
+    $is_answered = $input['is_answered'] !== "" ? $input['is_answered'] : null ?? null;
 
-    if (empty($case_type_id) || empty($field_id) || empty($name)) {
-        echo json_encode(['success' => false, 'message' => 'Case type, field type, and name are required']);
+    if (empty($field_id) || empty($name)) {
+        echo json_encode(['success' => false, 'message' => 'Field type and name are required']);
         exit;
     }
 

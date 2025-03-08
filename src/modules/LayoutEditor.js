@@ -4,6 +4,7 @@ import { Check, StarOutlineSharp, StarSharp, Add, Close, Dashboard } from "@mui/
 import Modal from "./Modal";
 import { Activity, FileText, Folder, Home, User, Settings, Bell, Calendar, Clipboard, Cloud, Code, DollarSign, Edit, Eye, File, Heart, Image, Lock, Mail, MapPin, MessageCircle, Phone, Shield, ShoppingCart, Star, Tag, Trash, Truck, Users, Video, Section, SectionIcon, LucideSection, TrashIcon, Eraser, Edit2, Trash2, Archive } from "lucide-react";
 import FolderTreeManager from "./FolderTreeManager";
+import { index } from "d3";
 
 const IconMap = {
     "Activity": Activity,
@@ -67,6 +68,14 @@ export const LayoutEditor = () => {
     const [dragging, setDragging] = useState(null);
     const [folderData, setFolderData] = useState({ name: "", parent_folder_id: 0, folder_access: "Standard" });
     const [folders, setFolders] = useState([]);
+    const [marketingSource, setMarketingSource] = useState({
+        source_name: "",
+        marketing_type: 0,
+        description: "",
+        template_id: 0,
+        order_id: 0
+    });
+    const [marketingSources, setMarketingSources] = useState([]);
 
     const fetchFolderStructure = async (templateId) => {
         try {
@@ -111,6 +120,7 @@ export const LayoutEditor = () => {
     useEffect(() => {
         fetchTemplates();
         fetchAvailableFields();
+        fetchMarketingSources();
     }, []);
 
     const fetchTemplates = async () => {
@@ -499,6 +509,48 @@ export const LayoutEditor = () => {
         }
     };
 
+    const fetchMarketingSources = async () => {
+        try {
+            const response = await fetch("https://dalyblackdata.com/api/marketing_sources.php");
+            const data = await response.json();
+            setMarketingSources(data.marketing_sources || []);
+        } catch (error) {
+            console.error("Error fetching marketing sources:", error);
+        }
+    };
+
+    const postMarketingSource = async (newSource) => {
+        marketingSource.template_id = defaultTemplate.id;
+
+        try {
+            const response = await fetch("https://dalyblackdata.com/api/marketing_sources.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(marketingSource),
+            });
+    
+            const data = await response.json();
+            console.log("Marketing Source Created:", data);
+    
+            if (data.success) {
+                fetchMarketingSources();
+                setMarketingSource({
+                    source_name: "",
+                    marketing_type: 0,
+                    description: "",
+                    template_id: defaultTemplate.id,
+                    order_id: 0,
+                });
+            } else {
+                console.error("Error creating marketing source:", data.message);
+            }
+        } catch (error) {
+            console.error("Error posting marketing source:", error);
+        }
+    };
+
     return (
         <div className="page-container">
             <header>
@@ -518,18 +570,21 @@ export const LayoutEditor = () => {
                     <h4 onClick={() => setSelectedTemplateHeader(0)} className={selectedTemplateHeader === 0 ? 'active' : ''}>Sections</h4>
                     <h4 onClick={() => setSelectedTemplateHeader(1)} className={selectedTemplateHeader === 1 ? 'active' : ''}>Phases</h4>
                     <h4 onClick={() => setSelectedTemplateHeader(2)} className={selectedTemplateHeader === 2 ? 'active' : ''}>Folder Structure</h4>
+                    <h4 onClick={() => setSelectedTemplateHeader(3)} className={selectedTemplateHeader === 3 ? 'active' : ''}>Marketing Sources</h4>
                 </div>
                 <div className='template-container-header'>
-                    <h4>{defaultTemplate?.name} {selectedTemplateHeader === 0 ? 'Sections' : selectedTemplateHeader === 1 ? 'Phases' : 'Folder Structure'}</h4>
+                    <h4>{defaultTemplate?.name} {selectedTemplateHeader === 0 ? 'Sections' : selectedTemplateHeader === 1 ? 'Phases' : selectedTemplateHeader === 2 ? 'Folder Structure' : 'Marketing Sources'}</h4>
                     <button className="action alt" onClick={() => {
                         if (selectedTemplateHeader === 0) {
                             setCreateNew('section')
                         } else if (selectedTemplateHeader === 1) {
                             setCreateNew('phase')
-                        } else {
+                        } else if (selectedTemplateHeader === 2) {
                             setCreateNew('folder')
+                        } else {
+                            setCreateNew('marketing')
                         }
-                    }}>Add {selectedTemplateHeader === 0 ? 'Section' : selectedTemplateHeader === 1 ? 'Phase' : 'Folder'}</button>
+                    }}>Add {selectedTemplateHeader === 0 ? 'Section' : selectedTemplateHeader === 1 ? 'Phase' : selectedTemplateHeader === 2 ? 'Folder' : 'Marketing Source'}</button>
                 </div>
             </header>
             {createTemplate && (
@@ -650,11 +705,20 @@ export const LayoutEditor = () => {
                                 ))}
                             </div>
                         </div>
-                    ) : (selectedTemplateHeader === 2 && (
+                    ) : (selectedTemplateHeader === 2 ? (
                         <FolderTreeManager 
                             templateId={defaultTemplate?.id} 
                             folders={folders}
                         />
+                    ) : (selectedTemplateHeader === 3 &&
+                        <div className='marketing-source-container'>
+                            {marketingSources.map((source, index) => (
+                                <div key={index} className="marketing-source">
+                                    <h4>{source.source_name}</h4>
+                                    <p>{source.description}</p>
+                                </div>
+                            ))}
+                        </div>
                     ))
                 )}
             </div>
@@ -759,39 +823,66 @@ export const LayoutEditor = () => {
                             </div>
                             <button className="action" onClick={createNewPhase}>Save Phase</button>
                         </div>
-                    ) : (
-                        <div className='new-template'>
-                            <h4>Create New Folder</h4>
-                            <div className='form-group'>
-                                <label htmlFor='name'>Folder Name</label>
-                                <input type="text" placeholder="Folder Name" value={folderData.name} onChange={(e) => setFolderData({ ...folderData, name: e.target.value })}/>
+                    ) : (createNew === 'folder' ? (
+                            <div className='new-template'>
+                                <h4>Create New Folder</h4>
+                                <div className='form-group'>
+                                    <label htmlFor='name'>Folder Name</label>
+                                    <input type="text" placeholder="Folder Name" value={folderData.name} onChange={(e) => setFolderData({ ...folderData, name: e.target.value })}/>
+                                </div>
+                                <div className='form-group'>
+                                    <label htmlFor='parent_folder_id'>Parent Folder</label>
+                                    <select
+                                        className="default-select"
+                                        value={folderData.parent_folder_id || ""}
+                                        onChange={(e) => setFolderData({ ...folderData, parent_folder_id: e.target.value })}
+                                    >
+                                        <option value={0}>Root Folder</option>
+                                        {folders.map(folder => (
+                                            <option key={folder.id} value={folder.id}>{folder.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className='form-group'>
+                                    <label htmlFor='folder_access'>Folder Access</label>
+                                    <select
+                                        className="default-select"
+                                        value={folderData.folder_access}
+                                        onChange={(e) => setFolderData({ ...folderData, folder_access: e.target.value })}
+                                    >
+                                        <option value="Standard">Standard</option>
+                                        <option value="Protected">Protected</option>
+                                    </select>
+                                </div>
+                                <button className="action" onClick={createFolder}>Save Folder</button>
                             </div>
-                            <div className='form-group'>
-                                <label htmlFor='parent_folder_id'>Parent Folder</label>
-                                <select
-                                    className="default-select"
-                                    value={folderData.parent_folder_id || ""}
-                                    onChange={(e) => setFolderData({ ...folderData, parent_folder_id: e.target.value })}
-                                >
-                                    <option value={0}>Root Folder</option>
-                                    {folders.map(folder => (
-                                        <option key={folder.id} value={folder.id}>{folder.name}</option>
-                                    ))}
-                                </select>
+                        ) : (
+                            <div className='new-template'>
+                                <h4>Create New Marketing Source</h4>
+                                <div className='form-group'>
+                                    <label htmlFor='source_name'>Source Name</label>
+                                    <input type="text" id='source_name' onChange={(e) => setMarketingSource({ ...marketingSource, source_name: e.target.value })} value={marketingSource.source_name} name='source_name' placeholder="Source Name"/>
+                                </div>
+                                <div className='form-group'>
+                                    <label htmlFor='description'>Description</label>
+                                    <textarea placeholder="Source Description"  onChange={(e) => setMarketingSource({ ...marketingSource, description: e.target.value })} value={marketingSource.description} />
+                                </div>
+                                <div className='form-group'>
+                                    <label htmlFor='source_type'>Source Type</label>
+                                    <select className='default-select'  onChange={(e) => setMarketingSource({ ...marketingSource, marketing_type: e.target.value })} value={marketingSource.marketing_type} >
+                                        <option value=''>Select Source Type</option>
+                                        <option value='1'>Marketing Source</option>
+                                        <option value='2'>Contact Source</option>
+                                        <option value='3'>Referral Source</option>
+                                    </select>
+                                </div>
+                                <div className='form-group'>
+                                    <label htmlFor='order_id'>Order</label>
+                                    <input type='number' placeholder='Order' onChange={(e) => setMarketingSource({ ...marketingSource, order_id: e.target.value})}/>
+                                </div>
+                                <button className="action" onClick={postMarketingSource}>Save New Source</button>
                             </div>
-                            <div className='form-group'>
-                                <label htmlFor='folder_access'>Folder Access</label>
-                                <select
-                                    className="default-select"
-                                    value={folderData.folder_access}
-                                    onChange={(e) => setFolderData({ ...folderData, folder_access: e.target.value })}
-                                >
-                                    <option value="Standard">Standard</option>
-                                    <option value="Protected">Protected</option>
-                                </select>
-                            </div>
-                            <button className="action" onClick={createFolder}>Save Folder</button>
-                        </div>
+                        )
                     )}
                 </Modal>
             )}

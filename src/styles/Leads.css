@@ -1,0 +1,19 @@
+.lead-setup, .intake-details, .marketing-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 15px;
+
+    .form-group, .form-group input, .contact-input {
+        width: 100%;
+    }
+}
+
+.form-group.left {
+    align-items: flex-start !important;
+
+    label {
+        padding: 0 5px;
+    }
+}

@@ -70,7 +70,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
 .filter-container input[type="date"] {
     padding: 5px 10px;
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 3px;
     color: var(--text-color);
     background-color: var(--secondary-color);
     font-family: 'Inter', 'Poppins', sans-serif;
@@ -201,8 +201,12 @@ option:checked {
     transition: height 0.3s ease;
     
     &.open {
-        height: 245px;
+        height: 265px;
         display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin: 15px;
     }
 }
 
@@ -222,6 +226,7 @@ option:checked {
     display: flex;
     justify-content: center;
     align-items: center;
+    gap: 15px;
 }
 
 .filters {
@@ -230,12 +235,23 @@ option:checked {
     align-items: center;
     flex-direction: column;
     gap: 10px;
+    width: 30%;
+    min-width: 250px;
 
     > div {
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-end;
+        align-items: center;
         width: 100%;
         gap: 10px;
+    }
+
+    input {
+        height: 36px;
+        color: var(--text-color);
+        background-color: var(--secondary-color);
+        border: 1px solid var(--border-color);
+        border-radius: 3px;
     }
 }
 
@@ -247,10 +263,10 @@ option:checked {
     border: 1px solid var(--border-color) !important;
     height: auto !important;
     scrollbar-color: var(--hover-color) var(--card-color);
-    border-radius: 8px 0 0 8px;
 
     option {
         color: var(--text-color);
+        background-color: var(--secondary-color);
     }
 }
 
@@ -329,11 +345,13 @@ button {
     font-size: 14px;
 }
 
+.subtext, input:disabled {
+    color: var(--subtext-color);
+}
+
 .subtext {
     font-size: 12px;
-    color: var(--subtext-color);
     line-height: 1;
-    text-wrap: nowrap;
 }
 
 @media (min-width: 1025px) {

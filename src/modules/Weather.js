@@ -5,13 +5,13 @@ import Line from '../resources/image.png';
 function Pages({ data, pageSize, currentPage, totalPages, handlePageChange, set }) {
     return (
         <div className="pages" style={set ? {position: 'absolute', bottom: '10px', left: '50%', transform: 'translateX(-50%)' } : {}}>
-            <button className='weather-btns' onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 0}>
+            <button className='weather-btns action' onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 0}>
                 Previous
             </button>
             <span>
                 Page {currentPage + (totalPages > 0 ? 1 : 0)} of {totalPages}
             </span>
-            <button className='weather-btns' onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages - 1}>
+            <button className='weather-btns action' onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages - 1}>
                 Next
             </button>
         </div>
@@ -300,7 +300,7 @@ export default function Weather({ theme }) {
                                         Array.from(e.target.selectedOptions, (option) => option.value)
                                     )
                                 }
-                                className='weather-select'
+                                className='default-select'
                             >
                                 {eventTypes.map((eventType, index) => (
                                     <option key={index} value={eventType}>
@@ -341,11 +341,11 @@ export default function Weather({ theme }) {
                     </div>
                 </div>
                 <div className="filter-btns">
-                    <button className='weather-btns' onClick={applyFilters}>Apply Filters</button>
-                    <button className='weather-btns' onClick={clearFilters}>Clear Filters</button>
+                    <button className='weather-btns action' onClick={applyFilters}>Apply Filters</button>
+                    <button className='weather-btns action' onClick={clearFilters}>Clear Filters</button>
                 </div>
             </div>
-            <button className='weather-btns filter-btn' onClick={() => setShowFilters(!showFilters)}>{showFilters ? "Hide Filters" : "Filters"}</button>
+            <button className='weather-btns filter-btn action' onClick={() => setShowFilters(!showFilters)}>{showFilters ? "Hide Filters" : "Filters"}</button>
             {/* Results Table */}
             <div id='weather-container'>
                 {currentPageData.length > 0 ? (
@@ -530,7 +530,7 @@ export default function Weather({ theme }) {
                                         <tr>
                                             <td colSpan="5" style={{borderTop: "0px solid white"}}>
                                                 <h4>Schools Hit:</h4>
-                                                <button className='weather-btns' 
+                                                <button className='weather-btns action' 
                                                     onClick={() => printInnerTable(schoolData)} 
                                                     style={{ marginBottom: "10px", padding: "5px 10px", backgroundColor: "#f4bc41", color: "black", border: "none", cursor: "pointer" }}
                                                 >
@@ -578,16 +578,13 @@ export default function Weather({ theme }) {
                     <p className='no-events'>{dataSet ? <Loading /> : 'No events to display.'}</p>
                 )}
             </div>
-
             <Pages data={schoolData} pageSize={pageSize} currentPage={currentPage} totalPages={totalPages} handlePageChange={handlePageChange} />
-
-            {/* Load More and Load All Buttons */}
             {hasMoreData && (
                 <div className='load-options' style={{display: "flex", justifyContent: "center", flexDirection: "row"}}>
-                    <button className='weather-btns' onClick={handleLoadMore} disabled={loading}>
+                    <button className='weather-btns action' onClick={handleLoadMore} disabled={loading}>
                         {loading ? "Loading..." : "Load More"}
                     </button>
-                    <button className='weather-btns' onClick={handleLoadAll} disabled={loading}>
+                    <button className='weather-btns action' onClick={handleLoadAll} disabled={loading}>
                         {loadingAll ? "Loading All..." : "Load All"}
                     </button>
                 </div>

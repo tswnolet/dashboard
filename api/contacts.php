@@ -1,9 +1,23 @@
 <?php
 require './db.php';
+
 session_start();
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $searchQuery = $_GET['search'] ?? null;
+
+    if ($searchQuery) {
+        $contacts = searchContacts($conn, $searchQuery);
+    } else {
+        $contacts = fetchAllContacts($conn);
+    }
+
+    echo json_encode(['success' => true, 'contacts' => $contacts]);
+    exit;
+}
+
+function fetchAllContacts($conn) {
     $sql = "SELECT * FROM contacts";
     $result = $conn->query($sql);
     $contacts = [];
@@ -13,12 +27,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $contact['phones'] = fetchContactDetails($conn, $contact_id, 'phone');
         $contact['emails'] = fetchContactDetails($conn, $contact_id, 'email');
         $contact['addresses'] = fetchContactDetails($conn, $contact_id, 'address');
-
         $contacts[] = $contact;
     }
 
-    echo json_encode(['success' => true, 'contacts' => $contacts]);
-    exit;
+    return $contacts;
+}
+
+function searchContacts($conn, $query) {
+    $searchQuery = "%{$query}%";
+
+    $sql = "
+        SELECT DISTINCT c.*
+        FROM contacts c
+        LEFT JOIN contact_details cd 
+            ON c.id = cd.contact_id AND cd.detail_type = 'email'
+        WHERE 
+            REPLACE(TRIM(CONCAT_WS(' ', c.first_name, c.middle_name, c.last_name)), '  ', ' ') LIKE ?
+            OR c.nickname LIKE ?
+            OR c.company_name LIKE ?
+            OR JSON_UNQUOTE(JSON_EXTRACT(cd.detail_data, '$.email')) LIKE ?
+        LIMIT 5
+    ";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ssss", $searchQuery, $searchQuery, $searchQuery, $searchQuery);
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+    $contacts = [];
+
+    while ($contact = $result->fetch_assoc()) {
+        $contact_id = $contact['id'];
+        $contact['phones'] = fetchContactDetails($conn, $contact_id, 'phone');
+        $contact['emails'] = fetchContactDetails($conn, $contact_id, 'email');
+        $contact['addresses'] = fetchContactDetails($conn, $contact_id, 'address');
+        $contacts[] = $contact;
+    }
+
+    $stmt->close();
+    return $contacts;
 }
 
 function fetchContactDetails($conn, $contact_id, $detail_type) {
