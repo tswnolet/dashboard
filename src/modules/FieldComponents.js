@@ -1,69 +1,93 @@
 import React, { useState, useEffect, useRef } from "react";
 import '../styles/LayoutEditor.css';
-import { Ar } from "@mynaui/icons-react";
 import { createPortal } from "react-dom";
 import { CreateContact } from "./CreateContact";
-import { Money } from "@mui/icons-material";
 
-export const Text = ({ type, placeholder, value }) => {
-    if(type === 'text') {
-        return <input type='text' placeholder={`${placeholder}...`} value={value} />;
-    } else if(type === 'textarea') {
-        return <textarea placeholder={`${placeholder}...`} value={value} />;
-    }
+export const Text = ({ type, placeholder, value, onChange }) => {
+    return type === 'text' ? (
+        <input type='text' placeholder={placeholder} value={value || ""} onChange={(e) => onChange(e.target.value)} />
+    ) : (
+        <textarea placeholder={placeholder} value={value || ""} onChange={(e) => onChange(e.target.value)} />
+    );
 };
 
-export const Dropdown = ({ options, value }) => {
-    options = Array.isArray(options) ? options : options ? JSON.parse(options) : [];
+export const Dropdown = ({ options = [], value = "", onChange = () => {} }) => {
+    let parsedOptions = [];
+
+    try {
+        parsedOptions = Array.isArray(options)
+            ? options
+            : options 
+                ? JSON.parse(options) 
+                : [];
+    } catch (error) {
+        console.error("Dropdown options parsing error:", error);
+        parsedOptions = [];
+    }
+
     return (
-        <select className='default-select' value={value}>
-            {options.map((option) => (
-                <option key={option} value={option}>{option}</option>
+        <select className='default-select' value={value || ""} onChange={(e) => onChange(e.target.value)}>
+            <option value="">Select...</option>
+            {parsedOptions.map((option, index) => (
+                <option key={index} value={option}>{option}</option>
             ))}
         </select>
     );
 };
 
-export const Boolean = ({ options, value }) => {
-    const [active, setActive] = useState(2);
+export const Boolean = ({ options, value, onChange }) => {
     return (
         <div className='boolean'>
             {options.map((option, index) => (
-                <div className={`option${index === active ? ' active' : ''}`} onClick={() => setActive(index)}>{option}</div>
+                <div 
+                    key={index} 
+                    className={`option${value === option ? ' active' : ''}`} 
+                    onClick={() => onChange(option)}
+                >
+                    {option}
+                </div>
             ))}
         </div>
     );
 };
 
-export const NumberInput = ({ type, value }) => {
+export const NumberInput = ({ type, value, onChange }) => {
     return (
         <div className='number-input'>
-            <input type='text' inputMode="numeric" placeholder='0.00' max={type === 'percent' ? 100 : null} />
-            {type != 'number' && <span className='number-symbol subtext'>{type === 'currency' ? "$" : '%'}</span>}
+            <input 
+                type='number' 
+                inputMode="numeric" 
+                placeholder='0.00' 
+                value={value || ""}
+                onChange={(e) => onChange(e.target.value)}
+            />
+            {type !== 'number' && <span className='number-symbol subtext'>{type === 'currency' ? "$" : '%'}</span>}
         </div>
     );
 };
 
-export const DateInput = ({ value }) => {
-    return <input type='date' value={value} />;
+export const DateInput = ({ value, onChange }) => {
+    return <input type='date' value={value || ""} onChange={(e) => onChange(e.target.value)} />;
 };
 
-export const Contact = ({ selectedContact, onCreateNewContact }) => {
-    const [value, setValue] = useState(selectedContact?.full_name || "");
+export const Contact = ({ selectedContact, onCreateNewContact, setSelectedContact }) => {
+    const [searchTerm, setSearchTerm] = useState(selectedContact?.full_name || "");
     const [searchResults, setSearchResults] = useState([]);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
+    
     const inputRef = useRef(null);
     const dropdownRef = useRef(null);
+    const containerRef = useRef(null);
     const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
 
     useEffect(() => {
-        if (value.trim().length >= 2) {
-            fetchContacts(value);
+        if (searchTerm.trim().length >= 2) {
+            fetchContacts(searchTerm);
         } else {
             setSearchResults([]);
+            setIsDropdownOpen(false);
         }
-    }, [value]);
+    }, [searchTerm]);
 
     const fetchContacts = async (query) => {
         try {
@@ -85,16 +109,17 @@ export const Contact = ({ selectedContact, onCreateNewContact }) => {
     };
 
     const handleSelectContact = (contact) => {
-        setValue(contact.full_name);
+        setSearchTerm(contact.full_name);
         setSearchResults([]);
         setIsDropdownOpen(false);
+        setSelectedContact(contact);
     };
 
     const positionDropdown = () => {
         if (inputRef.current) {
             const rect = inputRef.current.getBoundingClientRect();
             setDropdownPosition({
-                top: rect.bottom + window.scrollY,
+                top: rect.bottom + window.scrollY + 2,
                 left: rect.left + window.scrollX,
                 width: rect.width
             });
@@ -102,77 +127,65 @@ export const Contact = ({ selectedContact, onCreateNewContact }) => {
     };
 
     useEffect(() => {
-        if (isDropdownOpen) {
-            positionDropdown();
-            window.addEventListener("scroll", positionDropdown);
-            window.addEventListener("resize", positionDropdown);
-        } else {
-            window.removeEventListener("scroll", positionDropdown);
-            window.removeEventListener("resize", positionDropdown);
-        }
-
-        return () => {
-            window.removeEventListener("scroll", positionDropdown);
-            window.removeEventListener("resize", positionDropdown);
-        };
-    }, [isDropdownOpen]);
-
-    useEffect(() => {
         const handleClickOutside = (event) => {
             if (
+                containerRef.current &&
+                !containerRef.current.contains(event.target) &&
                 dropdownRef.current &&
-                !dropdownRef.current.contains(event.target) &&
-                !inputRef.current.contains(event.target)
+                !dropdownRef.current.contains(event.target)
             ) {
                 setIsDropdownOpen(false);
             }
         };
 
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
+        if (isDropdownOpen) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isDropdownOpen]);
 
     return (
-        <>
-            <div className='contact-input' style={{ position: "relative" }}>
-                <input
-                    ref={inputRef}
-                    type='text'
-                    placeholder="Search or add contact..."
-                    value={value}
-                    onFocus={() => searchResults.length > 0 && setIsDropdownOpen(true)}
-                    onChange={(e) => setValue(e.target.value)}
-                />
-                <div
-                    className='form-box alt'
-                    title='Create new contact'
-                    onClick={onCreateNewContact}
-                >
-                    +
-                </div>
-                {isDropdownOpen && searchResults.length > 0 && createPortal(
-                    <ul
-                        ref={dropdownRef}
-                        className="search-dropdown"
-                        style={{
-                            top: dropdownPosition.top + 2,
-                            left: dropdownPosition.left,
-                            width: dropdownPosition.width + 41,
-                            zIndex: 1002,
-                        }}
-                    >
-                        {searchResults.map((contact) => (
-                            <li
-                                key={contact.id}
-                                onClick={() => handleSelectContact(contact)}
-                            >
-                                {contact.full_name} ({contact.emails?.[0]?.email || "No email"})
-                            </li>
-                        ))}
-                    </ul>,
-                    document.body
-                )}
+        <div className='contact-input' style={{ position: "relative" }} ref={containerRef}>
+            <input
+                ref={inputRef}
+                type='text'
+                placeholder="Search or add contact..."
+                value={searchTerm}
+                onFocus={() => searchResults.length > 0 && setIsDropdownOpen(true)}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                name='contact-input'
+            />
+            <div
+                className='form-box alt'
+                title='Create new contact'
+                onClick={onCreateNewContact}
+            >
+                +
             </div>
-        </>
+            {isDropdownOpen && searchResults.length > 0 && createPortal(
+                <ul
+                    ref={dropdownRef}
+                    className="search-dropdown"
+                    style={{
+                        top: dropdownPosition.top,
+                        left: dropdownPosition.left,
+                        width: dropdownPosition.width + 41,
+                        zIndex: 1002,
+                    }}
+                >
+                    {searchResults.map((contact) => (
+                        <li
+                            key={contact.id}
+                            onClick={() => handleSelectContact(contact)}
+                        >
+                            {contact.full_name} ({contact.emails?.[0]?.email || "No email"})
+                        </li>
+                    ))}
+                </ul>,
+                document.body
+            )}
+        </div>
     );
 };

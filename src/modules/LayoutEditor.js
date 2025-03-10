@@ -73,7 +73,7 @@ export const LayoutEditor = () => {
         marketing_type: 0,
         description: "",
         template_id: 0,
-        order_id: 0
+        order_id: null
     });
     const [marketingSources, setMarketingSources] = useState([]);
 
@@ -521,6 +521,7 @@ export const LayoutEditor = () => {
 
     const postMarketingSource = async (newSource) => {
         marketingSource.template_id = defaultTemplate.id;
+        marketingSource.order_id = marketingSource.order_id === null ? marketingSources.length + 1 : marketingSource.order_id;
 
         try {
             const response = await fetch("https://dalyblackdata.com/api/marketing_sources.php", {
@@ -532,7 +533,6 @@ export const LayoutEditor = () => {
             });
     
             const data = await response.json();
-            console.log("Marketing Source Created:", data);
     
             if (data.success) {
                 fetchMarketingSources();
@@ -541,8 +541,9 @@ export const LayoutEditor = () => {
                     marketing_type: 0,
                     description: "",
                     template_id: defaultTemplate.id,
-                    order_id: 0,
+                    order_id: null,
                 });
+                setCreateNew(null);
             } else {
                 console.error("Error creating marketing source:", data.message);
             }
@@ -716,6 +717,7 @@ export const LayoutEditor = () => {
                                 <div key={index} className="marketing-source">
                                     <h4>{source.source_name}</h4>
                                     <p>{source.description}</p>
+                                    <p>{source.order_id} ({source.marketing_type === '1' ? "Marketing Source" : source.marketing_type === '2' ? "Contact Source" : "Referral Source"})</p>
                                 </div>
                             ))}
                         </div>

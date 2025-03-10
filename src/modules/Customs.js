@@ -210,7 +210,7 @@ export const CustomFields = () => {
                         </p>
                         <div className='form-group alt mid' style={{maxWidth: '250px'}}>
                             {(field.field_id === "1" || field.field_id === "2") && <Text type={field.field_id === '2' ? 'textarea' : 'text'} placeholder={field.name}/>}
-                            {(field.field_id === "3" || field.field_id === "4" || field.field_id === '5') && <NumberInput type={field.field_id === '3' ? 'currency' : field.field_id === '4' ? 'percent' : 'text'}/>}
+                            {(field.field_id === "3" || field.field_id === "4" || field.field_id === '5') && <NumberInput type={field.field_id === '3' ? 'currency' : field.field_id === '4' ? 'percent' : 'number'}/>}
                             {field.field_id === "6"  && <DateInput />}
                             {field.field_id === "8" && <Contact />}
                             {field.field_id === "10" && <Dropdown options={field.options} placeholder={field.name}/>}

@@ -55,6 +55,7 @@ const SearchBar = ({ expanded, setExpanded }) => {
       <input
         ref={inputRef}
         type="text"
+        name='search-bar'
         placeholder="Search"
         className="search-input"
         style={{ display: expanded ? "block" : "none" }}

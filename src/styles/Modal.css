@@ -18,6 +18,7 @@
     width: 80%;
     position: relative;
     max-height: 90%;
+    overflow-y: auto;
 }
 
 .modal-content:not(.wide) {
@@ -31,7 +32,6 @@
     flex-direction: column;
     max-width: 800px;
     height: 80%;
-    overflow-y: auto;
     scrollbar-color: var(--hover-color) var(--card-color);
 
     .address {
@@ -47,7 +47,7 @@
         justify-content: center;
         align-items: center;
         max-width: 47.5%;
-        margin: 5px 0 0 0;
+        margin: 10px 0 0 0;
 
         label {
             width: 100%;
@@ -65,6 +65,10 @@
     .form-group.postal {
         width: 37.5%;
     }
+}
+
+.modal-content .form-group {
+    min-width: 25%;
 }
 
 .modal-title {

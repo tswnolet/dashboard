@@ -152,8 +152,8 @@
 .contact-input .form-box {
     cursor: pointer;
     padding: 8px 12px;
-    border: 1px solid #ccc;
-    background-color: #f9f9f9;
+    border: 1px solid var(--border-color);
+    background-color: var(--text-color);
     border-radius: 4px;
     user-select: none;
 }

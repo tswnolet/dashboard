@@ -52,11 +52,13 @@ export const Theme = ({ theme, changeTheme }) => {
   return (
     <ThemeProvider theme={theme === 'dark' ? darkTheme : lightTheme}>
       <CssBaseline />
-      <label className="switch">
+      <label htmlFor='theme-switch' className="switch">
         <input
           type="checkbox"
           onChange={changeTheme}
           checked={isChecked}
+          name='theme-switch'
+          id='theme-switch'
         />
         <span className="slider"></span>
       </label>

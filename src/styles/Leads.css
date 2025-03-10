@@ -1,7 +1,8 @@
-.lead-setup, .intake-details, .marketing-info {
+.lead-setup, .case-specs, .intake-details, .marketing-info, .case-details {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
     width: 100%;
     gap: 15px;
 
