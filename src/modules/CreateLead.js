@@ -5,6 +5,8 @@ import { CreateContact } from "./CreateContact";
 import '../styles/Leads.css';
 import { Text, NumberInput, DateInput, Dropdown, Boolean } from "./FieldComponents";
 import { useMemo } from "react";
+import { Star } from "lucide-react";
+import { StarRate } from "@mui/icons-material";
 
 export const Leads = ({ user }) => {
     const [leads, setLeads] = useState([]);
@@ -16,9 +18,9 @@ export const Leads = ({ user }) => {
     const [marketingSources, setMarketingSources] = useState([]);
     const [caseFields, setCaseFields] = useState([]);
     const [formData, setFormData] = useState({
-        intakeby: user,
+        intake_by: user,
         created_at: new Date().toISOString().split('T')[0],
-        contact: null,
+        contact_id: null,
         preferred_contact: '',
         case_type: '',
         incident_date: '',
@@ -33,6 +35,15 @@ export const Leads = ({ user }) => {
         notes: ''
     });
     const [filteredFields, setFilteredFields] = useState([]);
+    const [users, setUsers] = useState([]);
+    const [statuses, setStatuses] = useState([]);
+    const [statusData, setStatusData] = useState([]);
+
+    useEffect(() => {
+        if (new URLSearchParams(window.location.search).get("new") === "true") {
+            setCreateLead(true);
+        }
+    }, []);
 
     useEffect(() => {
         const updatedFields = caseFields.filter((field) => {
@@ -69,6 +80,8 @@ export const Leads = ({ user }) => {
         fetchLeads();
         fetchCaseTypes();
         fetchMarketingSources();
+        fetchUsers();
+        fetchStatuses();
     }, []);
 
     useEffect(() => {
@@ -98,6 +111,26 @@ export const Leads = ({ user }) => {
             setLeads(data.leads);
         } catch (error) {
             console.error("Error fetching leads:", error);
+        }
+    };
+
+    const fetchUsers = async () => {
+        try {
+            const response = await fetch(`https://dalyblackdata.com/api/user.php?users=true&time=${new Date().getTime()}`);
+            const data = await response.json();
+            setUsers(data.users);
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        }
+    };
+
+    const fetchStatuses = async () => {
+        try {
+            const response = await fetch(`https://dalyblackdata.com/api/statuses.php?time=${new Date().getTime()}`);
+            const data = await response.json();
+            setStatuses(data.statuses);
+        } catch (error) {
+            console.error("Error fetching statuses:", error);
         }
     };
 
@@ -210,6 +243,10 @@ export const Leads = ({ user }) => {
 
     return (
         <div className='page-container'>
+            <div id='page-header'>
+                <h1>Leads</h1>
+                <button className='action' onClick={() => setCreateLead(true)}>Create Lead</button>
+            </div>
             {leads?.map((lead) => (
                 <div key={lead.id}>
                     <p>{lead.name}</p>
@@ -220,6 +257,7 @@ export const Leads = ({ user }) => {
 
             {createLead && (
                 <Modal 
+                onClose={() => setCreateLead(false)}
                     title="Create New Lead"
                     header={(
                         <div className='modal-header-actions'>
@@ -227,6 +265,7 @@ export const Leads = ({ user }) => {
                             <button className='action' onClick={handleCreateLead}>Save</button>
                         </div>
                     )}
+                    wide
                 >
                     <div className='modal-content-wrapper'>
                         <div className='sub-title'>
@@ -251,6 +290,7 @@ export const Leads = ({ user }) => {
                                 <Contact 
                                     selectedContact={selectedContact}
                                     setSelectedContact={setSelectedContact}
+                                    onChange={(e) => setFormData({ ...formData, contact_id: e.target.value })}
                                     onCreateNewContact={() => setCreateContact(true)}
                                     name='contact_id'
                                 />
@@ -305,7 +345,7 @@ export const Leads = ({ user }) => {
                             )}
                             <div className='form-group'>
                                 <label htmlFor='marketing_notes'>Marketing Notes</label>
-                                <textarea id='marketing_notes' value={formData.marketing_notes} onChange={(e) => setFormData({ ...formData, marketing_notes: e.target.value })}></textarea>
+                                <textarea id='marketing_notes' placeholder='Marketing Notes...' value={formData.marketing_notes} onChange={(e) => setFormData({ ...formData, marketing_notes: e.target.value })}></textarea>
                             </div>
                         </div>
                         <div className='sub-title'>
@@ -398,6 +438,50 @@ export const Leads = ({ user }) => {
                                         return null;
                                 }
                             })}
+                        </div>
+                        <div className='sub-title'>
+                            <h4>Office Details</h4>
+                        </div>
+                        <div className='office-details'>
+                            <div className='form-group'>
+                                <label htmlFor='likelihood'>Case Likelihood</label>
+                                <select id='likelihood' className='default-select' value={formData.case_likelihood} onChange={(e) => setFormData({ ...formData, case_likelihood: e.target.value })}>
+                                    <option value='' disabled>Select...</option>
+                                    <option value='1'>No Case</option>
+                                    <option value='2'>Unlikely Case</option>
+                                    <option value='3'>Possible Case</option>
+                                    <option value='4'>Likely Case</option>
+                                    <option value='5'>Very Likely Case</option>
+                                </select>
+                            </div>
+                            <div className='form-group'>
+                                <label htmlFor='office'>Office</label>
+                                <select id='office' className='default-select' value={formData.office} onChange={(e) => setFormData({ ...formData, office: e.target.value })}>
+                                    <option value='' disabled>Select...</option>
+                                    <option value='1'>Texas</option>
+                                    <option value='2'>Colorado</option>
+                                    <option value='3'>Louisiana</option>
+                                    <option value='4'>Florida</option>
+                                </select>
+                            </div>
+                            <div className='form-group'>
+                                <label htmlFor='assigned-to'>Assigned To</label>
+                                <select id='assigned-to' className='default-select' value={formData.assigned_to} onChange={(e) => setFormData({ ...formData, assigned_to: e.target.value })}>
+                                    <option value='' disabled>Select...</option>
+                                    {users.map((user) => (
+                                        <option key={user.id} value={user.id}>{user.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className='form-group'>
+                                <label htmlFor='status'>Status</label>
+                                <select id='status' className='default-select' value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })}>
+                                    <option value='' disabled>Select...</option>
+                                    {statuses.map((status) => (
+                                        <option key={status.id} value={status.id}>{status.name}</option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </Modal>

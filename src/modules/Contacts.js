@@ -13,10 +13,12 @@ export const Contacts = () => {
     useEffect(() => {
         if(url.get("new") === "true") {
             setCreateContact(true);
-        } else {
-            fetchContacts();
         }
     }, []);
+
+    useEffect(() => {
+        fetchContacts();
+    }, [createContact]);
 
     useEffect(() => {
         function handleResize() {

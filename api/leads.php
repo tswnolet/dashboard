@@ -39,11 +39,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
 
-    $intake_by = $input['intake_by'] ?? null;
+    $intake_by = $input['intake_by'] ?? 1;
     $created_at = $input['created_at'] ?? date('Y-m-d H:i:s');
     $contact_id = $input['contact_id'] ?? null;
     $preferred_contact = $input['preferred_contact'] ?? '';
-    $case_type_id = $input['case_type_id'] ?? null;
+    $case_type_id = $input['case_type'] ?? null;
     $incident_date = $input['incident_date'] ?? null;
     $marketing_source = $input['marketing_source'] ?? null;
     $referral_contact = $input['referral_contact'] ?? null;

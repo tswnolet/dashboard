@@ -198,6 +198,7 @@
     border: 1px solid var(--border-color);
     border-radius: 3px;
     height: 100%;
+    max-width: 200px;
     overflow: hidden;
     user-select: none;
 }
@@ -214,6 +215,16 @@
 
 .boolean .option:not(:first-child) {
     border-left: 1px solid var(--border-color);
+}
+
+.option:not(.active) {
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+
+    &:hover {
+        background-color: var(--hover-color);
+        color: var(--secondary-color);
+    }
 }
 
 .option.active {

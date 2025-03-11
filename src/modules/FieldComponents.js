@@ -3,11 +3,11 @@ import '../styles/LayoutEditor.css';
 import { createPortal } from "react-dom";
 import { CreateContact } from "./CreateContact";
 
-export const Text = ({ type, placeholder, value, onChange }) => {
+export const Text = ({ type, placeholder, value, onChange, disable }) => {
     return type === 'text' ? (
-        <input type='text' placeholder={placeholder} value={value || ""} onChange={(e) => onChange(e.target.value)} />
+        <input type='text' disabled={disable} placeholder={placeholder} value={value || ""} onChange={(e) => onChange(e.target.value)} />
     ) : (
-        <textarea placeholder={placeholder} value={value || ""} onChange={(e) => onChange(e.target.value)} />
+        <textarea placeholder={placeholder} disabled={disable} value={value || ""} onChange={(e) => onChange(e.target.value)} />
     );
 };
 
@@ -36,9 +36,20 @@ export const Dropdown = ({ options = [], value = "", onChange = () => {} }) => {
 };
 
 export const Boolean = ({ options, value, onChange }) => {
+    let parsedOptions = [];
+
+    try {
+        parsedOptions = Array.isArray(options) 
+            ? options 
+            : JSON.parse(options);
+    } catch (error) {
+        console.error("Error parsing Boolean options:", options, error);
+        parsedOptions = [];
+    }
+
     return (
         <div className='boolean'>
-            {options.map((option, index) => (
+            {parsedOptions.map((option, index) => (
                 <div 
                     key={index} 
                     className={`option${value === option ? ' active' : ''}`} 
@@ -66,8 +77,8 @@ export const NumberInput = ({ type, value, onChange }) => {
     );
 };
 
-export const DateInput = ({ value, onChange }) => {
-    return <input type='date' value={value || ""} onChange={(e) => onChange(e.target.value)} />;
+export const DateInput = ({ value, onChange, disable = false}) => {
+    return <input type='date' disabled={disable} value={value || ""} onChange={(e) => onChange(e.target.value)} />;
 };
 
 export const Contact = ({ selectedContact, onCreateNewContact, setSelectedContact }) => {
@@ -151,7 +162,7 @@ export const Contact = ({ selectedContact, onCreateNewContact, setSelectedContac
             <input
                 ref={inputRef}
                 type='text'
-                placeholder="Search or add contact..."
+                placeholder="Search or create contact..."
                 value={searchTerm}
                 onFocus={() => searchResults.length > 0 && setIsDropdownOpen(true)}
                 onChange={(e) => setSearchTerm(e.target.value)}

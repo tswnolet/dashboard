@@ -3,17 +3,34 @@ require './db.php';
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $caseTypes = fetchCaseTypes($conn);
-    $customFields = fetchCustomFields($conn);
-    $fieldTypes = fetchFieldTypes($conn);
+    $section_id = $_GET['section_id'];
 
-    echo json_encode([
-        'success' => true,
-        'case_types' => $caseTypes,
-        'custom_fields' => $customFields,
-        'field_types' => $fieldTypes
-    ]);
-    exit;
+    if (!isset($_GET['section_id'])) {
+        $caseTypes = fetchCaseTypes($conn);
+        $customFields = fetchCustomFields($conn);
+        $fieldTypes = fetchFieldTypes($conn);
+
+        echo json_encode([
+            'success' => true,
+            'case_types' => $caseTypes,
+            'custom_fields' => $customFields,
+            'field_types' => $fieldTypes
+        ]);
+        exit;
+    }
+    
+    if (isset($section_id)) {
+        $query = "
+            SELECT * FROM fields;";
+        $result = $conn->query($query);
+        $fields = [];
+        while ($row = $result->fetch_assoc()) {
+            $fields[] = $row;
+        }
+
+        $customFields = fetchCustomFields($conn, $section_id);
+        echo json_encode(['success' => true, 'custom_fields' => $customFields, 'fields' => $fields]);
+    }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -80,16 +97,23 @@ function fetchCaseTypes($conn) {
     return $caseTypes;
 }
 
-function fetchCustomFields($conn) {
+function fetchCustomFields($conn, $section_id = null) {
+    $where = $section_id ? "WHERE cf.section_id = ?" : "";
     $query = "
-        SELECT cf.id, cf.case_type_id, cf.name, cf.options, cf.default_value, cf.obsolete, cf.display_when, cf.is_answered, ct.name as case_type, cf.field_id, f.name as field_name, f.type as field_type, 
+        SELECT cf.id, cf.case_type_id, cf.field_id, cf.name, cf.options, cf.default_value, cf.obsolete, cf.display_when, cf.is_answered, cf.section_id, ct.name as case_type, cf.field_id, f.name as field_name, f.type as field_type, 
                cf.order_id, cf.required
         FROM custom_fields cf
         JOIN case_types ct ON cf.case_type_id = ct.id
         JOIN fields f ON cf.field_id = f.id
+        $where
         ORDER BY cf.case_type_id, cf.order_id
     ";
-    $result = $conn->query($query);
+    $stmt = $conn->prepare($query);
+    if ($section_id) {
+        $stmt->bind_param('i', $section_id);
+    }
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     $customFields = [];
     while ($row = $result->fetch_assoc()) {

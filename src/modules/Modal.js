@@ -22,7 +22,7 @@ const Modal = ({ children, onClose, title, wide = false, header, footer }) => {
                     </div>
                 )}
 
-                {!footer && !wide && (
+                {!footer && !wide && !header && (
                     <button className="modal-close" onClick={onClose}>×</button>
                 )}
             </div>

@@ -5,6 +5,7 @@ import Modal from "./Modal";
 import { Activity, FileText, Folder, Home, User, Settings, Bell, Calendar, Clipboard, Cloud, Code, DollarSign, Edit, Eye, File, Heart, Image, Lock, Mail, MapPin, MessageCircle, Phone, Shield, ShoppingCart, Star, Tag, Trash, Truck, Users, Video, Section, SectionIcon, LucideSection, TrashIcon, Eraser, Edit2, Trash2, Archive } from "lucide-react";
 import FolderTreeManager from "./FolderTreeManager";
 import { index } from "d3";
+import { Boolean, Contact, DateInput, Dropdown, NumberInput, Text } from "./FieldComponents";
 
 const IconMap = {
     "Activity": Activity,
@@ -57,6 +58,7 @@ export const LayoutEditor = () => {
     const [addingField, setAddingField] = useState(null);
     const [selectedField, setSelectedField] = useState("");
     const [availableFields, setAvailableFields] = useState([]);
+    const [customFields, setCustomFields] = useState([]);
     const [sectionExpanded, setSectionExpanded] = useState(false);
     const [editingSection, setEditingSection] = useState(null);
     const [customFieldData, setCustomFieldData] = useState({ name: "", section_id: "", field_id: "", order_id: 0, rules: {} });
@@ -68,6 +70,7 @@ export const LayoutEditor = () => {
     const [dragging, setDragging] = useState(null);
     const [folderData, setFolderData] = useState({ name: "", parent_folder_id: 0, folder_access: "Standard" });
     const [folders, setFolders] = useState([]);
+    const [fieldTypes, setFieldTypes] = useState([]);
     const [marketingSource, setMarketingSource] = useState({
         source_name: "",
         marketing_type: 0,
@@ -76,6 +79,37 @@ export const LayoutEditor = () => {
         order_id: null
     });
     const [marketingSources, setMarketingSources] = useState([]);
+    const [fieldLimit, setFieldLimit] = useState(4);
+    const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+    const [hoveredField, setHoveredField] = useState(null);
+    const [hoverTimeout, setHoverTimeout] = useState(null);
+    const [statuses, setStatuses] = useState([]);
+    const [statusData, setStatusData] = useState({ name: "", description: "" });
+    
+    const handleMouseEnter = (fieldId) => {
+        if (hoverTimeout) clearTimeout(hoverTimeout);
+
+        setHoveredField(fieldId);
+    };
+    
+    const handleMouseLeave = () => {
+        if (hoverTimeout) clearTimeout(hoverTimeout);
+    
+        const timeout = setTimeout(() => {
+            setHoveredField(null);
+        }, 500);
+    
+        setHoverTimeout(timeout);
+    };
+
+    useEffect(() => {
+        const handleResize = () => {
+            setScreenWidth(window.innerWidth);
+        };
+
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
     const fetchFolderStructure = async (templateId) => {
         try {
@@ -84,6 +118,36 @@ export const LayoutEditor = () => {
             setFolders(data.folders || []);
         } catch (error) {
             console.error("Error fetching folder structure:", error);
+        }
+    };
+
+    const fetchStatuses = async () => {
+        try {
+            const response = await fetch(`https://dalyblackdata.com/api/statuses.php?time=${new Date().getTime()}`);
+            const data = await response.json();
+            setStatuses(data.statuses || []);
+        } catch (error) {
+            console.error("Error fetching statuses:", error);
+        }
+    };
+
+    const postStatuses = async () => {
+        try {
+            const response = await fetch(`https://dalyblackdata.com/api/statuses.php`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(statusData),
+            });
+            const data = await response.json();
+            if (data.success) {
+                fetchStatuses();
+                setCreateNew(null);
+                setStatusData({ name: "", description: "" });
+            } else {
+                console.error("Error posting status:", data.message);
+            }
+        } catch (error) {
+            console.error("Error posting status:", error);
         }
     };
 
@@ -121,6 +185,7 @@ export const LayoutEditor = () => {
         fetchTemplates();
         fetchAvailableFields();
         fetchMarketingSources();
+        fetchStatuses();
     }, []);
 
     const fetchTemplates = async () => {
@@ -163,9 +228,10 @@ export const LayoutEditor = () => {
 
     const fetchCurrentFields = async (sectionId) => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/fields.php?section_id=${sectionId}`);
+            const response = await fetch(`https://dalyblackdata.com/api/custom_fields.php?section_id=${sectionId}&time=${new Date().getTime()}`);
             const data = await response.json();
-            setCurrentFields(data.fields || []);
+            setCurrentFields(data.custom_fields || []);
+            setFieldTypes(data.fields);
         } catch (error) {
             console.error("Error fetching fields:", error);
         }
@@ -552,6 +618,52 @@ export const LayoutEditor = () => {
         }
     };
 
+    const handleFieldChange = (fieldId, value) => {
+        setFormData((prev) => ({
+            ...prev,
+            [fieldId]: value,
+        }));
+    };
+
+    const renderFieldInput = (field) => {
+        switch (field.field_id) {
+            case 1:
+                return (
+                    <Text type="text" placeholder={field.name} disable/>
+                );
+            case 2:
+                return (
+                    <Text type="textarea" placeholder={field.name} disable/>
+                );
+            case 3:
+                return (
+                    <NumberInput type="currency" />
+                );
+            case 6:
+                return (
+                    <DateInput disable/>
+                );
+            case 8:
+                return (
+                    <Contact selectedContact={formData[field.id]} />
+                );
+            case 10:
+                return (
+                    <Dropdown options={field.options || "[]"} />
+                );
+            case 12:
+                return (
+                    <Boolean
+                        options={field.options || []}
+                        value={"Unknown"}
+                        onChange={(selectedValue) => handleFieldChange(field.id, selectedValue)}
+                    />
+                );
+            default:
+                return null;
+        }
+    };    
+
     return (
         <div className="page-container">
             <header>
@@ -568,24 +680,59 @@ export const LayoutEditor = () => {
                     <button className="action" onClick={() => setCreateTemplate(true)}>New Template</button>
                 </div>
                 <div id='template-header'>
-                    <h4 onClick={() => setSelectedTemplateHeader(0)} className={selectedTemplateHeader === 0 ? 'active' : ''}>Sections</h4>
-                    <h4 onClick={() => setSelectedTemplateHeader(1)} className={selectedTemplateHeader === 1 ? 'active' : ''}>Phases</h4>
-                    <h4 onClick={() => setSelectedTemplateHeader(2)} className={selectedTemplateHeader === 2 ? 'active' : ''}>Folder Structure</h4>
-                    <h4 onClick={() => setSelectedTemplateHeader(3)} className={selectedTemplateHeader === 3 ? 'active' : ''}>Marketing Sources</h4>
+                    {screenWidth < 729 ? (
+                        <select className='default-select' value={selectedTemplateHeader} onChange={(e) => setSelectedTemplateHeader(Number(e.target.value))}>
+                            <option value={0}>Sections</option>
+                            <option value={1}>Phases</option>
+                            <option value={2}>Folder Structure</option>
+                            <option value={3}>Marketing Sources</option>
+                            <option value={4}>Lead Statuses</option>
+                        </select>
+                    )  : (
+                        <>
+                            <h4 onClick={() => setSelectedTemplateHeader(0)} className={selectedTemplateHeader === 0 ? 'active' : ''}>Sections</h4>
+                            <h4 onClick={() => setSelectedTemplateHeader(1)} className={selectedTemplateHeader === 1 ? 'active' : ''}>Phases</h4>
+                            <h4 onClick={() => setSelectedTemplateHeader(2)} className={selectedTemplateHeader === 2 ? 'active' : ''}>Folder Structure</h4>
+                            <h4 onClick={() => setSelectedTemplateHeader(3)} className={selectedTemplateHeader === 3 ? 'active' : ''}>Marketing Sources</h4>
+                            <h4 onClick={() => setSelectedTemplateHeader(4)} className={selectedTemplateHeader === 4 ? 'active' : ''}>Lead Statuses</h4>
+                        </>
+                    )}
                 </div>
                 <div className='template-container-header'>
-                    <h4>{defaultTemplate?.name} {selectedTemplateHeader === 0 ? 'Sections' : selectedTemplateHeader === 1 ? 'Phases' : selectedTemplateHeader === 2 ? 'Folder Structure' : 'Marketing Sources'}</h4>
+                    <h4>{defaultTemplate?.name} {selectedTemplateHeader === 0 ? 'Sections' : selectedTemplateHeader === 1 ? 'Phases' : selectedTemplateHeader === 2 ? 'Folder Structure' : selectedTemplateHeader === 3 ? 'Marketing Sources' : 'Lead Statuses'}</h4>
                     <button className="action alt" onClick={() => {
-                        if (selectedTemplateHeader === 0) {
-                            setCreateNew('section')
-                        } else if (selectedTemplateHeader === 1) {
-                            setCreateNew('phase')
-                        } else if (selectedTemplateHeader === 2) {
-                            setCreateNew('folder')
-                        } else {
-                            setCreateNew('marketing')
+                        switch (selectedTemplateHeader) {
+                            case 0:
+                                setCreateNew('section');
+                                break;
+                            case 1:
+                                setCreateNew('phase');
+                                break;
+                            case 2:
+                                setCreateNew('folder');
+                                break;
+                            case 3:
+                                setCreateNew('marketing');
+                                break;
+                            case 4:
+                                setCreateNew('statuses');
+                                break;
+                            default:
+                                break;
                         }
-                    }}>Add {selectedTemplateHeader === 0 ? 'Section' : selectedTemplateHeader === 1 ? 'Phase' : selectedTemplateHeader === 2 ? 'Folder' : 'Marketing Source'}</button>
+                    }}>
+                        Add {
+                            selectedTemplateHeader === 0 
+                                ? 'Section' 
+                                : selectedTemplateHeader === 1 
+                                ? 'Phase' 
+                                : selectedTemplateHeader === 2 
+                                ? 'Folder' 
+                                : selectedTemplateHeader === 3 
+                                ? 'Marketing Source'
+                                : "Lead Status"
+                        }
+                    </button>
                 </div>
             </header>
             {createTemplate && (
@@ -661,12 +808,38 @@ export const LayoutEditor = () => {
                                         </div>
                                         <div className='section-fields'>
                                             <button className="action small" onClick={() => setAddingField(section.id)}>+ Field</button>
-                                            {currentFields && currentFields.length > 0 && (
-                                                <ul>
-                                                    {currentFields.map(field => (
-                                                        <li key={field.id}>{field.name} ({field.type}) {field.order_id}</li>
-                                                    ))}
-                                                </ul>
+                                            {currentFields.length > 0 &&
+                                                currentFields.map((field, index) => {
+                                                    if (index <= fieldLimit) {
+                                                        return (
+                                                            <div 
+                                                                className='group-fields' 
+                                                                key={field.id}
+                                                                onMouseOver={() => handleMouseEnter(field.id)}
+                                                                onMouseLeave={handleMouseLeave}
+                                                            >
+                                                                <h4>{field.name}</h4>
+                                                                {fieldTypes.map((type, index) => {
+                                                                    if (Number(type.id) === Number(field.field_id)) {
+                                                                        return (
+                                                                            <span className='subtext' key={index}>{type.name}</span>
+                                                                        )
+                                                                    }
+                                                                })}
+                                                                {field.id === hoveredField && (
+                                                                    <div className='form-group middle' key={field.id}>
+                                                                        {renderFieldInput(field)}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        )
+                                                    }
+                                                })
+                                            }
+                                            {currentFields.length > fieldLimit ? (
+                                                <button className='action alt'onClick={() => setFieldLimit(currentFields.length)}>Show More Fields</button>
+                                            ) : (currentFields.length > 0 && 
+                                                <button className='action alt'onClick={() => setFieldLimit(4)}>Show Less Fields</button>
                                             )}
                                         </div>
                                     </>
@@ -711,18 +884,27 @@ export const LayoutEditor = () => {
                             templateId={defaultTemplate?.id} 
                             folders={folders}
                         />
-                    ) : (selectedTemplateHeader === 3 &&
+                    ) : (selectedTemplateHeader === 3 ? (
                         <div className='marketing-source-container'>
                             {marketingSources.map((source, index) => (
                                 <div key={index} className="marketing-source">
                                     <h4>{source.source_name}</h4>
                                     <p>{source.description}</p>
-                                    <p>{source.order_id} ({source.marketing_type === '1' ? "Marketing Source" : source.marketing_type === '2' ? "Contact Source" : "Referral Source"})</p>
+                                    <p>({source.marketing_type === '1' ? "Marketing Source" : source.marketing_type === '2' ? "Contact Source" : "Referral Source"})</p>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className='lead-status-container'>
+                            {statuses.map((status, index) => (
+                                <div key={index} className="lead-status">
+                                    <h4>{status.name}</h4>
+                                    <p>{status.description}</p>
                                 </div>
                             ))}
                         </div>
                     ))
-                )}
+                ))}
             </div>
             {addingField && (
                 <Modal onClose={() => setAddingField(null)}>
@@ -858,7 +1040,7 @@ export const LayoutEditor = () => {
                                 </div>
                                 <button className="action" onClick={createFolder}>Save Folder</button>
                             </div>
-                        ) : (
+                        ) : (createNew === 'marketing' ? (
                             <div className='new-template'>
                                 <h4>Create New Marketing Source</h4>
                                 <div className='form-group'>
@@ -884,8 +1066,21 @@ export const LayoutEditor = () => {
                                 </div>
                                 <button className="action" onClick={postMarketingSource}>Save New Source</button>
                             </div>
-                        )
-                    )}
+                        ) : (createNew === 'statuses' ? (
+                            <div className='new-template'>
+                                <h4>Create New Lead Status</h4>
+                                <div className="form-group">
+                                    <label htmlFor='status_name'>Status Name</label>
+                                    <input type="text" placeholder="Status Name" value={statusData.name} onChange={(e) => setStatusData({ ...statusData, name: e.target.value })}/>
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor='status_name'>Status Description</label>
+                                    <textarea placeholder="Status Description" value={statusData.description} onChange={(e) => setStatusData({ ...statusData, description: e.target.value })}/>
+                                </div>
+                                <button className="action" onClick={postStatuses}>Save Status</button>
+                            </div>
+                        ) : <></>
+                    )))}
                 </Modal>
             )}
             {showIconModal && (

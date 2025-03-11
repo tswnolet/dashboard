@@ -1,4 +1,4 @@
-.lead-setup, .case-specs, .intake-details, .marketing-info, .case-details {
+.lead-setup, .case-specs, .intake-details, .marketing-info, .case-details, .office-details {
     display: flex;
     justify-content: space-between;
     align-items: center;

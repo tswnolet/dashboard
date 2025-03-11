@@ -20,7 +20,8 @@ header {
     justify-content: start;
     align-items: center;
     width: 100%;
-    gap: 25px;
+    max-width: 100%;
+    flex-wrap: wrap;
     margin-bottom: 20px;
     border-bottom: 1px solid var(--border-color);
     user-select: none;
@@ -76,12 +77,31 @@ header {
     margin: 10px 0;
     width: 100%;
     max-height: 300px;
-    overflow-y: auto;
+}
+
+.group-fields {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+    background-color: var(--background-color);
+    border-radius: 3px;
+    padding: 5px 10px;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    h4, p {text-wrap: wrap; text-align: center;}
 }
 
 .form-group label {
     font-weight: 600;
     color: var(--text-color);
+}
+
+.form-group.middle {
+    justify-content: center;
+    align-items: center;
 }
 
 .form-group input[type='text'], 
@@ -147,7 +167,7 @@ header {
     transition: fill 0.3s ease-in-out;
 }
 
-.section-container, .phase-container, .phase-list, .marketing-source-container {
+.section-container, .phase-container, .phase-list, .marketing-source-container, .lead-status-container {
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -196,6 +216,7 @@ header {
     align-items: center;
     gap: 10px;
     user-select: none;
+    width: 100%;
 
     svg {
         cursor: pointer;
@@ -216,7 +237,7 @@ header {
     background-color: var(--secondary-color);
 }
 
-.template-phase h4, .marketing-source-container h4 {
+.template-phase h4, .marketing-source-container h4, .lead-status-container h4 {
     margin: 0;
 }
 
@@ -229,14 +250,20 @@ header {
 
 .template-section {
     display: flex;
+    align-items: center;
     flex-direction: column;
     gap: 5px;
     background-color: var(--secondary-color);
     padding: 15px;
     border-radius: 3px;
+    cursor: pointer;
 
     h4 {
         margin: 0;
+    }
+
+    p {
+        width: 100%;
     }
 }
 
@@ -279,9 +306,16 @@ header {
 
 .section-fields {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     flex-direction: column;
+    gap: 10px;
+    max-height: 650px;
+    overflow-y: auto;
+    max-width: 90%;
+    min-width: 200px;
+    width: 50%;
+    padding: 25px;
 }
 
 .form-group input:not([type='checkbox']) {
@@ -337,7 +371,7 @@ header {
     border-color: var(--hover-color);
 }
 
-.marketing-source {
+.marketing-source, .lead-status {
     display: flex;
     justify-content: flex-start;
     align-items: center;
@@ -348,6 +382,10 @@ header {
 }
 
 @media (min-width: 769px) {
+    #template-header {
+        gap: 25px;
+    }
+
     .section-floating-label {
         position: absolute;
         left: -175px;
@@ -384,5 +422,10 @@ header {
 
     .section-floating-label {
         position: relative;
+    }
+
+    #template-header {
+        justify-content: center;
+        padding-bottom: 10px;
     }
 }

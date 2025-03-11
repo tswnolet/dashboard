@@ -19,6 +19,7 @@
     position: relative;
     max-height: 90%;
     overflow-y: auto;
+    scrollbar-color: var(--hover-color) var(--card-color);
 }
 
 .modal-content:not(.wide) {
@@ -32,7 +33,6 @@
     flex-direction: column;
     max-width: 800px;
     height: 80%;
-    scrollbar-color: var(--hover-color) var(--card-color);
 
     .address {
         display: flex;
@@ -79,6 +79,7 @@
     top: 0;
     padding: 20px 40px 0 40px;
     background: linear-gradient(to bottom, rgba(0,0,0,0.25), rgba(0,0,0,0));
+    z-index: 1002;
 }
 
 .modal-header-actions {

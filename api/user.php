@@ -1,16 +1,6 @@
 <?php
-session_set_cookie_params([
-    'lifetime' => 365 * 24 * 60 * 60, // 1 year
-    'path' => '/',
-    'domain' => '*', // Your domain
-    'secure' => true, // For HTTPS
-    'httponly' => true,
-    'samesite' => 'None', // Required for cross-origin
-]);
-session_start();
-
-require './headers.php';
 require './db.php';
+session_start();
 
 header("Content-Type: application/json");
 
@@ -49,6 +39,19 @@ if ($requestMethod === 'POST') {
         echo json_encode(["error" => "User not found"]);
     }
 } else if ($requestMethod === 'GET') {
+    if (isset($_GET['users'])) {
+        $sql = "SELECT user, name, access_level FROM users WHERE access_level != 'no access'";
+        $result = $conn->query($sql);
+
+        $users = [];
+
+        while ($row = $result->fetch_assoc()) {
+            $users[] = $row;
+        }
+
+        echo json_encode(["users" => $users]);
+        exit;
+    }
     if (!isset($_GET['user'])) {
         echo json_encode(["error" => "Username is required"]);
         exit;
