@@ -40,7 +40,7 @@ if ($requestMethod === 'POST') {
     }
 } else if ($requestMethod === 'GET') {
     if (isset($_GET['users'])) {
-        $sql = "SELECT user, name, access_level FROM users WHERE access_level != 'no access'";
+        $sql = "SELECT user, id, name, access_level FROM users WHERE access_level != 'no access'";
         $result = $conn->query($sql);
 
         $users = [];

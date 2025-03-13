@@ -85,6 +85,7 @@ export const LayoutEditor = () => {
     const [hoverTimeout, setHoverTimeout] = useState(null);
     const [statuses, setStatuses] = useState([]);
     const [statusData, setStatusData] = useState({ name: "", description: "" });
+    const [statusExpanded, setStatusExpanded] = useState(null);
     
     const handleMouseEnter = (fieldId) => {
         if (hoverTimeout) clearTimeout(hoverTimeout);
@@ -896,10 +897,32 @@ export const LayoutEditor = () => {
                         </div>
                     ) : (
                         <div className='lead-status-container'>
-                            {statuses.map((status, index) => (
-                                <div key={index} className="lead-status">
+                            {statuses.map((status, index) => status.substatus === null && (
+                                <div 
+                                    key={index} 
+                                    className={`lead-status${statusExpanded === status.id ? ' stacked' : ''}`}
+                                    onClick={() => {
+                                            setStatusExpanded(statusExpanded === status.id || statuses.reduce((acc, s) => acc += s.substatus === status.id ? 1 : 0, 0) === 0 ? null : status.id);
+                                            console.log()
+                                        }
+                                    }
+                                >
                                     <h4>{status.name}</h4>
                                     <p>{status.description}</p>
+                                    {statusExpanded !== status.id && <p>Substatuses: {statuses.reduce((acc, s) => acc += s.substatus === status.id ? 1 : 0, 0)}</p>}
+                                    {statusExpanded === status.id && (
+                                        <div className='sub-statuses'>
+                                            Substatuses:
+                                            {statuses.map((substatus, index) => substatus.substatus === status.id && (
+                                                <p className='subtext sub-status' key={index}>
+                                                    {substatus.name}
+                                                    <span>
+                                                        {substatus.description ? `(${substatus.description})` : null} 
+                                                    </span>
+                                                </p>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>

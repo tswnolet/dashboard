@@ -238,6 +238,10 @@ input[type='checkbox']:not(:checked) {
   padding: 20px 20px 0 100px;
 }
 
+#weather-table td {
+  flex-direction: column;
+}
+
 tr {
   display: flex;
   justify-content: center;
@@ -249,9 +253,12 @@ tr {
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-direction: column;
     width: 100%;
   }
+}
+
+.stacked {
+  flex-direction: column;
 }
 
 table:not(.schools) > tbody > tr > td {

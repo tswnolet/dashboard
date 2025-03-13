@@ -373,12 +373,36 @@ header {
 
 .marketing-source, .lead-status {
     display: flex;
-    justify-content: flex-start;
-    align-items: center;
     gap: 10px;
     padding: 15px;
     border-radius: 3px;
     background-color: var(--secondary-color);
+
+    &:not(.stacked) {
+        justify-content: flex-start;
+        align-items: center;
+    }
+}
+
+.lead-status {
+    cursor: pointer;
+}
+
+.lead-status.stacked {
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.sub-statuses {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.sub-status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 @media (min-width: 769px) {

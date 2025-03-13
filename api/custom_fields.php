@@ -3,7 +3,7 @@ require './db.php';
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $section_id = $_GET['section_id'];
+    $section_id = $_GET['section_id'] ?? null;
 
     if (!isset($_GET['section_id'])) {
         $caseTypes = fetchCaseTypes($conn);

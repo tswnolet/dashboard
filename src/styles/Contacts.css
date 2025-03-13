@@ -103,7 +103,7 @@ th.td {
     }
 }
 
-.contacts-table {
+.contacts-table, .leads-table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 50px;

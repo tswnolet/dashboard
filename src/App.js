@@ -49,7 +49,7 @@ const App = () => {
   const checkUserLoggedIn = async () => {
     if (process.env.NODE_ENV === 'development') {
       setLoggedIn(true);
-      setUser('devuser');
+      setUser({user: 'devuser', user_id: 1});
       setLoading(false);
       return;
     }
@@ -115,7 +115,7 @@ const ConditionalNav = ({ user, loggedIn, changeTheme, theme, logout, data, setD
     return null;
   }
 
-  return <Nav title={title || 'Dashboard'} user={user} loggedIn={loggedIn} changeTheme={changeTheme} theme={theme} logout={logout} />;
+  return <Nav title={title || 'Dashboard'} user={user.user} loggedIn={loggedIn} changeTheme={changeTheme} theme={theme} logout={logout} />;
 };
 
 const AppRoutes = ({ setUser, user, loggedIn, setLoggedIn, changeTheme, theme, data, setData, addCard, logout, setFilteredData, setShowAlert, showAlert, redirectPath, setRedirectPath }) => {
