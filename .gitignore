@@ -23,6 +23,9 @@ eval $(ssh-agent -s)
 
 google_ads.php
 leaddocket.php
+upload-file.php
+list-files.php
+create-folder.php
 
 npm-debug.log*
 yarn-debug.log*

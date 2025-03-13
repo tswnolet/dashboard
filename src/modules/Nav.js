@@ -13,7 +13,7 @@ import {
   RiBillLine,
 } from "react-icons/ri";
 import { Cloud, Contact2, FileEditIcon, Hash, Menu, Search } from "lucide-react";
-import { ArrowBack, MoreHorizOutlined, ChangeCircleOutlined, CloudDoneOutlined, CloudOutlined, Create, CreateOutlined, Add, AddOutlined, AddCircleOutline } from "@mui/icons-material";
+import { ArrowBack, MoreHorizOutlined, ChangeCircleOutlined, CloudDoneOutlined, CloudOutlined, Create, CreateOutlined, Add, AddOutlined, AddCircleOutline, DocumentScannerOutlined } from "@mui/icons-material";
 import Logo from "../resources/logo.png";
 import "../styles/Nav.css";
 import { Theme } from "./Theme";
@@ -34,7 +34,7 @@ function useOutsideClick(ref, callback) {
 }
 
 /* SearchBar Component */
-const SearchBar = ({ expanded, setExpanded }) => {
+export const SearchBar = ({ expanded, setExpanded }) => {
   const containerRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -308,6 +308,10 @@ const SubInfo = ({
         navigate={navigate}
         setLowerOption={setLowerOption}
       />
+      <div id='library' className={`menu-item ${isActive("/library") ? "active" : ""}`} style={{ justifyContent: expanded ? "flex-start" : "center" }} onClick={() => { if (!isActive("/library")) navigate("/library"); }} title="Library">
+        <DocumentScannerOutlined size={25} />
+        <span style={{ display: expanded ? "block" : "none" }}>Exhibits</span>
+      </div>
     </div>
   );
 };

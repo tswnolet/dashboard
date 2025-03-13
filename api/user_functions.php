@@ -87,15 +87,4 @@ function fetchUserData($conn, $userId, $startDate, $endDate) {
 
     return $data;
 }
-
-function processFunctionData($data, $funcName) {
-    switch ($funcName) {
-        case 'casesByLocation':
-            return processCasesByLocation($data);
-        case 'totalSettlement':
-            return processTotalSettlement($data);
-        default:
-            return $data;
-    }
-}
 ?>

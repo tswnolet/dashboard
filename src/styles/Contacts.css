@@ -40,7 +40,14 @@
 .contacts-table th:not(.td) {
     width: 100%;
     display: flex;
+    justify-content: center;
+}
+
+.contacts-table th:nth-child(2) {
+    display: flex;
     justify-content: flex-start;
+    align-items: center;
+    width: 100%;
 }
 
 th.td {
@@ -130,7 +137,16 @@ th.td {
     color: var(--text-color);
 }
 
-.contacts-table td {
+.contacts-table td:not(:nth-child(2)) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.contacts-table td:nth-child(2) {
     display: flex;
     justify-content: flex-start;
     align-items: center;

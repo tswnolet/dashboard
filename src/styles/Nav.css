@@ -263,6 +263,7 @@ nav.scrolled {
 
 .search-container.expanded {
   width: 100%;
+  max-width: 300px;
   background: var(--card-color);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }

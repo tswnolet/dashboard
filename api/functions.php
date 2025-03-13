@@ -989,7 +989,6 @@ function fetchDisengagementPercent($conn, $startDate, $endDate) {
 
         $value['disengagement_display'] = "{$value['total_disengaged']} ({$percent}%)";
         unset($value['total_disengaged']);
-        $totalCount++;
     }
 
     foreach ($prevData as $key => &$value) {
@@ -1010,9 +1009,9 @@ function fetchDisengagementPercent($conn, $startDate, $endDate) {
     });
 
     $rowCount = 2;
-    if ($totalCount > 8) $rowCount = 3;
-    if ($totalCount > 16) $rowCount = 4;
-    if ($totalCount > 24) $rowCount = 5;
+    if ($totalCount > 12) $rowCount = 3;
+    if ($totalCount > 20) $rowCount = 4;
+    if ($totalCount > 28) $rowCount = 5;
 
     return [
         "title" => "Disengagement Percent",
@@ -1020,7 +1019,7 @@ function fetchDisengagementPercent($conn, $startDate, $endDate) {
         "type" => "table",
         "headers" => ["Referred By", "Total Referred", "Disengagement (#)"],
         "col" => 2,
-        "row" => $rowCount,
+        "row" => 4,
         "prevData" => array_slice($prevData, 0, 20, true),
         "total" => [
             array_sum(array_column($data, 'total_referred')),
