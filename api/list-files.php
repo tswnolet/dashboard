@@ -6,8 +6,8 @@ $s3 = new S3Client([
     'version' => 'latest',
     'region'  => 'us-east-1',
     'credentials' => [
-        'key'    => 'AKIAST6S7JQ47ZAKECBX',
-        'secret' => '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',
+        'key'    => 'AKIAST6S7JQ4TCXYKW7X',
+        'secret' => '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',
     ]
 ]);
 
@@ -17,51 +17,44 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'DELETE') {
     $input = json_decode(file_get_contents("php://input"), true);
-    $fileKey = $input['fileKey'] ?? '';
-    $isFolder = $input['isFolder'] ?? false;
 
-    if (!$fileKey) {
-        echo json_encode(['error' => 'No file key provided']);
-        exit;
-    }
+    if (isset($input['folderPath'])) {
+        $folderPath = rtrim($input['folderPath'], '/') . '/';
 
-    try {
-        if ($isFolder) {
-            $objects = $s3->listObjectsV2([
+        try {
+            $result = $s3->listObjectsV2([
                 'Bucket' => $bucket,
-                'Prefix' => $fileKey . '/'
+                'Prefix' => $folderPath
             ]);
 
-            if (isset($objects['Contents'])) {
-                $deleteKeys = [];
-                foreach ($objects['Contents'] as $object) {
-                    $deleteKeys[] = ['Key' => $object['Key']];
-                }
-
-                if (!empty($deleteKeys)) {
-                    $s3->deleteObjects([
+            if (isset($result['Contents'])) {
+                foreach ($result['Contents'] as $object) {
+                    $s3->deleteObject([
                         'Bucket' => $bucket,
-                        'Delete' => ['Objects' => $deleteKeys]
+                        'Key' => $object['Key']
                     ]);
                 }
             }
 
-            $s3->deleteObject([
-                'Bucket' => $bucket,
-                'Key'    => rtrim($fileKey, '/') . '/'
-            ]);
-        } else {
-            $s3->deleteObject([
-                'Bucket' => $bucket,
-                'Key'    => $fileKey
-            ]);
+            echo json_encode(['success' => true, 'message' => 'Folder and contents deleted']);
+        } catch (Exception $e) {
+            echo json_encode(['error' => $e->getMessage()]);
         }
+        exit;
+    } 
 
-        echo json_encode(['success' => true, 'message' => 'Deleted successfully']);
-    } catch (Exception $e) {
-        echo json_encode(['error' => $e->getMessage()]);
+    if (isset($input['fileKey'])) {
+        try {
+            $s3->deleteObject([
+                'Bucket' => $bucket,
+                'Key' => $input['fileKey']
+            ]);
+            echo json_encode(['success' => true, 'message' => 'File deleted']);
+        } catch (Exception $e) {
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+        exit;
     }
-    exit;
 }
 
 try {

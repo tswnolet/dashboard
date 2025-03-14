@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { CreateCase } from './CreateCase';
 
 export const Cases = () => {
     const [createCase, setCreateCase] = useState(false);
@@ -16,14 +17,15 @@ export const Cases = () => {
         } catch (error) {
             console.error("Error fetching cases:", error);
         }
-    }
+    };
     
     return (
         <div className='page-container'>
             <div id='page-header'>
                 <h1>Cases</h1>
-                <button className='action'>Create Case</button>
+                <button className='action' onClick={() => setCreateCase(true)}>Create Case</button>
             </div>
+            {createCase && <CreateCase setCreateCase={setCreateCase} />}
         </div>
     );
 };

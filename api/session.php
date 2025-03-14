@@ -1,12 +1,4 @@
 <?php
-session_set_cookie_params([
-  'lifetime' => 24 * 60 * 60,
-  'path' => '/',
-  'domain' => '',
-  'secure' => true,
-  'httponly' => true,
-  'samesite' => 'None',
-]);
 session_start();
 
 if(isset($_GET['close'])) {

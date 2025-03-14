@@ -49,19 +49,22 @@ const App = () => {
   };
 
   const checkUserLoggedIn = async () => {
+    setLoggedIn(null);
+
     if (process.env.NODE_ENV === 'development') {
       setLoggedIn(true);
-      setUser({user: 'devuser', user_id: 1});
+      setUser({ user: 'devuser', user_id: 1 });
       setLoading(false);
       return;
     }
+
     try {
-      const response = await fetch('/api/session.php');
+      const response = await fetch('/api/session.php', { credentials: 'include' });
       const data = await response.json();
       if (data.isLoggedIn) {
         setLoggedIn(true);
-        setCookie('session', 'active', 1); 
-        setUser(data.name.split(' ')[0]);
+        setUser(data);
+        setCookie('session', 'active', 1);
       } else {
         setLoggedIn(false);
       }
@@ -117,7 +120,7 @@ const ConditionalNav = ({ user, loggedIn, changeTheme, theme, logout, data, setD
     return null;
   }
 
-  return <Nav title={title || 'Dashboard'} user={user.user} loggedIn={loggedIn} changeTheme={changeTheme} theme={theme} logout={logout} />;
+  return <Nav title={title || 'Dashboard'} user={user?.user} loggedIn={loggedIn} changeTheme={changeTheme} theme={theme} logout={logout} />;
 };
 
 const AppRoutes = ({ setUser, user, loggedIn, setLoggedIn, changeTheme, theme, data, setData, addCard, logout, setFilteredData, setShowAlert, showAlert, redirectPath, setRedirectPath }) => {
@@ -128,6 +131,10 @@ const AppRoutes = ({ setUser, user, loggedIn, setLoggedIn, changeTheme, theme, d
       setRedirectPath(location.pathname + location.search);
     }
   }, [loggedIn, location, setRedirectPath]);
+
+  if (loggedIn === null) {
+    return <Loading />;
+  }
 
   return (
     <Routes>

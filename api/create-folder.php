@@ -9,32 +9,31 @@ $s3 = new S3Client([
     'version' => 'latest',
     'region'  => 'us-east-1',
     'credentials' => [
-        'key'    => 'AKIAST6S7JQ47ZAKECBX',
-        'secret' => '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',
+        'key'    => 'AKIAST6S7JQ4TCXYKW7X',
+        'secret' => '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',
     ]
 ]);
 
 $bucket = 'case-exhibit-storage';
-$data = json_decode(file_get_contents("php://input"), true);
-$folderName = $data['folderName'] ?? '';
-$currentPath = $data['currentPath'] ?? 'Exhibits/';
 
-if (!$folderName) {
-    echo json_encode(['error' => 'No folder name provided']);
+$data = json_decode(file_get_contents("php://input"), true);
+$folderPath = rtrim($data['folderName'], '/') . '/';
+
+if (!$folderPath) {
+    echo json_encode(["success" => false, "error" => "No folder name provided."]);
     exit;
 }
-
-$fullPath = rtrim($currentPath, '/') . '/' . $folderName . '/';
 
 try {
     $s3->putObject([
         'Bucket' => $bucket,
-        'Key'    => $fullPath,
-        'Body'   => ''
+        'Key'    => $folderPath . "placeholder.txt",
+        'Body'   => "This is a placeholder file.",
+        'ACL'    => 'private'
     ]);
 
-    echo json_encode(['success' => true, 'message' => "Folder '$folderName' created inside '$currentPath'"]);
+    echo json_encode(["success" => true, "message" => "Folder created successfully!", "folderPath" => $folderPath]);
 } catch (AwsException $e) {
-    echo json_encode(['error' => $e->getMessage()]);
+    echo json_encode(["success" => false, "error" => $e->getMessage()]);
 }
 ?>

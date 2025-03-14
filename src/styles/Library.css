@@ -20,6 +20,7 @@ input[type="file"] {
     align-items: center;
     flex-direction: column;
     width: 100%;
+    margin-bottom: 50px;
     min-height: 45px;
     font-weight: 500;
     position: relative;
@@ -39,7 +40,16 @@ input[type="file"] {
         width: 100%;
         padding: 5px 20px;
 
-        th:not(:last-child), td {
+        th {
+            cursor:pointer;
+            user-select: none;
+        }
+
+        th, td {
+            font-size: 12.8px;
+        }
+
+        th:not(.file-actions)&:not(.file-name) td {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -51,13 +61,11 @@ input[type="file"] {
             gap: 10px;
             justify-content: flex-start;
             text-wrap: nowrap;
-            cursor: pointer;
-            user-select: none;
+            text-align: left;
         }
 
         .file-date, .file-size, .file-storage {
             width: 15%;
-            font-size: 12.8px;
             text-align: center;
         }
 
@@ -67,14 +75,13 @@ input[type="file"] {
 
         .file-actions {
             width: 60px;
-            cursor: pointer;
-            user-select: none;
-            font-size: 12.8px;
         }
 
         .file-actions-dots {
             padding: 5px 10px;
             border-radius: 3px;
+            cursor:pointer;
+            user-select: none;
         }
 
         .file-actions-dots:hover {
@@ -137,4 +144,49 @@ input[type="file"] {
 .file-actions-menu-child:hover {
     background-color: var(--hover-color);
     color: var(--secondary-color);
+}
+
+.file-preview {
+    position: absolute;
+    top: -150px;
+    background-color: var(--card-color);
+    z-index: 1003;
+    padding: 25px 50px;
+}
+
+.upload-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+}
+
+.upload-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s ease;
+    border-radius: 5px;
+}
+
+.upload-button:disabled {
+    background-color: #aaa;
+    cursor: not-allowed;
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+    width: 20px;
+    height: 20px;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }

@@ -34,7 +34,7 @@ function useOutsideClick(ref, callback) {
 }
 
 /* SearchBar Component */
-export const SearchBar = ({ expanded, setExpanded }) => {
+export const SearchBar = ({ expanded, setExpanded, setSearchQuery }) => {
   const containerRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -58,6 +58,7 @@ export const SearchBar = ({ expanded, setExpanded }) => {
         name='search-bar'
         placeholder="Search"
         className="search-input"
+        onChange={(e) => setSearchQuery(e.target.value)}
         style={{ display: expanded ? "block" : "none" }}
       />
     </div>
@@ -149,17 +150,19 @@ const MainOptions = ({
   toggleDropdown,
   mainOptionsRef,
   activeRoute,
+  openOption,
+  setOpenOption,
 }) => {
   const isActive = (route) => location.pathname == route;
   
   return (
     <div id="menu-maininfo" ref={mainOptionsRef}>
-      {lowerOption ? (
+      {lowerOption || openOption !== 0 ? (
         // If a lower option is active, render a "More" button.
         <div
           className="menu-item"
           style={{ justifyContent: expanded ? "flex-start" : "center" }}
-          onClick={() => setLowerOption(null)}
+          onClick={() => {setLowerOption(null); setOpenOption(0);}}
           title="More"
         >
           <MoreHorizOutlined size={25} />
@@ -236,7 +239,6 @@ const MainOptions = ({
   );
 };
 
-/* SubInfo Component */
 const SubInfo = ({
   expanded,
   location,
@@ -245,73 +247,89 @@ const SubInfo = ({
   toggleDropdown,
   dropdowns,
   activeRoute,
+  openOption,
+  setOpenOption,
 }) => {
   const isActive = (route) => location.pathname == route;
 
   return (
     <div id="menu-subinfo">
       <span className="divider horizontal"></span>
-      <div
-        id="client"
-        className={`menu-item ${isActive("/client-portal") ? "active" : ""}`}
-        style={{ justifyContent: expanded ? "flex-start" : "center" }}
-        onClick={() => {
-          if (!isActive("/client-portal")) navigate("/client-portal");
-          setLowerOption("client-portal");
-        }}
-        title="Client Portal"
-      >
-        <RiAccountBoxLine size={25} />
-        <span style={{ display: expanded ? "block" : "none" }}>
-          Client Portal
-        </span>
-      </div>
-      <Dropdown
-        label="Firm Settings"
-        Icon={RiBuildingLine}
-        expanded={expanded}
-        isOpen={dropdowns["firm-settings"]}
-        toggle={() => toggleDropdown("firm-settings")}
-        onItemClick={() => {
-          if (!isActive("/firm-settings")) navigate("/firm-settings");
-          setLowerOption("firm-settings");
-        }}
-        submenuItems={[
-          {
-            label: "Auto Tags",
-            Icon: Hash,
-            route: "/firm-settings/auto-tags",
-          },
-          {
-            label: "Billing",
-            Icon: RiBillLine,
-            route: "/firm-settings/billing",
-          },
-          {
-            label: "Contacts Setup",
-            Icon: Contact2,
-            route: "/firm-settings/contacts",
-          },
-          {
-            label: "Custom Fields",
-            Icon: FileEditIcon,
-            route: "/firm-settings/custom-fields",
-          },
-          {
-            label: "Layout Editor",
-            Icon: ChangeCircleOutlined,
-            route: "/firm-settings/layout-editor",
-          },
-        ]}
-        activeBase="/firm-settings"
-        location={location}
-        navigate={navigate}
-        setLowerOption={setLowerOption}
-      />
-      <div id='library' className={`menu-item ${isActive("/library") ? "active" : ""}`} style={{ justifyContent: expanded ? "flex-start" : "center" }} onClick={() => { if (!isActive("/library")) navigate("/library"); }} title="Library">
-        <DocumentScannerOutlined size={25} />
-        <span style={{ display: expanded ? "block" : "none" }}>Exhibits</span>
-      </div>
+      {openOption === 1 ? (
+        <>
+          <div
+            id="client"
+            className={`menu-item ${isActive("/client-portal") ? "active" : ""}`}
+            style={{ justifyContent: expanded ? "flex-start" : "center" }}
+            onClick={() => {
+              if (!isActive("/client-portal")) navigate("/client-portal");
+              setLowerOption("client-portal");
+            }}
+            title="Client Portal"
+          >
+            <RiAccountBoxLine size={25} />
+            <span style={{ display: expanded ? "block" : "none" }}>
+              Client Portal
+            </span>
+          </div>
+          <Dropdown
+            label="Firm Settings"
+            Icon={RiBuildingLine}
+            expanded={expanded}
+            isOpen={dropdowns["firm-settings"]}
+            toggle={() => toggleDropdown("firm-settings")}
+            onItemClick={() => {
+              if (!isActive("/firm-settings")) navigate("/firm-settings");
+              setLowerOption("firm-settings");
+            }}
+            submenuItems={[
+              {
+                label: "Auto Tags",
+                Icon: Hash,
+                route: "/firm-settings/auto-tags",
+              },
+              {
+                label: "Billing",
+                Icon: RiBillLine,
+                route: "/firm-settings/billing",
+              },
+              {
+                label: "Contacts Setup",
+                Icon: Contact2,
+                route: "/firm-settings/contacts",
+              },
+              {
+                label: "Custom Fields",
+                Icon: FileEditIcon,
+                route: "/firm-settings/custom-fields",
+              },
+              {
+                label: "Layout Editor",
+                Icon: ChangeCircleOutlined,
+                route: "/firm-settings/layout-editor",
+              },
+            ]}
+            activeBase="/firm-settings"
+            location={location}
+            navigate={navigate}
+            setLowerOption={setLowerOption}
+          />
+          <div id='library' className={`menu-item ${isActive("/library") ? "active" : ""}`} style={{ justifyContent: expanded ? "flex-start" : "center" }} onClick={() => { if (!isActive("/library")) navigate("/library"); }} title="Library">
+            <DocumentScannerOutlined size={25} />
+            <span style={{ display: expanded ? "block" : "none" }}>Exhibits</span>
+          </div>
+        </>
+      ) : (
+        <div
+          className="menu-item"
+          style={{ justifyContent: expanded ? "flex-start" : "center" }}
+          onClick={() => setOpenOption(1)}
+          title="More"
+        >
+          <MoreHorizOutlined size={25} />
+          <span style={{ display: expanded ? "block" : "none" }}>More</span>
+        </div>
+      )}
     </div>
   );
 };
@@ -389,6 +407,7 @@ const Nav = ({ theme, changeTheme, logout }) => {
   });
   const [lowerOption, setLowerOption] = useState(null);
   const [activeRoute, setActiveRoute] = useState("");
+  const [openOption, setOpenOption] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
   const mainOptionsRef = useRef(null);
@@ -472,7 +491,7 @@ const Nav = ({ theme, changeTheme, logout }) => {
           <SearchBar expanded={expanded} setExpanded={setExpanded} />
         </div>
         <span className="divider horizontal"></span>
-        <div id="menu-navigation" style={lowerOption ? { gap: "15px" } : { justifyContent: "space-between" }}>
+        <div id="menu-navigation" style={lowerOption || openOption === 1 ? { gap: "15px" } : { justifyContent: "space-between" }}>
           <MainOptions
             expanded={expanded}
             lowerOption={lowerOption}
@@ -483,6 +502,8 @@ const Nav = ({ theme, changeTheme, logout }) => {
             toggleDropdown={toggleDropdown}
             mainOptionsRef={mainOptionsRef}
             activeRoute={activeRoute}
+            openOption={openOption}
+            setOpenOption={setOpenOption}
           />
           <SubInfo
             expanded={expanded}
@@ -492,6 +513,8 @@ const Nav = ({ theme, changeTheme, logout }) => {
             toggleDropdown={toggleDropdown}
             dropdowns={dropdowns}
             activeRoute={activeRoute}
+            openOption={openOption}
+            setOpenOption={setOpenOption}
           />
         </div>
       </div>

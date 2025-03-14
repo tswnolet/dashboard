@@ -7,8 +7,8 @@ $s3 = new S3Client([
     'version' => 'latest',
     'region'  => 'us-east-1',
     'credentials' => [
-        'key'    => 'AKIAST6S7JQ47ZAKECBX',
-        'secret' => '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',
+        'key'    => 'AKIAST6S7JQ4TCXYKW7X',
+        'secret' => '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',
     ]
 ]);
 
@@ -43,13 +43,20 @@ foreach ($_FILES['files']['name'] as $index => $name) {
     $fileTmp = $_FILES['files']['tmp_name'][$index];
     $filePath = $_POST['filePaths'][$index];
     $normalizedFilePath = ltrim($filePath, '/');
-
     $fullPath = $baseFolder . $normalizedFilePath;
 
     $folderPath = dirname($fullPath) . '/';
     $fileName = basename($fullPath);
 
-    $uniqueFileName = getUniqueFileName($s3, $bucket, $folderPath, $fileName);
+    if ($s3->doesObjectExist($bucket, $folderPath . $fileName) && !isset($_POST['overwrite'])) {
+        echo json_encode([
+            "exists" => true,
+            "fileName" => $fileName
+        ]);
+        exit;
+    }
+
+    $uniqueFileName = isset($_POST['overwrite']) ? $fileName : getUniqueFileName($s3, $bucket, $folderPath, $fileName);
 
     try {
         $s3->putObject([
@@ -61,14 +68,10 @@ foreach ($_FILES['files']['name'] as $index => $name) {
 
         $uploadedFiles[] = $folderPath . $uniqueFileName;
     } catch (AwsException $e) {
-        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        echo json_encode(["success" => false, "error" => $e->getMessage()]);
         exit;
     }
 }
 
-echo json_encode([
-    'success' => true,
-    'message' => 'Files uploaded!',
-    'files' => $uploadedFiles
-]);
+echo json_encode(["success" => true, "message" => "Files uploaded!", "files" => $uploadedFiles]);
 ?>

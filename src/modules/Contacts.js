@@ -27,7 +27,6 @@ export const Contacts = () => {
             } else {
                 setRenderMobile(false);
             }
-            console.log(window.innerWidth);
         }
 
         window.addEventListener('resize', () => {
