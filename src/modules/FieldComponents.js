@@ -77,12 +77,12 @@ export const NumberInput = ({ type, value, onChange }) => {
     );
 };
 
-export const DateInput = ({ value, onChange, disable = false}) => {
+export const DateInput = ({ value, onChange, disable = false }) => {
     return <input type='date' disabled={disable} value={value || ""} onChange={(e) => onChange(e.target.value)} />;
 };
 
-export const Contact = ({ selectedContact, onCreateNewContact, setSelectedContact }) => {
-    const [searchTerm, setSearchTerm] = useState(selectedContact?.full_name || "");
+export const Contact = ({ selectedContact, onCreateNewContact, setSelectedContact, lead = false }) => {
+    const [searchTerm, setSearchTerm] = useState(selectedContact?.full_name || selectedContact?.contact_name || "");
     const [searchResults, setSearchResults] = useState([]);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     
@@ -93,12 +93,12 @@ export const Contact = ({ selectedContact, onCreateNewContact, setSelectedContac
 
     useEffect(() => {
         if (searchTerm.trim().length >= 2) {
-            fetchContacts(searchTerm);
+            lead ? fetchLeads(searchTerm) : fetchContacts(searchTerm);
         } else {
             setSearchResults([]);
             setIsDropdownOpen(false);
         }
-    }, [searchTerm]);
+    }, [searchTerm, lead]);
 
     const fetchContacts = async (query) => {
         try {
@@ -119,11 +119,30 @@ export const Contact = ({ selectedContact, onCreateNewContact, setSelectedContac
         }
     };
 
-    const handleSelectContact = (contact) => {
-        setSearchTerm(contact.full_name);
+    const fetchLeads = async (query) => {
+        try {
+            const response = await fetch(`https://dalyblackdata.com/api/leads.php?search=${encodeURIComponent(query)}&time=${new Date().getTime()}`);
+            const data = await response.json();
+            if (data.success) {
+                setSearchResults(data.leads.slice(0, 5));
+                setIsDropdownOpen(true);
+                positionDropdown();
+            } else {
+                setSearchResults([]);
+                setIsDropdownOpen(false);
+            }
+        } catch (error) {
+            console.error("Error fetching leads:", error);
+            setSearchResults([]);
+            setIsDropdownOpen(false);
+        }
+    };
+
+    const handleSelectItem = (item) => {
+        setSearchTerm(item.full_name || item.contact_name);
         setSearchResults([]);
         setIsDropdownOpen(false);
-        setSelectedContact(contact);
+        setSelectedContact(item);
     };
 
     const positionDropdown = () => {
@@ -162,19 +181,19 @@ export const Contact = ({ selectedContact, onCreateNewContact, setSelectedContac
             <input
                 ref={inputRef}
                 type='text'
-                placeholder="Search or create contact..."
+                placeholder={lead ? "Search for lead..." : "Search or create contact..."}
                 value={searchTerm}
                 onFocus={() => searchResults.length > 0 && setIsDropdownOpen(true)}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 name='contact-input'
             />
-            <div
+            {!lead && <div
                 className='form-box alt'
-                title='Create new contact'
+                title="Create new contact"
                 onClick={onCreateNewContact}
             >
                 +
-            </div>
+            </div>}
             {isDropdownOpen && searchResults.length > 0 && createPortal(
                 <ul
                     ref={dropdownRef}
@@ -186,12 +205,15 @@ export const Contact = ({ selectedContact, onCreateNewContact, setSelectedContac
                         zIndex: 1002,
                     }}
                 >
-                    {searchResults.map((contact) => (
+                    {searchResults.map((item) => (
                         <li
-                            key={contact.id}
-                            onClick={() => handleSelectContact(contact)}
+                            key={item.id}
+                            onClick={() => handleSelectItem(item)}
                         >
-                            {contact.full_name} ({contact.emails?.[0]?.email || "No email"})
+                            {lead 
+                                ? `${item.contact_name} (Status: ${item.status_name})`
+                                : `${item.full_name} (${item.emails?.[0]?.email || "No email"})`
+                            }
                         </li>
                     ))}
                 </ul>,

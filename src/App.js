@@ -20,6 +20,7 @@ import { CustomFields } from './modules/Customs';
 import { Leads } from './modules/CreateLead';
 import { Cases } from './modules/Cases';
 import { FileUpload, FileList } from './modules/ExhibitViewer';
+import { Case } from './modules/Case';
 
 const App = () => {
   const [loading, setLoading] = useState(true);
@@ -143,6 +144,7 @@ const AppRoutes = ({ setUser, user, loggedIn, setLoggedIn, changeTheme, theme, d
           <Route path="/nav" element={<></>} />
           <Route path="/dashboard" element={<Dashboard setLoggedIn={setLoggedIn} />} />
           <Route path="/cases" element={<Cases />} />
+          <Route path="/case/:id" element={<Case id={":id"} />} />
           <Route path="/intake" element={<Leads user={user} />} />
           <Route path="/contacts" element={<Contacts />} />
           <Route path="/client-portal" element={<WIP />} />

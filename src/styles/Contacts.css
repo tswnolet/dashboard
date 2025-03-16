@@ -54,7 +54,7 @@ th.td {
     min-width: 34px;
 }
 
-.contact-name-container, .contact-detail-container, .case-create-container {
+.contact-name-container, .contact-detail-container {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;

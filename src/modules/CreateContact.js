@@ -205,8 +205,8 @@ export const CreateContact = ({ setCreateContact, fetchContacts }) => {
                     </div>
                     <div className='contact-detail-container'>
                         {phones.map((phone, index) => (
-                            <>
-                                <div key={`${index}-${phone}`} className='form-group phone-type'>
+                            <div key={`phone-${index}`} className='phone-number-container'>
+                                <div className='form-group phone-type'>
                                     <label htmlFor={`phone-type-${index}`}>Phone Type</label>
                                     <select className='default-select' value={phone.type} onChange={(e) => {
                                         const newPhones = [...phones];
@@ -220,7 +220,7 @@ export const CreateContact = ({ setCreateContact, fetchContacts }) => {
                                         <option value="other">Other</option>
                                     </select>
                                 </div>
-                                <div key={`${index}-${index}`} className='form-group phone-input'>
+                                <div className='form-group phone-input'>
                                     <label htmlFor={`phone-number-${index}`}>Number</label>
                                     <input type="tel" id={`phone-number-${index}`} value={phone.number} onChange={(e) => {
                                         const newPhones = [...phones];
@@ -229,13 +229,13 @@ export const CreateContact = ({ setCreateContact, fetchContacts }) => {
                                     }} />
                                 </div>
                                 <div className='form-box alt' title='Add another phone number' onClick={addPhone}>+</div>
-                            </>
+                            </div>
                         ))}
                     </div>
                     <div className="contact-detail-container">
                         {emails.map((email, index) => (
-                            <>
-                                <div key={`${index}-first`} className='form-group email-type'>
+                            <div key={`email-${index}`} className='email-container'>
+                                <div className='form-group email-type'>
                                     <label htmlFor={`email-type-${index}`}>Email Type</label>
                                     <select className='default-select' id={`email-type-${index}`} value={email.type} onChange={(e) => {
                                         const newEmails = [...emails];
@@ -247,7 +247,7 @@ export const CreateContact = ({ setCreateContact, fetchContacts }) => {
                                         <option value="other">Other</option>
                                     </select>
                                 </div>
-                                <div key={`${index}-second`} className='form-group email-input'>
+                                <div className='form-group email-input'>
                                     <label htmlFor={`email-address-${index}`}>Email</label>
                                     <input type="email" id={`email-address-${index}`} value={email.email} onChange={(e) => {
                                         const newEmails = [...emails];
@@ -255,8 +255,8 @@ export const CreateContact = ({ setCreateContact, fetchContacts }) => {
                                         setEmails(newEmails);
                                     }} />
                                 </div>
-                                <div key={`${index}-third`} className='form-box alt' title='Add another email' onClick={addEmail}>+</div>
-                            </>
+                                <div className='form-box alt' title='Add another email' onClick={addEmail}>+</div>
+                            </div>
                         ))}
                     </div>
                     <div className='contact-detail-container'>

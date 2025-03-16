@@ -2,16 +2,19 @@ import React, { useState, useEffect } from "react";
 import Modal from "./Modal";
 import { Contact } from "./FieldComponents";
 import { CreateContact } from "./CreateContact";
+import { Info } from "lucide-react";
 
 export const CreateCase = ({ setCreateCase }) => {
     const [selectedContact, setSelectedContact] = useState(null);
     const [caseData, setCaseData] = useState({
-        caseName: "",
-        contact: null,
-        template: ""
+        case_name: "",
+        contact_id: 0,
+        lead_id: null,
+        template_id: 1
     });
     const [caseTemplates, setCaseTemplates] = useState([]);
     const [createContact, setCreateContact] = useState(false);
+    const [leadOrContact, setLeadOrContact] = useState("contact");
 
     useEffect(() => {
         console.log("Case data:", caseData);
@@ -20,7 +23,8 @@ export const CreateCase = ({ setCreateCase }) => {
     useEffect(() => {
         setCaseData((prevData) => ({
             ...prevData,
-            contact: selectedContact
+            contact_id: Number(selectedContact?.contact_id || selectedContact?.id) || null,
+            lead_id: selectedContact?.contact_id ? Number(selectedContact.id) : null
         }));
     }, [selectedContact]);
 
@@ -51,7 +55,6 @@ export const CreateCase = ({ setCreateCase }) => {
 
             const data = await response.json();
             setCaseTemplates(data.templates);
-            console.log(data.templates);
 
         } catch (error) {
             console.error("Error fetching case templates:", error);
@@ -64,7 +67,7 @@ export const CreateCase = ({ setCreateCase }) => {
 
     const handleCreateCase = async () => {
         try {
-            const response = await fetch("https://dalyblackdata.com/api/create_case.php", {
+            const response = await fetch("https://dalyblackdata.com/api/cases.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -77,7 +80,6 @@ export const CreateCase = ({ setCreateCase }) => {
             }
 
             const data = await response.json();
-            console.log("Case created:", data);
 
         } catch (error) {
             console.error("Error creating case:", error);
@@ -101,32 +103,41 @@ export const CreateCase = ({ setCreateCase }) => {
             >
                 <div className='modal-content-wrapper'>
                     <div className='form-group'>
-                        <label>Case Name</label>
+                        <label htmlFor='case_name'>Case Name<span className='required'>*</span></label>
                         <input
+                            id='case_name'
+                            name='case_name'
                             type="text"
                             placeholder="Case Name"
-                            value={caseData.caseName}
-                            onChange={(e) => handleFieldChange("caseName", e.target.value)}
+                            value={caseData.case_name}
+                            onChange={(e) => handleFieldChange("case_name", e.target.value)}
                         />
                     </div>
                     <div className='form-group'>
-                        <label>Add Contact</label>
-                        <Contact 
-                            selectedContact={selectedContact}
-                            setSelectedContact={setSelectedContact}
-                            onCreateNewContact={() => setCreateContact(true)}
-                        />
+                        <label htmlFor={`${leadOrContact === 'contact' ? 'contact' : 'lead'}_id`}>{leadOrContact === 'contact' ? 'Add Contact' : 'Link Lead'}<span className='required'>*</span></label>
+                        <div className='sub-group'>
+                            <select className='default-select' title='Select "Lead" to use already created case detail data.' value={leadOrContact} onChange={(e) => setLeadOrContact(e.target.value)}>
+                                <option value="contact">Contact</option>
+                                <option value="lead">Lead</option>
+                            </select>
+                            <Contact 
+                                selectedContact={selectedContact}
+                                setSelectedContact={setSelectedContact}
+                                onCreateNewContact={() => setCreateContact(true)}
+                                lead={leadOrContact === "lead"}
+                            />
+                        </div>
                     </div>
                     <div className='form-group'>
                         <label>Case Template</label>
                         <select
                             className='default-select'
-                            value={caseData.template || caseTemplates[0]?.name}
-                            onChange={(e) => handleFieldChange("template", e.target.value)}
+                            value={caseData.template_id || caseTemplates[0]?.id}
+                            onChange={(e) => handleFieldChange("template_id", Number(e.target.value))}
                         >
                             <option value="" disabled>Select a Template</option>
                             {caseTemplates.map((template, index) => (
-                                <option key={index} value={template.name}>{template.name}</option>
+                                <option key={index} value={template.id}>{template.name}</option>
                             ))}
                         </select>
                     </div>

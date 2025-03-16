@@ -78,7 +78,7 @@
     width: 100%;
     top: 0;
     padding: 20px 40px 0 40px;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.25), rgba(0,0,0,0));
+    background: linear-gradient(to bottom, rgba(0,0,0,0.15), rgba(0,0,0,0));
     z-index: 1002;
 }
 
@@ -131,17 +131,46 @@
 }
 
 .required {
+    padding: 0 5px;
     color: rgba(255, 76, 76, 0.89);
 }
 
-@media (min-width: 768px) {
+@media (min-width: 769px) {
     .modal-title {
         position: sticky;
+    }
+
+    .sub-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .sub-group > select {
+        grid-column: 1 / 2;
+    }
+
+    .sub-group > input, .sub-group > .contact-input {
+        grid-column: 2 / 5;
     }
 }
 
 @media (max-width: 768px) {
     .modal-title {
         flex-direction: column;
+    }
+
+    .sub-group {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+    }
+
+    .sub-group > select, .sub-group > input, .sub-group > .contact-input {
+        width: 100%;
     }
 }

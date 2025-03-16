@@ -132,14 +132,8 @@
     justify-content: center;
     align-items: center;
     position: relative;
-    gap: 10px;
-}
-
-.contact-input {
-    position: relative;
-    display: flex;
-    align-items: center;
     gap: 5px;
+    width: 100%;
 }
 
 .contact-input input {
