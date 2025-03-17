@@ -12,14 +12,14 @@ import {
   RiLogoutCircleLine,
   RiBillLine,
 } from "react-icons/ri";
-import { Cloud, Contact2, FileEditIcon, Hash, Menu, Search } from "lucide-react";
+import { Book, BookMarkedIcon, Cloud, Contact2, FileEditIcon, Hash, Menu, Search } from "lucide-react";
 import { ArrowBack, MoreHorizOutlined, ChangeCircleOutlined, CloudDoneOutlined, CloudOutlined, Create, CreateOutlined, Add, AddOutlined, AddCircleOutline, DocumentScannerOutlined } from "@mui/icons-material";
 import Logo from "../resources/logo.png";
 import "../styles/Nav.css";
 import { Theme } from "./Theme";
 import { CreateContact } from "./CreateContact";
 
-/* Hook to deect clicks outside a given ref */
+/* Hook to detect clicks outside a given ref */
 function useOutsideClick(ref, callback) {
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -314,9 +314,15 @@ const SubInfo = ({
             navigate={navigate}
             setLowerOption={setLowerOption}
           />
-          <div id='library' className={`menu-item ${isActive("/library") ? "active" : ""}`} style={{ justifyContent: expanded ? "flex-start" : "center" }} onClick={() => { if (!isActive("/library")) navigate("/library"); }} title="Library">
-            <DocumentScannerOutlined size={25} />
-            <span style={{ display: expanded ? "block" : "none" }}>Exhibits</span>
+          <div 
+            id='library' 
+            className={`menu-item ${isActive("/library") ? "active" : ""}`} 
+            style={{ justifyContent: expanded ? "flex-start" : "center" }} 
+            onClick={() => { if (!isActive("/library")) navigate("/library"); setLowerOption("library"); }} 
+            title="Case Library"
+          >
+            <BookMarkedIcon size={25} />
+            <span style={{ display: expanded ? "block" : "none" }}>Case Library</span>
           </div>
         </>
       ) : (
@@ -413,6 +419,10 @@ const Nav = ({ theme, changeTheme, logout }) => {
   const mainOptionsRef = useRef(null);
 
   useEffect(() => {
+    setOpenOption(lowerOption ? 1 : 0);
+  }, [lowerOption]);
+
+  useEffect(() => {
     setActiveRoute(location.pathname);
   }, [location.pathname]);
 
@@ -446,18 +456,22 @@ const Nav = ({ theme, changeTheme, logout }) => {
   const isLowerOptionPage = useCallback(() => {
     return (
       location.pathname.startsWith("/client-portal") ||
-      location.pathname.startsWith("/firm-settings")
+      location.pathname.startsWith("/firm-settings") || 
+      location.pathname.startsWith("/library")
     );
   }, [location.pathname]);
 
   useEffect(() => {
     if (isLowerOptionPage()) {
-      if (location.pathname.startsWith("/client-portal"))
+      if (location.pathname.startsWith("/client-portal")) {
         setLowerOption("client-portal");
-      else if (location.pathname.startsWith("/firm-settings"))
+      } else if (location.pathname.startsWith("/firm-settings")) {
         setLowerOption("firm-settings");
-    } else {
-      setLowerOption(null);
+      } else if (location.pathname.startsWith("/library")) {
+        setLowerOption("library");
+      } else {
+        setLowerOption(null);
+      }
     }
   }, [location.pathname, isLowerOptionPage]);
 
@@ -467,6 +481,8 @@ const Nav = ({ theme, changeTheme, logout }) => {
         setLowerOption("client-portal");
       else if (location.pathname.startsWith("/firm-settings"))
         setLowerOption("firm-settings");
+      else if (location.pathname.startsWith("/library"))
+        setLowerOption("library");
     }
   });
 

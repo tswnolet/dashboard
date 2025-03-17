@@ -5,6 +5,14 @@ header('Content-Type: application/json');
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $section_id = $_GET['section_id'] ?? null;
 
+    $query = "
+        SELECT * FROM fields;";
+    $result = $conn->query($query);
+    $fields = [];
+    while ($row = $result->fetch_assoc()) {
+        $fields[] = $row;
+    }
+
     if (!isset($_GET['section_id'])) {
         $caseTypes = fetchCaseTypes($conn);
         $customFields = fetchCustomFields($conn);
@@ -14,20 +22,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             'success' => true,
             'case_types' => $caseTypes,
             'custom_fields' => $customFields,
+            'fields' => $fieldTypes,
             'field_types' => $fieldTypes
         ]);
         exit;
     }
     
     if (isset($section_id)) {
-        $query = "
-            SELECT * FROM fields;";
-        $result = $conn->query($query);
-        $fields = [];
-        while ($row = $result->fetch_assoc()) {
-            $fields[] = $row;
-        }
-
         $customFields = fetchCustomFields($conn, $section_id);
         echo json_encode(['success' => true, 'custom_fields' => $customFields, 'fields' => $fields]);
     }

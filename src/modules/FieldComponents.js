@@ -26,7 +26,7 @@ export const Dropdown = ({ options = [], value = "", onChange = () => {} }) => {
     }
 
     return (
-        <select className='default-select' value={value || ""} onChange={(e) => onChange(e.target.value)}>
+        <select className={`default-select`} value={value || ""} onChange={(e) => onChange(e.target.value)}>
             <option value="">Select...</option>
             {parsedOptions.map((option, index) => (
                 <option key={index} value={option}>{option}</option>
@@ -81,7 +81,7 @@ export const DateInput = ({ value, onChange, disable = false }) => {
     return <input type='date' disabled={disable} value={value || ""} onChange={(e) => onChange(e.target.value)} />;
 };
 
-export const Contact = ({ selectedContact, onCreateNewContact, setSelectedContact, lead = false }) => {
+export const Contact = ({ selectedContact, onCreateNewContact, setSelectedContact, onCreateNewLead, lead = false }) => {
     const [searchTerm, setSearchTerm] = useState(selectedContact?.full_name || selectedContact?.contact_name || "");
     const [searchResults, setSearchResults] = useState([]);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -186,14 +186,15 @@ export const Contact = ({ selectedContact, onCreateNewContact, setSelectedContac
                 onFocus={() => searchResults.length > 0 && setIsDropdownOpen(true)}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 name='contact-input'
+                autoComplete="off"
             />
-            {!lead && <div
+            <div
                 className='form-box alt'
                 title="Create new contact"
-                onClick={onCreateNewContact}
+                onClick={() => !lead ? onCreateNewContact() : onCreateNewLead()}
             >
                 +
-            </div>}
+            </div>
             {isDropdownOpen && searchResults.length > 0 && createPortal(
                 <ul
                     ref={dropdownRef}

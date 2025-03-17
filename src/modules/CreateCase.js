@@ -3,17 +3,19 @@ import Modal from "./Modal";
 import { Contact } from "./FieldComponents";
 import { CreateContact } from "./CreateContact";
 import { Info } from "lucide-react";
+import { CreateLead } from "./CreateLead";
 
-export const CreateCase = ({ setCreateCase }) => {
+export const CreateCase = ({ user, setCreateCase, fetchCases, caseTemplates }) => {
     const [selectedContact, setSelectedContact] = useState(null);
+    const [selectedLead, setSelectedLead] = useState(null);
     const [caseData, setCaseData] = useState({
         case_name: "",
         contact_id: 0,
         lead_id: null,
         template_id: 1
     });
-    const [caseTemplates, setCaseTemplates] = useState([]);
     const [createContact, setCreateContact] = useState(false);
+    const [createLead, setCreateLead] = useState(false);
     const [leadOrContact, setLeadOrContact] = useState("contact");
 
     useEffect(() => {
@@ -45,26 +47,6 @@ export const CreateCase = ({ setCreateCase }) => {
         setCreateCase(true);
     };
 
-    const fetchCaseTemplates = async () => {
-        try {
-            const response = await fetch("https://dalyblackdata.com/api/layout.php");
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            setCaseTemplates(data.templates);
-
-        } catch (error) {
-            console.error("Error fetching case templates:", error);
-        }
-    };
-
-    useEffect(() => {
-        fetchCaseTemplates();
-    }, []);
-
     const handleCreateCase = async () => {
         try {
             const response = await fetch("https://dalyblackdata.com/api/cases.php", {
@@ -80,11 +62,22 @@ export const CreateCase = ({ setCreateCase }) => {
             }
 
             const data = await response.json();
+            fetchCases();
 
         } catch (error) {
             console.error("Error creating case:", error);
         }
     };
+
+    const handleNewLeadCreated = (lead) => {
+        setSelectedLead(lead);
+        setCreateLead(false);
+        setCreateCase(true);
+    };
+
+    useEffect(() => {
+        console.log(createLead);
+    }, [createLead]);
 
     return (
         <>
@@ -114,19 +107,13 @@ export const CreateCase = ({ setCreateCase }) => {
                         />
                     </div>
                     <div className='form-group'>
-                        <label htmlFor={`${leadOrContact === 'contact' ? 'contact' : 'lead'}_id`}>{leadOrContact === 'contact' ? 'Add Contact' : 'Link Lead'}<span className='required'>*</span></label>
-                        <div className='sub-group'>
-                            <select className='default-select' title='Select "Lead" to use already created case detail data.' value={leadOrContact} onChange={(e) => setLeadOrContact(e.target.value)}>
-                                <option value="contact">Contact</option>
-                                <option value="lead">Lead</option>
-                            </select>
-                            <Contact 
-                                selectedContact={selectedContact}
-                                setSelectedContact={setSelectedContact}
-                                onCreateNewContact={() => setCreateContact(true)}
-                                lead={leadOrContact === "lead"}
-                            />
-                        </div>
+                        <label htmlFor='lead_id'>Link or Create Lead<span className='required'>*</span></label>
+                        <Contact
+                            setSelectedContact={setSelectedContact}
+                            selectedContact={selectedContact}
+                            onCreateNewLead={() => setCreateLead(true)}
+                            lead={true}
+                        />
                     </div>
                     <div className='form-group'>
                         <label>Case Template</label>
@@ -144,6 +131,7 @@ export const CreateCase = ({ setCreateCase }) => {
                 </div>
             </Modal>
             {createContact && <CreateContact setCreateContact={setCreateContact} onContactCreated={handleNewContactCreated} />}
+            {createLead && <CreateLead setCreateLead={setCreateLead} user={user} />}
         </>
     );
 };

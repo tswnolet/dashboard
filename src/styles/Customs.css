@@ -235,6 +235,17 @@
     width: 100%;
 }
 
+.number-input input {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+.number-input input::-webkit-outer-spin-button,
+.number-input input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
 .number-input .number-symbol {
     position: absolute;
     right: 10px;

@@ -7,6 +7,20 @@ import FolderTreeManager from "./FolderTreeManager";
 import { index } from "d3";
 import { Boolean, Contact, DateInput, Dropdown, NumberInput, Text } from "./FieldComponents";
 
+const Vital = ({ vital, description }) => {
+    return (
+        <div className="vital">
+            <div className='form-group small'>
+                <label className='vital-name'>{vital}</label>
+                {/*false === true && <Dropdown options={caseTypes.map((type) => type.name)}/>*/}
+            </div>
+            <div className='vital-description'>
+                <p className='subtext'>{description}</p>
+            </div>
+        </div>
+    );
+}
+
 const IconMap = {
     "Activity": Activity,
     "FileText": FileText,
@@ -68,6 +82,7 @@ export const LayoutEditor = () => {
     const [phaseData, setPhaseData] = useState({ phase: "", description: "", template_id: 0, order_id: 0 });
     const [editPhase, setEditPhase] = useState(null);
     const [dragging, setDragging] = useState(null);
+    const [vitalData, setVitalData] = useState({ name: "", description: "", icon: "", order_id: 0 });
     const [folderData, setFolderData] = useState({ name: "", parent_folder_id: 0, folder_access: "Standard" });
     const [folders, setFolders] = useState([]);
     const [fieldTypes, setFieldTypes] = useState([]);
@@ -86,6 +101,7 @@ export const LayoutEditor = () => {
     const [statuses, setStatuses] = useState([]);
     const [statusData, setStatusData] = useState({ name: "", description: "" });
     const [statusExpanded, setStatusExpanded] = useState(null);
+    const [caseTypes, setCaseTypes] = useState([]);
     
     const handleMouseEnter = (fieldId) => {
         if (hoverTimeout) clearTimeout(hoverTimeout);
@@ -195,8 +211,8 @@ export const LayoutEditor = () => {
             const data = await response.json();
 
             if (data.templates.length > 0) {
-                setTemplates(data.templates);
-                const firstTemplate = data.templates[0];
+                setTemplates(data.templates.filter((template) => template.visibility !== "2"));
+                const firstTemplate = data.templates.filter((template) => template.default === "1")[0];
                 setDefaultTemplate(firstTemplate);
                 fetchTemplateLayout(firstTemplate.id);
             }
@@ -227,9 +243,9 @@ export const LayoutEditor = () => {
         }
     };
 
-    const fetchCurrentFields = async (sectionId) => {
+    const fetchCurrentFields = async (sectionId = null) => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/custom_fields.php?section_id=${sectionId}&time=${new Date().getTime()}`);
+            const response = await fetch(`https://dalyblackdata.com/api/custom_fields.php?${sectionId ? `section_id=${sectionId}&` : ""}time=${new Date().getTime()}`);
             const data = await response.json();
             setCurrentFields(data.custom_fields || []);
             setFieldTypes(data.fields);
@@ -586,6 +602,16 @@ export const LayoutEditor = () => {
         }
     };
 
+    const fetchCaseTypes = async () => {
+        try {
+            const response = await fetch("https://dalyblackdata.com/api/case_types.php");
+            const data = await response.json();
+            setCaseTypes(data.case_types || []);
+        } catch (error) {
+            console.error("Error fetching case types:", error);
+        }
+    };
+
     const postMarketingSource = async (newSource) => {
         marketingSource.template_id = defaultTemplate.id;
         marketingSource.order_id = marketingSource.order_id === null ? marketingSources.length + 1 : marketingSource.order_id;
@@ -663,7 +689,12 @@ export const LayoutEditor = () => {
             default:
                 return null;
         }
-    };    
+    };
+
+    useEffect(() => {
+        fetchCurrentFields();
+        fetchCaseTypes();
+    }, []);
 
     return (
         <div className="page-container">
@@ -685,22 +716,39 @@ export const LayoutEditor = () => {
                         <select className='default-select' value={selectedTemplateHeader} onChange={(e) => setSelectedTemplateHeader(Number(e.target.value))}>
                             <option value={0}>Sections</option>
                             <option value={1}>Phases</option>
-                            <option value={2}>Folder Structure</option>
-                            <option value={3}>Marketing Sources</option>
-                            <option value={4}>Lead Statuses</option>
+                            <option value={2}>Vitals</option>
+                            <option value={3}>Folder Structure</option>
+                            <option value={4}>Marketing Sources</option>
+                            <option value={5}>Lead Statuses</option>
                         </select>
                     )  : (
                         <>
                             <h4 onClick={() => setSelectedTemplateHeader(0)} className={selectedTemplateHeader === 0 ? 'active' : ''}>Sections</h4>
                             <h4 onClick={() => setSelectedTemplateHeader(1)} className={selectedTemplateHeader === 1 ? 'active' : ''}>Phases</h4>
-                            <h4 onClick={() => setSelectedTemplateHeader(2)} className={selectedTemplateHeader === 2 ? 'active' : ''}>Folder Structure</h4>
-                            <h4 onClick={() => setSelectedTemplateHeader(3)} className={selectedTemplateHeader === 3 ? 'active' : ''}>Marketing Sources</h4>
-                            <h4 onClick={() => setSelectedTemplateHeader(4)} className={selectedTemplateHeader === 4 ? 'active' : ''}>Lead Statuses</h4>
+                            <h4 onClick={() => setSelectedTemplateHeader(2)} className={selectedTemplateHeader === 2 ? 'active' : ''}>Vitals</h4>
+                            <h4 onClick={() => setSelectedTemplateHeader(3)} className={selectedTemplateHeader === 3 ? 'active' : ''}>Folder Structure</h4>
+                            <h4 onClick={() => setSelectedTemplateHeader(4)} className={selectedTemplateHeader === 4 ? 'active' : ''}>Marketing Sources</h4>
+                            <h4 onClick={() => setSelectedTemplateHeader(5)} className={selectedTemplateHeader === 5 ? 'active' : ''}>Lead Statuses</h4>
                         </>
                     )}
                 </div>
                 <div className='template-container-header'>
-                    <h4>{defaultTemplate?.name} {selectedTemplateHeader === 0 ? 'Sections' : selectedTemplateHeader === 1 ? 'Phases' : selectedTemplateHeader === 2 ? 'Folder Structure' : selectedTemplateHeader === 3 ? 'Marketing Sources' : 'Lead Statuses'}</h4>
+                    <h4>
+                        {defaultTemplate?.name}
+                        {" "}
+                        {selectedTemplateHeader === 0 
+                            ? 'Sections' 
+                                : selectedTemplateHeader === 1 
+                            ? 'Phases' 
+                                : selectedTemplateHeader === 2 
+                            ? 'Vitals' 
+                                : selectedTemplateHeader === 3 
+                            ? 'Folder Structure' 
+                                : selectedTemplateHeader === 4 
+                            ? 'Marketing Sources' 
+                                : 'Lead Statuses'
+                        }
+                    </h4>
                     <button className="action alt" onClick={() => {
                         switch (selectedTemplateHeader) {
                             case 0:
@@ -710,12 +758,15 @@ export const LayoutEditor = () => {
                                 setCreateNew('phase');
                                 break;
                             case 2:
-                                setCreateNew('folder');
+                                setCreateNew('vitals');
                                 break;
                             case 3:
-                                setCreateNew('marketing');
+                                setCreateNew('folder');
                                 break;
                             case 4:
+                                setCreateNew('marketing');
+                                break;
+                            case 5:
                                 setCreateNew('statuses');
                                 break;
                             default:
@@ -728,10 +779,12 @@ export const LayoutEditor = () => {
                                 : selectedTemplateHeader === 1 
                                 ? 'Phase' 
                                 : selectedTemplateHeader === 2 
-                                ? 'Folder' 
+                                ? 'Vital' 
                                 : selectedTemplateHeader === 3 
-                                ? 'Marketing Source'
-                                : "Lead Status"
+                                ? 'Folder'
+                                : selectedTemplateHeader === 4
+                                ? "Marketing Source"
+                                : 'Lead Status'
                         }
                     </button>
                 </div>
@@ -881,11 +934,24 @@ export const LayoutEditor = () => {
                             </div>
                         </div>
                     ) : (selectedTemplateHeader === 2 ? (
+                        <div className='vitals-container'>
+                            <div className='vitals-list'>
+                                <Vital vital='Case Type' description={'The type of case being managed. Value assigned during lead creation.'} />
+                                <Vital vital='Intake Data' description={'The date the case was created. Value assigned during lead creation.'} />
+                                <Vital vital='Intake Time' description={'The time the case was created. Value assigned during lead creation.'} />
+                                <Vital vital='Intake User' description={'The user who created the case. Value assigned during lead creation.'} />
+                                <Vital vital='Marketing Source' description={'The source of the lead. Value assigned during lead creation.'} />
+                                <Vital vital='Referred By' description={'The person or company who referred the lead. Value assigned during lead creation.'} />
+                                <Vital vital='DB Origination' description={'The Daly & Black employee who referred the lead. Value assigned during lead creation.'} />
+                                
+                            </div>
+                        </div>
+                    ) : (selectedTemplateHeader === 3 ? (
                         <FolderTreeManager 
                             templateId={defaultTemplate?.id} 
                             folders={folders}
                         />
-                    ) : (selectedTemplateHeader === 3 ? (
+                    ) : (selectedTemplateHeader === 4 ? (
                         <div className='marketing-source-container'>
                             {marketingSources.map((source, index) => (
                                 <div key={index} className="marketing-source">
@@ -927,7 +993,7 @@ export const LayoutEditor = () => {
                             ))}
                         </div>
                     ))
-                ))}
+                )))}
             </div>
             {addingField && (
                 <Modal onClose={() => setAddingField(null)}>
@@ -1003,7 +1069,7 @@ export const LayoutEditor = () => {
                             <h4>Create New Section</h4>
                             <div className='form-group'>
                                 <label htmlFor='name'>Section Name</label>
-                                <input 
+                                <input
                                     type="text" 
                                     placeholder="Section Name" 
                                     name="name" 
@@ -1029,6 +1095,23 @@ export const LayoutEditor = () => {
                                 <input type='number' placeholder='Order' value={phaseData.order_id} onChange={(e) => setPhaseData({ ...phaseData, order_id: e.target.value })}/>
                             </div>
                             <button className="action" onClick={createNewPhase}>Save Phase</button>
+                        </div>
+                    ) : (createNew === 'vitals' ? (
+                        <div className='new-template'>
+                            <h4>Create New Vital</h4>
+                            <div className='form-group'>
+                                <label htmlFor='vital_name'>Vital Name</label>
+                                <input type="text" id='vital_name' onChange={(e) => setVitalData({ ...vitalData, vital_name: e.target.value })} value={vitalData.vital_name} name='vital_name' placeholder="Vital Name"/>
+                            </div>
+                            <div className='form-group'>
+                                <label htmlFor='vital_field'>Vital Field</label>
+                                <select className='default-select' onChange={(e) => setVitalData({ ...vitalData, vital_field: e.target.value })} value={vitalData.vital_field} >
+                                    <option value=''>Select Vital Field</option>
+                                    {currentFields.map(field => (
+                                        <option key={field.id} value={field.id}>{field.name}</option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
                     ) : (createNew === 'folder' ? (
                             <div className='new-template'>
@@ -1103,7 +1186,7 @@ export const LayoutEditor = () => {
                                 <button className="action" onClick={postStatuses}>Save Status</button>
                             </div>
                         ) : <></>
-                    )))}
+                    ))))}
                 </Modal>
             )}
             {showIconModal && (

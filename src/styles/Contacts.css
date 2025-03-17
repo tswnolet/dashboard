@@ -3,6 +3,9 @@
     flex-direction: column;
 }
 
+.contacts-table thead {
+}
+
 .contact {
     display: flex;
     justify-content: flex-start;
@@ -12,6 +15,17 @@
     padding: 5px 10px;
     cursor: pointer;
     border-bottom: 1px solid var(--border-color);
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+}
+
+.contact:first-child {
+    border-radius: 3px 3px 0 0;
+    border-top: 1px solid var(--border-color);
+}
+
+.contact:last-child {
+    border-radius: 0 0 3px 3px;
 }
 
 .contact-picture, .form-box {
@@ -96,8 +110,6 @@ th.td {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 32px;
-    height: 32px;
     border-radius: 3px;
     background-color: var(--border-color);
 
@@ -108,6 +120,16 @@ th.td {
         font-size: 12.8px;
         height: 32px;
     }
+}
+
+.contact-initials:not(.large) {
+    width: 32px;
+    height: 32px;
+}
+
+.contact-initials.large {
+    width: 45px;
+    height: 45px;
 }
 
 .contacts-table, .leads-table {
@@ -160,7 +182,14 @@ th.td {
     border-radius: 3px;
     padding: 0 5px;
     font-size: 12.8px;
+}
+
+.tag:not(.caps) {
     text-transform: lowercase;
+}
+
+.tag.caps {
+    text-transform: capitalize;
 }
 
 .person-or-company {

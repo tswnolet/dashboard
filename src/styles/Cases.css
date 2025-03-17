@@ -53,3 +53,49 @@ td.case-name {
     background-color: var(--secondary-color);
     border: 1px solid var(--border-color);
 }
+
+.case-sidebar-header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    padding: 15px;
+    gap: 10px;
+}
+
+.case-sidebar-breakdown {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2.5px;
+    width: 100%;
+    padding: 15px;
+}
+
+.case-sidebar-vitals {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+    width: 100%;
+}
+
+.sidebar-vital-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.sidebar-vital {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-direction: column;
+    width: 100%;
+}
+
+.sidebar-vital > span:first-child {
+    color: var(--fill);
+}

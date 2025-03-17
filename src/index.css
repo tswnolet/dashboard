@@ -26,6 +26,7 @@
   --dark: 0;
   --graph-color: #624b8f;
   --fill: rgb(40, 57, 85);
+  --fill-2: #f4bc41;
 }
 
 .dark {
@@ -44,6 +45,7 @@
   --dark: 255;
   --graph-color: #ede8ff;
   --fill: #f4bc41;
+  --fill-2: rgb(40, 57, 85);
 }
 
 body {
@@ -420,7 +422,14 @@ table:not(.schools) > tbody > tr > td {
 .default-select, .action, .section-properties input, .section-properties textarea {
   outline: none;
   border-radius: 3px;
-  max-width: 500px;
+
+  &:not(.small) {
+    max-width: 500px;
+  }
+}
+
+.small {
+  margin: 0 !important;
 }
 
 .default-select, .action, .section-properties input {
@@ -487,4 +496,15 @@ table:not(.schools) > tbody > tr > td {
 
 .sub-title.alt {
   color: var(--subtext-color);
+}
+
+option:disabled {
+  color: var(--dark) !important;
+}
+
+.info-label {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 5px;
 }

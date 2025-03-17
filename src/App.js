@@ -17,7 +17,7 @@ import { WIP } from './modules/WIP';
 import { LayoutEditor } from './modules/LayoutEditor';
 import { Contacts } from './modules/Contacts';
 import { CustomFields } from './modules/Customs';
-import { Leads } from './modules/CreateLead';
+import { Leads } from './modules/Leads';
 import { Cases } from './modules/Cases';
 import { FileUpload, FileList } from './modules/ExhibitViewer';
 import { Case } from './modules/Case';
@@ -143,7 +143,7 @@ const AppRoutes = ({ setUser, user, loggedIn, setLoggedIn, changeTheme, theme, d
         <>
           <Route path="/nav" element={<></>} />
           <Route path="/dashboard" element={<Dashboard setLoggedIn={setLoggedIn} />} />
-          <Route path="/cases" element={<Cases />} />
+          <Route path="/cases" element={<Cases user={user} />} />
           <Route path="/case/:id" element={<Case id={":id"} />} />
           <Route path="/intake" element={<Leads user={user} />} />
           <Route path="/contacts" element={<Contacts />} />

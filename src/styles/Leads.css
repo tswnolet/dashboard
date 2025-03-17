@@ -34,6 +34,17 @@
     height: 45px;
     cursor: pointer;
     border-bottom: 1px solid var(--border-color);
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+}
+
+.lead:first-child, .case:first-child {
+    border-radius: 3px 3px 0 0;
+    border-top: 1px solid var(--border-color);
+}
+
+.lead:last-child, .case:last-child {
+    border-radius: 0 0 3px 3px;
 }
 
 .leads-table thead, .cases-table thead {
@@ -46,12 +57,15 @@
     padding: 5px 15px;
 }
 
-.leads-table th, .cases-table th:not(.case-name) {
+.leads-table th, .cases-table th {
     width: 100%;
     display: flex;
-    justify-content: center;
     align-items: center;
     gap: 10px;
+
+    &:not(.case-name) {
+        justify-content: center;
+    }
 }
 
 .star-icon:not(.empty) {
@@ -59,7 +73,7 @@
 }
 
 @media (min-width: 769px) {
-    .lead-name, .case-name {
+    .lead-name {
         min-width: 25%;
     }
 
@@ -69,7 +83,7 @@
 }
 
 @media (max-width: 768px) {
-    .lead-name, .case-name {
+    .lead-name {
         min-width: 50%;
     }
 

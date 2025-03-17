@@ -11,16 +11,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $contact_id = $data['contact_id'] ?? '';
     $lead_id = $data['lead_id'] ?? '';
     $template_id = $data['template_id'] ?? '';
-    $created_by = $_SESSION['user_id'] ?? 0;
+    $created_by = $_SESSION['user_id'] ?? 6;
 
     if (empty($case_name) || empty($template_id)) {
         echo json_encode(['success' => false, 'message' => 'Missing required data']);
         exit;
     }
 
-    $sql = "INSERT INTO cases (case_name, contact_id, lead_id, template_id, created_by) VALUES (?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO cases (case_name, contact_id, lead_id, template_id) VALUES (?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("siiii", $case_name, $contact_id, $lead_id, $template_id, $created_by);
+    $stmt->bind_param("siii", $case_name, $contact_id, $lead_id, $template_id);
     $stmt->execute();
 
     if ($stmt->affected_rows > 0) {
@@ -43,15 +43,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id'])) {
         SELECT 
             cases.*, 
             users.user AS created_by_name, 
+            phases.phase AS phase_name,
             COALESCE(contacts.profile_picture, 
                 CONCAT(
                     UPPER(LEFT(contacts.first_name, 1)), 
                     UPPER(LEFT(contacts.last_name, 1))
                 )
-            ) AS contact_display 
+            ) AS contact_display,
+            leads.*, 
+            contacts.*
         FROM cases 
         JOIN users ON cases.created_by = users.id 
+        JOIN phases ON cases.phase_id = phases.id
         LEFT JOIN contacts ON cases.contact_id = contacts.id
+        LEFT JOIN leads ON cases.lead_id = leads.id
         WHERE cases.id = ?
     ";
     
@@ -71,15 +76,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         SELECT 
             cases.*, 
             users.user AS created_by_name, 
+            phases.phase AS phase_name,
             COALESCE(contacts.profile_picture, 
                 CONCAT(
                     UPPER(LEFT(contacts.first_name, 1)), 
                     UPPER(LEFT(contacts.last_name, 1))
                 )
-            ) AS contact_display 
+            ) AS contact_display,
+            leads.*, 
+            contacts.*
         FROM cases 
         JOIN users ON cases.created_by = users.id 
+        JOIN phases ON cases.phase_id = phases.id
         LEFT JOIN contacts ON cases.contact_id = contacts.id
+        LEFT JOIN leads ON cases.lead_id = leads.id
     ";
     
     $result = $conn->query($sql);

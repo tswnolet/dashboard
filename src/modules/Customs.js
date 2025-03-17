@@ -3,7 +3,7 @@ import Modal from "./Modal";
 import '../styles/Customs.css';
 import { Boolean, Contact, Dropdown, Text, NumberInput, DateInput } from "./FieldComponents";
 import { ArrowDown } from "@mynaui/icons-react";
-import { ArrowDown01, ArrowDownIcon, ArrowDownToDot, ChevronDown, ChevronUp, MoveDownIcon } from "lucide-react";
+import { ArrowDown01, ArrowDownIcon, ArrowDownToDot, ChevronDown, ChevronUp, Info, MoveDownIcon } from "lucide-react";
 import { ArrowDownward } from "@mui/icons-material";
 
 export const CustomFields = () => {
@@ -30,6 +30,9 @@ export const CustomFields = () => {
     const displayFieldOptions = Array.isArray(selectedDisplayField?.options) 
         ? selectedDisplayField.options
         : [];
+    const [showTooltip, setShowTooltip] = useState(false);
+    const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
+    const [fieldOptionsSelected, setFieldOptionsSelected] = useState({});
 
     useEffect(() => {
         const foundType = fieldTypes.find(ft => Number(ft.id) === Number(newField.field_id));
@@ -92,9 +95,10 @@ export const CustomFields = () => {
                     options: fields.options ? JSON.parse(fields.options) : []
                 }));
     
-                setCaseTypes(data.case_types);
+                setCaseTypes(data.case_types.filter(type => type.id !== "0"));
                 setFields(parsedFields);
                 setFieldTypes(data.field_types);
+                console.log(data.field_types, data.custom_fields);
             } else {
                 console.error("Error fetching data:", data.message);
             }
@@ -181,261 +185,288 @@ export const CustomFields = () => {
         }
     };
 
+    const handleMouseMove = (event) => {
+        setTooltipPos({ x: event.clientX + 10, y: event.clientY });
+    };
+
+    const handleBooleanChange = (field_id, value) => {
+        setFieldOptionsSelected((prev) => ({
+            ...prev,
+            [field_id]: value
+        }));
+    };
+
     return (
-        <div className="page-container">
-            <div id='page-header'>
-                <h1>Custom Fields</h1>
-                <button className='action' onClick={() => setCreateNew('field')}>New Field</button>
-                <button className='action alt' onClick={() => setCreateNew('case type')}>New Case Type</button>
-            </div>
-            <h4 className='sub-title alt'>Case Types</h4>
-            <div className='case-types'>
-                {caseTypes.map((type) => (
-                    <div key={type.id} className='case-type'>
-                        <p>{type.name} ({type.aka})</p>
-                        {type.description && <p className='subtext'>{type.description}</p>}
-                    </div>
-                ))}
-            </div>
-            <h4 className='sub-title alt'>Custom Fields</h4>
-            <div className="fields-list">
-                {fields?.map((field) => (
-                    <div key={field.id} className="field">
-                        <p className='field-name'>{field.name}{" "}
-                            <span className='subtext'>
-                            ({fieldTypes.map((fieldType, index) => 
-                                    field.field_id === fieldType.id ? fieldType.name : null
-                                )})
-                            </span>
-                        </p>
-                        <div className='form-group alt mid' style={{maxWidth: '250px'}}>
-                            {(field.field_id === "1" || field.field_id === "2") && <Text type={field.field_id === '2' ? 'textarea' : 'text'} placeholder={field.name}/>}
-                            {(field.field_id === "3" || field.field_id === "4" || field.field_id === '5') && <NumberInput type={field.field_id === '3' ? 'currency' : field.field_id === '4' ? 'percent' : 'number'}/>}
-                            {field.field_id === "6"  && <DateInput />}
-                            {field.field_id === "8" && <Contact />}
-                            {field.field_id === "10" && <Dropdown options={field.options} placeholder={field.name}/>}
-                            {field.field_id === "12" && <Boolean options={field.options} />}
+        <>
+            <div className="page-container">
+                <div id='page-header'>
+                    <h1>Custom Fields</h1>
+                    <button className='action' onClick={() => setCreateNew('field')}>New Field</button>
+                    <button className='action alt' onClick={() => setCreateNew('case type')}>New Case Type</button>
+                </div>
+                <h4 className='sub-title alt'>Case Types</h4>
+                <div className='case-types'>
+                    {caseTypes.map((type) => (
+                        <div key={type.id} className='case-type'>
+                            <p>{type.name} ({type.aka})</p>
+                            {type.description && <p className='subtext'>{type.description}</p>}
                         </div>
-                        <div className='field-info'>
-                            <p className='subtext'>
-                                {field.display_when ? `(Display when ${
-                                    fields.find(f => 
-                                        f.id === field.display_when && f.case_type_id === field.case_type_id
-                                    ).name
-                                    } is ${field.is_answered !== "" && fields.find(f => 
-                                        f.id === field.display_when && f.case_type_id === field.case_type_id
-                                    ).options[parseFloat(field.is_answered)] || "Anything"})` : null
-                                }
+                    ))}
+                </div>
+                <h4 className='sub-title alt'>Custom Fields</h4>
+                <div className="fields-list">
+                    {fields?.map((field) => (
+                        <div key={field.id} className="field">
+                            <p className='field-name'>{field.name}{" "}
+                                <span className='subtext'>
+                                ({fieldTypes?.map((fieldType, index) => 
+                                        field.field_id === Number(fieldType.id) ? fieldType.name : null
+                                    )})
+                                </span>
                             </p>
-                            <p className="subtext">
-                                {caseTypes.map((caseTypes, index) =>
-                                    field.case_type_id === caseTypes.id ? caseTypes.name : null
-                                )}
-                            </p>
+                            <div className='form-group alt mid' style={{maxWidth: '250px'}}>
+                                {(field.field_id === 1 || field.field_id === 2) && <Text type={field.field_id === 2 ? 'textarea' : 'text'} placeholder={field.name} value={fieldOptionsSelected[field.id] || ''} onChange={(e) => handleBooleanChange(field.id, e)}/>}
+                                {(field.field_id === 3 || field.field_id === 4 || field.field_id === 5) && <NumberInput type={field.field_id === 3 ? 'currency' : field.field_id === 4 ? 'percent' : 'number'} value={fieldOptionsSelected[field.id] || ''} onChange={(e) => handleBooleanChange(field.id, e)}/>}
+                                {field.field_id === 6  && <DateInput value={fieldOptionsSelected[field.id] || ''} onChange={(e) => handleBooleanChange(field.id, e)}/>}
+                                {field.field_id === 8 && <Contact  value={fieldOptionsSelected[field.id] || ''} setSelectedContact={(e) => handleBooleanChange(field.id, e)} onCreateNewContact={() => null}/>}
+                                {field.field_id === 10 && <Dropdown options={field.options} placeholder={field.name} value={fieldOptionsSelected[field.id] || ""} onChange={(e) => handleBooleanChange(field.id, e)}/>}
+                                {field.field_id === 12 && <Boolean options={field.options} value={fieldOptionsSelected[field.id] || "Unknown"} onChange={(e) => handleBooleanChange(field.id, e)} />}
+                            </div>
+                            <div className='field-info'>
+                                <p className='subtext'>
+                                    {field.display_when ? `(Display when ${
+                                        fields.find(f => 
+                                            f.id === field.display_when && f.case_type_id === field.case_type_id
+                                        ).name
+                                        } is ${field.is_answered !== "" && fields.find(f => 
+                                            f.id === field.display_when && f.case_type_id === field.case_type_id
+                                        ).options[parseFloat(field.is_answered)] || "Anything"})` : null
+                                    }
+                                </p>
+                                <p className="subtext">
+                                    {caseTypes.map((caseTypes, index) =>
+                                        field.case_type_id === caseTypes.id ? caseTypes.name : null
+                                    )}
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                ))}
-            </div>
-            {createNew === 'field' ? (
-                <Modal
-                    onClose={() => setCreateNew(false)}
-                    submit={handleFieldSubmit}
-                >
-                    <div className='new-template'>
-                        <h4>Create New Field</h4>
-                        <div className="form-group">
-                            <label htmlFor="name">Name</label>
-                            <input
-                                type="text"
-                                name="name"
-                                value={newField.name}
-                                onChange={handleInputChange}
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="field_id">Type</label>
-                            <select
-                                name="field_id"
-                                value={newField.field_id}
-                                onChange={handleInputChange}
-                                className='default-select'
-                            >
-                                <option value="">Select Type</option>
-                                {fieldTypes.map((type) => (
-                                    <option key={type.id} value={type.id}>{type.name}</option>
-                                ))}
-                            </select>
-                        </div>
-                        {fieldTypeNeedsOptions(selectedFieldType) && (
-                            <div className="form-group" style={{alignItems: "center"}}>
-                                <label>Options (Dropdown Choices)</label>
-                                {newField.options.map((option, index) => (
-                                    <div key={index} className="option-input">
-                                        <input
-                                            type="text"
-                                            value={option}
-                                            onChange={(e) => handleOptionChange(index, e.target.value)}
+                    ))}
+                </div>
+                {createNew === 'field' ? (
+                    <Modal
+                        onClose={() => setCreateNew(false)}
+                        submit={handleFieldSubmit}
+                    >
+                        <div className='new-template'>
+                            <h4>Create New Field</h4>
+                            <div className="form-group">
+                                <label htmlFor="name">Name</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={newField.name}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="field_id">Type</label>
+                                <select
+                                    name="field_id"
+                                    value={newField.field_id}
+                                    onChange={handleInputChange}
+                                    className='default-select'
+                                >
+                                    <option value="">Select Type</option>
+                                    {fieldTypes.map((type) => (
+                                        <option key={type.id} value={type.id}>{type.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            {fieldTypeNeedsOptions(selectedFieldType) && (
+                                <div className="form-group" style={{alignItems: "center"}}>
+                                    <label>Options (Dropdown Choices)</label>
+                                    {newField.options.map((option, index) => (
+                                        <div key={index} className="option-input">
+                                            <input
+                                                type="text"
+                                                value={option}
+                                                onChange={(e) => handleOptionChange(index, e.target.value)}
+                                            />
+                                            <button type="button" className='form-box alt' onClick={() => handleRemoveOption(index)}>-</button>
+                                        </div>
+                                    ))}
+                                    <button type="button" className='form-box alt' onClick={handleAddOption}>+</button>
+                                </div>
+                            )}
+                            {isBooleanType(selectedFieldType) && (
+                                <div className="form-group list">
+                                    <label>Options (Yes/No/Unknown - Auto-filled)</label>
+                                    <ul>
+                                        <li>Yes</li>
+                                        <li>No</li>
+                                        <li>Unknown</li>
+                                    </ul>
+                                </div>
+                            )}
+                            <div className="form-group">
+                                <label htmlFor='case_type_id' className='info-label'>
+                                    Case Type
+                                    <Info
+                                        size={16} 
+                                        className='info-icon'
+                                        onMouseEnter={() => setShowTooltip(true)}
+                                        onMouseMove={handleMouseMove}
+                                        onMouseLeave={() => setShowTooltip(false)}
+                                    />
+                                </label>
+                                <select
+                                    name='case_type_id'
+                                    value={newField.case_type_id}
+                                    onChange={handleInputChange}
+                                    className='default-select'
+                                >
+                                    <option value="">Select Case Type</option>
+                                    {caseTypes.map((type) => (
+                                        <option key={type.id} value={type.id}>{type.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className='advanced-options' onClick={() => setAdvancedOpen(prev => !prev)}>Advanced Options {advancedOpen ? <ChevronUp /> : <ChevronDown />}</div>
+                            {advancedOpen && (
+                                <div className='advanced-options-list'>
+                                    <div className="form-group alt">
+                                        <label htmlFor="required">Required</label>
+                                        <input 
+                                            type="checkbox" 
+                                            name="required"
+                                            checked={newField.required === 2}
+                                            onChange={(e) => setNewField({...newField, required: e.target.checked ? 2 : 1})}
                                         />
-                                        <button type="button" className='form-box alt' onClick={() => handleRemoveOption(index)}>-</button>
-                                    </div>
-                                ))}
-                                <button type="button" className='form-box alt' onClick={handleAddOption}>+</button>
-                            </div>
-                        )}
-                        {isBooleanType(selectedFieldType) && (
-                            <div className="form-group list">
-                                <label>Options (Yes/No/Unknown - Auto-filled)</label>
-                                <ul>
-                                    <li>Yes</li>
-                                    <li>No</li>
-                                    <li>Unknown</li>
-                                </ul>
-                            </div>
-                        )}
-                        <div className="form-group">
-                            <label htmlFor='case_type_id'>Case Type</label>
-                            <select
-                                name='case_type_id'
-                                value={newField.case_type_id}
-                                onChange={handleInputChange}
-                                className='default-select'
-                            >
-                                <option value="">Select Case Type</option>
-                                {caseTypes.map((type) => (
-                                    <option key={type.id} value={type.id}>{type.name}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className='advanced-options' onClick={() => setAdvancedOpen(prev => !prev)}>Advanced Options {advancedOpen ? <ChevronUp /> : <ChevronDown />}</div>
-                        {advancedOpen && (
-                            <div className='advanced-options-list'>
-                                <div className="form-group alt">
-                                    <label htmlFor="required">Required</label>
-                                    <input 
-                                        type="checkbox" 
-                                        name="required"
-                                        checked={newField.required === 2}
-                                        onChange={(e) => setNewField({...newField, required: e.target.checked ? 2 : 1})}
-                                    />
-                                    <div 
-                                        className='checkbox'
-                                        onClick={() => setNewField({...newField, required: newField.required === 2 ? 1 : 2})}
-                                    >
-                                        {newField.required === 2 ? '✓' : ''}
-                                    </div>
-                                </div>
-                                <div className="form-group alt">
-                                    <label htmlFor="obsolete">Obsolete</label>
-                                    <input 
-                                        type="checkbox" 
-                                        name="obsolete"
-                                        checked={newField.obsolete === 2}
-                                        onChange={(e) => setNewField({...newField, obsolete: e.target.checked ? 2 : 1})}
-                                    />
-                                    <div 
-                                        className='checkbox'
-                                        onClick={() => setNewField({...newField, obsolete: newField.obsolete === 2 ? 1 : 2})}
-                                    >
-                                        {newField.obsolete === 2 ? '✓' : ''}
-                                    </div>
-                                </div>
-                                <div className="form-group alt">
-                                    <label htmlFor="hidden">Hidden</label>
-                                    <input 
-                                        type="checkbox" 
-                                        name="hidden"
-                                        checked={newField.hidden === 2}
-                                        onChange={(e) => setNewField({...newField, hidden: e.target.checked ? 2 : 1})}
-                                    />
-                                    <div 
-                                        className='checkbox'
-                                        onClick={() => setNewField({...newField, hidden: newField.hidden === 2 ? 1 : 2})}
-                                    >
-                                        {newField.hidden === 2 ? '✓' : ''}
-                                    </div>
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor='default_value'>Default Value</label>
-                                    {newField.options.length > 0 ? (
-                                        <select
-                                            name='default_value'
-                                            value={newField.default_value}
-                                            onChange={handleInputChange}
-                                            className='default-select'
+                                        <div 
+                                            className='checkbox'
+                                            onClick={() => setNewField({...newField, required: newField.required === 2 ? 1 : 2})}
                                         >
-                                            <option value=''>Select Default Value</option>
-                                            {newField.options.map((option, index) => (
-                                                <option key={index} value={option}>{option}</option>
+                                            {newField.required === 2 ? '✓' : ''}
+                                        </div>
+                                    </div>
+                                    <div className="form-group alt">
+                                        <label htmlFor="obsolete">Obsolete</label>
+                                        <input 
+                                            type="checkbox" 
+                                            name="obsolete"
+                                            checked={newField.obsolete === 2}
+                                            onChange={(e) => setNewField({...newField, obsolete: e.target.checked ? 2 : 1})}
+                                        />
+                                        <div 
+                                            className='checkbox'
+                                            onClick={() => setNewField({...newField, obsolete: newField.obsolete === 2 ? 1 : 2})}
+                                        >
+                                            {newField.obsolete === 2 ? '✓' : ''}
+                                        </div>
+                                    </div>
+                                    <div className="form-group alt">
+                                        <label htmlFor="hidden">Hidden</label>
+                                        <input 
+                                            type="checkbox" 
+                                            name="hidden"
+                                            checked={newField.hidden === 2}
+                                            onChange={(e) => setNewField({...newField, hidden: e.target.checked ? 2 : 1})}
+                                        />
+                                        <div 
+                                            className='checkbox'
+                                            onClick={() => setNewField({...newField, hidden: newField.hidden === 2 ? 1 : 2})}
+                                        >
+                                            {newField.hidden === 2 ? '✓' : ''}
+                                        </div>
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor='default_value'>Default Value</label>
+                                        {newField.options.length > 0 ? (
+                                            <select
+                                                name='default_value'
+                                                value={newField.default_value}
+                                                onChange={handleInputChange}
+                                                className='default-select'
+                                            >
+                                                <option value=''>Select Default Value</option>
+                                                {newField.options.map((option, index) => (
+                                                    <option key={index} value={option}>{option}</option>
+                                                ))}
+                                            </select>
+                                        ) : (
+                                            <input
+                                                type='text'
+                                                name='default_value'
+                                                placeholder='Default value...'
+                                                value={newField.default_value}
+                                                onChange={handleInputChange}
+                                            />
+                                        )}
+                                    </div>
+                                    <div className='form-group'>
+                                        <label htmlFor='description'>Display This Field When</label>
+                                        <select
+                                            name="display_when"
+                                            value={newField.display_when || ""}
+                                            onChange={handleInputChange}
+                                            className="default-select"
+                                        >
+                                            <option value="" disabled>Select Field</option>
+                                            {filteredFields.map((f) => (
+                                                <option key={f.id} value={f.id}>{f.name}</option>
                                             ))}
                                         </select>
-                                    ) : (
-                                        <input
-                                            type='text'
-                                            name='default_value'
-                                            placeholder='Default value...'
-                                            value={newField.default_value}
+                                    </div>
+                                    <div className='form-group'>
+                                        <label htmlFor='is_answered'>Is Answered As</label>
+                                        <select
+                                            name="is_answered"
+                                            value={newField.is_answered}
                                             onChange={handleInputChange}
-                                        />
-                                    )}
+                                            className="default-select"
+                                        >
+                                            <option value="">Select Answer</option>
+                                            {displayFieldOptions.map((option, index) => (
+                                                <option key={index} value={index}>{option}</option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </div>
-                                <div className='form-group'>
-                                    <label htmlFor='description'>Display This Field When</label>
-                                    <select
-                                        name="display_when"
-                                        value={newField.display_when}
-                                        onChange={handleInputChange}
-                                        className="default-select"
-                                    >
-                                        <option value="">Select Field</option>
-                                        {filteredFields.map((f) => (
-                                            <option key={f.id} value={f.id}>{f.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className='form-group'>
-                                    <label htmlFor='is_answered'>Is Answered As</label>
-                                    <select
-                                        name="is_answered"
-                                        value={newField.is_answered}
-                                        onChange={handleInputChange}
-                                        className="default-select"
-                                    >
-                                        <option value="">Select Answer</option>
-                                        {displayFieldOptions.map((option, index) => (
-                                            <option key={index} value={index}>{option}</option>
-                                        ))}
-                                    </select>
-                                </div>
+                            )}
+                            <button className='action' onClick={() => {handleFieldSubmit(); setCreateNew(null);}}>Create</button>
+                        </div>
+                    </Modal>
+                ) : createNew === 'case type' && (
+                    <Modal onClose={() => setCreateNew(null)}>
+                        <div className='new-template'>
+                            <h4>Create New Case Type</h4>
+                            <div className="form-group">
+                                <label htmlFor="name">Name</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={newField.name}
+                                    onChange={handleInputChange}
+                                />
                             </div>
-                        )}
-                        <button className='action' onClick={() => {handleFieldSubmit(); setCreateNew(null);}}>Create</button>
-                    </div>
-                </Modal>
-            ) : createNew === 'case type' && (
-                <Modal onClose={() => setCreateNew(null)}>
-                    <div className='new-template'>
-                        <h4>Create New Case Type</h4>
-                        <div className="form-group">
-                            <label htmlFor="name">Name</label>
-                            <input
-                                type="text"
-                                name="name"
-                                value={newField.name}
-                                onChange={handleInputChange}
-                            />
+                            <div className='form-group'>
+                                <label htmlFor='description'>Description</label>
+                                <textarea
+                                    name='description'
+                                    value={newField.description}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+                            <button className='action' onClick={() => {createCaseType(); setCreateNew(null);}}>Create</button>
                         </div>
-                        <div className='form-group'>
-                            <label htmlFor='description'>Description</label>
-                            <textarea
-                                name='description'
-                                value={newField.description}
-                                onChange={handleInputChange}
-                            />
-                        </div>
-                        <button className='action' onClick={() => {createCaseType(); setCreateNew(null);}}>Create</button>
-                    </div>
-                </Modal>
+                    </Modal>
+                )}
+            </div>
+            {showTooltip && (
+                <div className="tooltip" style={{ top: `${tooltipPos.y}px`, left: `${tooltipPos.x}px` }}>
+                    Select a case type to limit the field to only cases of that type. Leave as "Select Case Type" to show field in all cases.
+                </div>
             )}
-        </div>
+        </>
     );
 }

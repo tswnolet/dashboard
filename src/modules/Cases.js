@@ -5,21 +5,23 @@ import { useNavigate } from 'react-router';
 import { Info } from 'lucide-react';
 import { CaseSidebar } from './CaseSidebar';
 
-export const Cases = () => {
+export const Cases = ({ user }) => {
     const [createCase, setCreateCase] = useState(false);
     const [cases, setCases] = useState([]);
     const [displaySidebar, setDisplaySidebar] = useState(null);
     const nameRef = useRef(null);
     const navigate = useNavigate();
+    const [caseTemplates, setCaseTemplates] = useState([]);
     const [displayHeaders, setDisplayHeaders] = useState({
         case_name: true,
-        status: true,
+        phase: true,
         tags: true,
         created_at: true,
         last_updated: true
     });
     const [showTooltip, setShowTooltip] = useState(false);
     const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
+    const [caseTypes, setCaseTypes] = useState([]);
 
     useEffect(() => {
         const updateDisplayHeaders = () => {
@@ -27,8 +29,9 @@ export const Cases = () => {
 
             setDisplayHeaders({
                 case_name: true,
-                status: true,
+                phase: true,
                 tags: width > 768,
+                case_type: width > 968,
                 created_at: width > 1350,
                 last_updated: width > 1150,
             });
@@ -70,7 +73,9 @@ export const Cases = () => {
             "December",
         ];
         const dateObject = new Date(date);
-        return [months[dateObject.getMonth()] + " " + dateObject.getDate() + ", " + dateObject.getFullYear(), dateObject.toLocaleString(), dateObject.toLocaleTimeString()];
+        return [months[dateObject.getMonth()] + " " + dateObject.getDate() + ", " + dateObject.getFullYear(), 
+                dateObject.toLocaleString(), 
+                dateObject.toLocaleTimeString()];
     };
 
     const handleMouseMove = (event) => {
@@ -83,9 +88,36 @@ export const Cases = () => {
         }
     }
 
+    const fetchCaseTemplates = async () => {
+        try {
+            const response = await fetch("https://dalyblackdata.com/api/layout.php");
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            setCaseTemplates(data.templates);
+
+        } catch (error) {
+            console.error("Error fetching case templates:", error);
+        }
+    };
+
+    const fetchCaseTypes = async () => {
+        try {
+            const response = await fetch(`https://dalyblackdata.com/api/custom_fields.php?time=${new Date().getTime()}`);
+            const data = await response.json();
+            setCaseTypes(data.case_types);
+        } catch (error) {
+            console.error("Error fetching case types:", error);
+        }
+    };
+
     useEffect(() => {
-        console.log(displaySidebar);
-    },[displaySidebar]);
+        fetchCaseTemplates();
+        fetchCaseTypes();
+    }, []);
 
     return (
         <div className='page-container case-container'>
@@ -102,7 +134,7 @@ export const Cases = () => {
                             <tr>
                                 <th className='case-name'>Case Name</th>
                                 <th>
-                                    Status
+                                    Phase
                                     <Info 
                                         size={16} 
                                         className='info-icon'
@@ -111,6 +143,7 @@ export const Cases = () => {
                                         onMouseLeave={() => setShowTooltip(false)}
                                     />
                                 </th>
+                                {displayHeaders.case_type && <th>Case Type</th>}
                                 {displayHeaders.created_at && <th>Created</th>}
                                 {displayHeaders.last_updated && <th>Last Updated</th>}
                             </tr>
@@ -131,8 +164,9 @@ export const Cases = () => {
                                             # {Object.entries(JSON.parse(c.tags)).map(([key, value], index) => value)}
                                         </span>}
                                     </td>
-                                    <td>{c.status}</td>
-                                    {displayHeaders.last_updated && <td>{formatDate(c.create_date)[0]}</td>}
+                                    <td>{c.phase_name}</td>
+                                    {displayHeaders.case_type && <td>{caseTypes.map((type) => type.id === c.case_type_id ? type.name : null)}</td>}
+                                    {displayHeaders.created_at && <td>{formatDate(c.create_date)[0]}</td>}
                                     {displayHeaders.last_updated && <td>{formatDate(c.updated_at)[0]}, {formatDate(c.updated_at)[2]}</td>}
                                 </tr>
                             ))}
@@ -140,14 +174,14 @@ export const Cases = () => {
                     </table>
                     {showTooltip && (
                         <div className="tooltip" style={{ top: `${tooltipPos.y}px`, left: `${tooltipPos.x}px` }}>
-                            This column represents the current case status (aka "phase").
+                            This column represents the current case phase (aka "status").
                         </div>
                     )}
                     {displaySidebar && (
-                        <CaseSidebar id={displaySidebar}/>
+                        <CaseSidebar id={displaySidebar} cases={cases} caseTemplates={caseTemplates} caseTypes={caseTypes} formatDate={formatDate} />
                     )}
                 </div>
-            {createCase && <CreateCase setCreateCase={setCreateCase} />}
+            {createCase && <CreateCase user={user} setCreateCase={setCreateCase} fetchCases={fetchCases} caseTemplates={caseTemplates} />}
         </div>
     );
 };

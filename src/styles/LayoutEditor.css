@@ -405,6 +405,29 @@ header {
     gap: 5px;
 }
 
+.vitals-list {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.vital {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    border-radius: 3px;
+    width: 50%;
+    background-color: var(--secondary-color);
+    cursor: pointer;
+
+    p {
+        margin: 0;
+    }
+}
+
 @media (min-width: 769px) {
     #template-header {
         gap: 25px;
