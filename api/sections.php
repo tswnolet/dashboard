@@ -59,10 +59,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
 
+    $icon = $input['icon'] ?? 'Star';
+    $description = $input['description'] ?? '';
+
     if (isset($input['name'], $input['template_id'], $input['order_id'])) {
-        $sql = "INSERT INTO sections (name, template_id, order_id) VALUES (?, ?, ?)";
+        $sql = "INSERT INTO sections (name, icon, template_id, description, order_id) VALUES (?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sii", $input['name'], $input['template_id'], $input['order_id']);
+        $stmt->bind_param("ssisi", $input['name'], $icon, $input['template_id'], $description, $input['order_id']);
         $stmt->execute();
 
         if ($stmt->affected_rows > 0) {
@@ -192,6 +195,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         } catch (Exception $e) {
             $conn->rollback();
             echo json_encode(['success' => false, 'message' => 'Error reordering sections', 'error' => $e->getMessage()]);
+        }
+    } elseif (isset($input['section_id'], $input['id'], $input['template_id'], $input['order_id'])) {
+        $sql = "UPDATE custom_fields SET section_id = ?, order_id = ?, template_id = ? WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("iiii", $input['section_id'], $input['order_id'], $input['template_id'], $input['id']);
+        $stmt->execute();
+
+        if ($stmt->affected_rows > 0) {
+            echo json_encode(['success' => true, 'message' => 'Field updated successfully']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Error updating field', 'error' => $conn->error]);
         }
     } else {
         echo json_encode(['success' => false, 'message' => 'Missing required fields']);

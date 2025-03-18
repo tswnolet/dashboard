@@ -22,7 +22,9 @@ export const CustomFields = () => {
         hidden: 1,
         default_value: "",
         display_when: null,
-        is_answered: ""
+        is_answered: "",
+        section_id: null,
+        template_id: 1
     });    
     const [selectedFieldType, setSelectedFieldType] = useState(null);
     const filteredFields = fields.filter(f => f.case_type_id === newField.case_type_id);
@@ -97,8 +99,7 @@ export const CustomFields = () => {
     
                 setCaseTypes(data.case_types.filter(type => type.id !== "0"));
                 setFields(parsedFields);
-                setFieldTypes(data.field_types);
-                console.log(data.field_types, data.custom_fields);
+                setFieldTypes(data.fields);
             } else {
                 console.error("Error fetching data:", data.message);
             }
@@ -175,7 +176,9 @@ export const CustomFields = () => {
                     hidden: 1,
                     default_value: "",
                     display_when: null,
-                    is_answered: ""
+                    is_answered: "",
+                    section_id: null,
+                    template_id: 1
                 });
             } else {
                 console.error("Error creating custom field:", data.message);
@@ -413,10 +416,11 @@ export const CustomFields = () => {
                                         >
                                             <option value="" disabled>Select Field</option>
                                             {filteredFields.map((f) => (
-                                                <option key={f.id} value={f.id}>{f.name}</option>
+                                                <option key={f.id} value={f.id}>{f.name.length > 50 ? `${f.name.slice(0, 50)}...` : f.name}</option>
                                             ))}
                                         </select>
                                     </div>
+
                                     <div className='form-group'>
                                         <label htmlFor='is_answered'>Is Answered As</label>
                                         <select
@@ -430,6 +434,24 @@ export const CustomFields = () => {
                                                 <option key={index} value={index}>{option}</option>
                                             ))}
                                         </select>
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor='section_id'>Section ID</label>
+                                        <input
+                                            type="number"
+                                            name="section_id"
+                                            value={newField.section_id}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor='template_id'>Template ID</label>
+                                        <input
+                                            type="number"
+                                            name="template_id"
+                                            value={newField.template_id}
+                                            onChange={handleInputChange}
+                                        />
                                     </div>
                                 </div>
                             )}

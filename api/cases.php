@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id'])) {
     $sql = "
         SELECT 
             cases.*, 
-            users.user AS created_by_name, 
+            users.user AS created_by_name,
             phases.phase AS phase_name,
             COALESCE(contacts.profile_picture, 
                 CONCAT(
@@ -51,13 +51,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id'])) {
                 )
             ) AS contact_display,
             leads.*, 
-            contacts.*
+            contacts.*, 
+            ref_contact.full_name AS referral_contact_name,
+            JSON_ARRAYAGG(
+                JSON_OBJECT(
+                    'field_name', custom_fields.name,
+                    'value', lead_updates.value,
+                    'created_at', lead_updates.created_at
+                )
+            ) AS lead_updates_data
         FROM cases 
         JOIN users ON cases.created_by = users.id 
         JOIN phases ON cases.phase_id = phases.id
         LEFT JOIN contacts ON cases.contact_id = contacts.id
         LEFT JOIN leads ON cases.lead_id = leads.id
+        LEFT JOIN contacts AS ref_contact ON leads.referral_contact = ref_contact.id
+        LEFT JOIN lead_updates ON leads.id = lead_updates.lead_id
+        LEFT JOIN custom_fields ON lead_updates.field_id = custom_fields.id
         WHERE cases.id = ?
+        GROUP BY cases.id, leads.id, contacts.id, ref_contact.id;
     ";
     
     $stmt = $conn->prepare($sql);
@@ -75,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $sql = "
         SELECT 
             cases.*, 
-            users.user AS created_by_name, 
+            users.user AS created_by_name,
             phases.phase AS phase_name,
             COALESCE(contacts.profile_picture, 
                 CONCAT(
@@ -84,12 +96,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 )
             ) AS contact_display,
             leads.*, 
-            contacts.*
+            contacts.*, 
+            ref_contact.full_name AS referral_contact_name,
+            JSON_ARRAYAGG(
+                JSON_OBJECT(
+                    'field_name', custom_fields.name,
+                    'value', lead_updates.value,
+                    'created_at', lead_updates.created_at
+                )
+            ) AS lead_updates_data
         FROM cases 
         JOIN users ON cases.created_by = users.id 
         JOIN phases ON cases.phase_id = phases.id
         LEFT JOIN contacts ON cases.contact_id = contacts.id
         LEFT JOIN leads ON cases.lead_id = leads.id
+        LEFT JOIN contacts AS ref_contact ON leads.referral_contact = ref_contact.id
+        LEFT JOIN lead_updates ON leads.id = lead_updates.lead_id
+        LEFT JOIN custom_fields ON lead_updates.field_id = custom_fields.id
+        GROUP BY cases.id, leads.id, contacts.id, ref_contact.id;
     ";
     
     $result = $conn->query($sql);

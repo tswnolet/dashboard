@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import "../styles/LayoutEditor.css";
-import { Check, StarOutlineSharp, StarSharp, Add, Close, Dashboard } from "@mui/icons-material";
 import Modal from "./Modal";
-import { Activity, FileText, Folder, Home, User, Settings, Bell, Calendar, Clipboard, Cloud, Code, DollarSign, Edit, Eye, File, Heart, Image, Lock, Mail, MapPin, MessageCircle, Phone, Shield, ShoppingCart, Star, Tag, Trash, Truck, Users, Video, Section, SectionIcon, LucideSection, TrashIcon, Eraser, Edit2, Trash2, Archive } from "lucide-react";
 import FolderTreeManager from "./FolderTreeManager";
-import { index } from "d3";
 import { Boolean, Contact, DateInput, Dropdown, NumberInput, Text } from "./FieldComponents";
+import { IconMap } from "./IconMap";
+import { StarOutlineSharp, Close, Archive } from "@mui/icons-material";
+import { Edit, Loader2, Trash2 } from "lucide-react";
 
 const Vital = ({ vital, description }) => {
     return (
@@ -21,38 +21,6 @@ const Vital = ({ vital, description }) => {
     );
 }
 
-const IconMap = {
-    "Activity": Activity,
-    "FileText": FileText,
-    "File": Folder,
-    "Home": Home,
-    "User": User,
-    "Settings": Settings,
-    "Bell": Bell,
-    "Calendar": Calendar,
-    "Clipboard": Clipboard,
-    "Cloud": Cloud,
-    "Code": Code,
-    "DollarSign": DollarSign,
-    "Edit": Edit,
-    "Eye": Eye,
-    "Heart": Heart,
-    "Image": Image,
-    "Lock": Lock,
-    "Mail": Mail,
-    "MapPin": MapPin,
-    "MessageCircle": MessageCircle,
-    "Phone": Phone,
-    "Shield": Shield,
-    "ShoppingCart": ShoppingCart,
-    "Star": Star,
-    "Tag": Tag,
-    "Trash": Trash,
-    "Truck": Truck,
-    "Users": Users,
-    "Video": Video,
-}
-
 export const LayoutEditor = () => {
     const [sections, setSections] = useState([]);
     const [phases, setPhases] = useState([]);
@@ -60,6 +28,7 @@ export const LayoutEditor = () => {
     const [createTemplate, setCreateTemplate] = useState(false);
     const [createNew, setCreateNew] = useState(null);
     const [defaultTemplate, setDefaultTemplate] = useState(null);
+    const [isSaving, setIsSaving] = useState(null);
     const [formData, setFormData] = useState({
         name: "",
         aka: "",
@@ -68,11 +37,9 @@ export const LayoutEditor = () => {
         default: 0,
         favorite: 0,
     });
-    const [sectionData, setSectionData] = useState({ name: "", description: "", icon: "", order_id: 0 });
+    const [sectionData, setSectionData] = useState({ name: "", description: "", icon: "Star", order_id: 0 });
     const [addingField, setAddingField] = useState(null);
     const [selectedField, setSelectedField] = useState("");
-    const [availableFields, setAvailableFields] = useState([]);
-    const [customFields, setCustomFields] = useState([]);
     const [sectionExpanded, setSectionExpanded] = useState(false);
     const [editingSection, setEditingSection] = useState(null);
     const [customFieldData, setCustomFieldData] = useState({ name: "", section_id: "", field_id: "", order_id: 0, rules: {} });
@@ -102,6 +69,8 @@ export const LayoutEditor = () => {
     const [statusData, setStatusData] = useState({ name: "", description: "" });
     const [statusExpanded, setStatusExpanded] = useState(null);
     const [caseTypes, setCaseTypes] = useState([]);
+    const [currentSection, setCurrentSection] = useState(null);
+    const [allFields, setAllFields] = useState([]);
     
     const handleMouseEnter = (fieldId) => {
         if (hoverTimeout) clearTimeout(hoverTimeout);
@@ -149,6 +118,7 @@ export const LayoutEditor = () => {
     };
 
     const postStatuses = async () => {
+        setIsSaving('statuses');
         try {
             const response = await fetch(`https://dalyblackdata.com/api/statuses.php`, {
                 method: "POST",
@@ -166,10 +136,12 @@ export const LayoutEditor = () => {
         } catch (error) {
             console.error("Error posting status:", error);
         }
+        setIsSaving(null);
     };
 
     const createFolder = async () => {
         if (!folderData.name) return;
+        setIsSaving('folder');
     
         const newFolder = {
             template_id: defaultTemplate.id,
@@ -196,11 +168,11 @@ export const LayoutEditor = () => {
         } catch (error) {
             console.error("Error creating folder:", error);
         }
+        setIsSaving(null);
     };
 
     useEffect(() => {
         fetchTemplates();
-        fetchAvailableFields();
         fetchMarketingSources();
         fetchStatuses();
     }, []);
@@ -233,22 +205,19 @@ export const LayoutEditor = () => {
         }
     };
 
-    const fetchAvailableFields = async () => {
-        try {
-            const response = await fetch("https://dalyblackdata.com/api/fields.php");
-            const data = await response.json();
-            setAvailableFields(data.fields || []);
-        } catch (error) {
-            console.error("Error fetching fields:", error);
-        }
-    };
+    const fetchCurrentFields = async (sectionId = null, templateId = null) => {
+        setCurrentFields([]);
+        setCurrentSection(sectionId || null);
 
-    const fetchCurrentFields = async (sectionId = null) => {
+        templateId = templateId || 1;
+
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/custom_fields.php?${sectionId ? `section_id=${sectionId}&` : ""}time=${new Date().getTime()}`);
+            const response = await fetch(`https://dalyblackdata.com/api/custom_fields.php?${sectionId ? `section_id=${sectionId}&template_id=${templateId}&` : `template_id=${templateId}&`}time=${new Date().getTime()}`);
             const data = await response.json();
             setCurrentFields(data.custom_fields || []);
             setFieldTypes(data.fields);
+            setCaseTypes(data.case_types || []);
+            setAllFields(data.all_custom_fields.length > 0 ? data.all_custom_fields : allFields);
         } catch (error) {
             console.error("Error fetching fields:", error);
         }
@@ -277,6 +246,8 @@ export const LayoutEditor = () => {
     };
 
     const handleTemplateSubmit = async (e) => {
+        setIsSaving('template');
+
         e.preventDefault();
         try {
             const response = await fetch("https://dalyblackdata.com/api/layout.php", {
@@ -294,12 +265,18 @@ export const LayoutEditor = () => {
         } catch (error) {
             console.error("Error creating template:", error);
         }
+    
+        setIsSaving(null);
     };
 
     const createNewSection = async () => {
-        if (!defaultTemplate || !sectionData.name) return;
-        const newSection = { name: sectionData.name, template_id: defaultTemplate.id, order_id: sections.length + 1 };
-
+        if (!defaultTemplate || !sectionData.name) {
+            console.log("No template or section name" + defaultTemplate + Object.entries(sectionData));
+            return;
+        }
+        const newSection = { name: sectionData.name, icon: editingSection.icon, template_id: defaultTemplate.id, description: sectionData.description, order_id: sections.length + 1 };
+        setIsSaving('section');
+        
         try {
             const response = await fetch("https://dalyblackdata.com/api/sections.php", {
                 method: "POST",
@@ -310,16 +287,19 @@ export const LayoutEditor = () => {
             if (data.success) {
                 fetchTemplateLayout(defaultTemplate.id);
                 setCreateNew(null);
-                setSectionData({ name: "" });
+                setSectionData({ name: "", description: '', icon: "Star", order_id: 0 });
+                setEditingSection(null);
             }
         } catch (error) {
             console.error("Error creating section:", error);
         }
+        setIsSaving(null);
     };
 
     const createNewPhase = async () => {
         if (!defaultTemplate || !phaseData.phase) return;
         const newPhase = { phase: phaseData.phase, description: phaseData.description, template_id: defaultTemplate.id, order_id: phaseData.order_id || phases.length + 1 };
+        setIsSaving('phase');
 
         try {
             const response = await fetch("https://dalyblackdata.com/api/sections.php", {
@@ -336,6 +316,7 @@ export const LayoutEditor = () => {
         } catch (error) {
             console.error("Error creating phase:", error);
         }
+        setIsSaving(null);
     };
 
     const updatePhase = async () => {
@@ -379,17 +360,18 @@ export const LayoutEditor = () => {
     const addFieldToSection = async (sectionId) => {
         if (!selectedField) return;
 
+        setIsSaving('addingfield');
+
         const newField = {
-            name: customFieldData.name,
             section_id: sectionId,
-            field_id: selectedField,
-            order_id: customFieldData.order_id || currentFields.length + 1,
-            rules: customFieldData.rules
+            id: selectedField,
+            template_id: defaultTemplate.id,
+            order_id: currentFields.length + 1,
         };
 
         try {
-            const response = await fetch("https://dalyblackdata.com/api/sections.php?add_field=true", {
-                method: "POST",
+            const response = await fetch("https://dalyblackdata.com/api/sections.php", {
+                method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(newField),
             });
@@ -399,18 +381,19 @@ export const LayoutEditor = () => {
                 fetchTemplateLayout(defaultTemplate.id);
                 setAddingField(null);
                 setSelectedField("");
-                fetchCurrentFields(sectionId);
-                setCustomFieldData({ name: "", section_id: "", field_id: "", order_id: 0, rules: {} });
+                fetchCurrentFields(sectionId, defaultTemplate.id);
+                setCustomFieldData({ section_id: null, id: 0, template_id: null, order_id: 0});
             }
         } catch (error) {
             console.error("Error adding field:", error);
         }
+        setIsSaving(null);
     };
 
     const toggleSection = (section) => {
         if (sectionExpanded !== section.id) {
             setSectionExpanded(section.id);
-            fetchCurrentFields(section.id);
+            fetchCurrentFields(section.id, defaultTemplate.id);
             setEditingSection({
                 id: section.id,
                 name: section.name,
@@ -448,6 +431,8 @@ export const LayoutEditor = () => {
 
     const closeSection = () => {
         setSectionExpanded(false);
+        setEditingSection(null);
+        setCurrentSection(null);
     };
 
     const handleIconClick = () => {
@@ -458,7 +443,9 @@ export const LayoutEditor = () => {
         handleSectionPropertyChange({ target: { name: 'icon', value: iconKey } });
         setShowIconModal(false);
 
-        if (editingSection) {
+        console.log(iconKey, editingSection);
+
+        if (editingSection?.length > 1 || editingSection?.icon !== iconKey && createNew != 'section') {
             const updatedSection = { ...editingSection, icon: iconKey };
             try {
                 const response = await fetch("https://dalyblackdata.com/api/sections.php", {
@@ -602,19 +589,10 @@ export const LayoutEditor = () => {
         }
     };
 
-    const fetchCaseTypes = async () => {
-        try {
-            const response = await fetch("https://dalyblackdata.com/api/case_types.php");
-            const data = await response.json();
-            setCaseTypes(data.case_types || []);
-        } catch (error) {
-            console.error("Error fetching case types:", error);
-        }
-    };
-
     const postMarketingSource = async (newSource) => {
         marketingSource.template_id = defaultTemplate.id;
         marketingSource.order_id = marketingSource.order_id === null ? marketingSources.length + 1 : marketingSource.order_id;
+        setIsSaving('marketing');
 
         try {
             const response = await fetch("https://dalyblackdata.com/api/marketing_sources.php", {
@@ -643,6 +621,7 @@ export const LayoutEditor = () => {
         } catch (error) {
             console.error("Error posting marketing source:", error);
         }
+        setIsSaving(null);
     };
 
     const handleFieldChange = (fieldId, value) => {
@@ -693,7 +672,6 @@ export const LayoutEditor = () => {
 
     useEffect(() => {
         fetchCurrentFields();
-        fetchCaseTypes();
     }, []);
 
     return (
@@ -804,7 +782,7 @@ export const LayoutEditor = () => {
                             </div>
                             <div className="form-group">
                                 <label htmlFor="description">Description</label>
-                                <textarea id="description" name="description" value={formData.description} onChange={handleInputChange} />
+                                <textarea id="description" name="description" value={formData.description || ""} onChange={handleInputChange} />
                             </div>
                             <button type="submit" className="action">Save Template</button>
                         </form>
@@ -831,7 +809,7 @@ export const LayoutEditor = () => {
                                             <h4>{section.name}</h4>
                                             {section.built_in === 1  && <p>(Built In)</p>}
                                         </div>
-                                        <p>{section.description}</p>
+                                        <p>{section.description || section.name}</p>
                                     </>
                                 ) : (
                                     <>
@@ -851,7 +829,7 @@ export const LayoutEditor = () => {
                                                 <label htmlFor="description" className='section-floating-label'>
                                                     Description
                                                 </label>
-                                                <textarea id='description' className="description-text" onChange={handleSectionPropertyChange} value={editingSection?.description} name='description' onBlur={handleSectionUpdate} />
+                                                <textarea id='description' className="description-text" onChange={handleSectionPropertyChange} value={editingSection?.description ?? ""} name='description' onBlur={handleSectionUpdate} />
                                             </div>
                                             <div className='section-label'>
                                                 <label htmlFor='order_id' className='section-floating-label'>
@@ -862,7 +840,7 @@ export const LayoutEditor = () => {
                                         </div>
                                         <div className='section-fields'>
                                             <button className="action small" onClick={() => setAddingField(section.id)}>+ Field</button>
-                                            {currentFields.length > 0 &&
+                                            {currentFields.length > 0 && currentSection === section.id &&
                                                 currentFields.map((field, index) => {
                                                     if (index <= fieldLimit) {
                                                         return (
@@ -892,7 +870,7 @@ export const LayoutEditor = () => {
                                             }
                                             {currentFields.length > fieldLimit ? (
                                                 <button className='action alt'onClick={() => setFieldLimit(currentFields.length)}>Show More Fields</button>
-                                            ) : (currentFields.length > 0 && 
+                                            ) : (currentFields.length > 0 && currentFields.length > 4 && 
                                                 <button className='action alt'onClick={() => setFieldLimit(4)}>Show Less Fields</button>
                                             )}
                                         </div>
@@ -1000,17 +978,7 @@ export const LayoutEditor = () => {
                     <div className="new-template">
                         <h4>Add Field to Section</h4>
                         <div className="form-group">
-                            <label htmlFor="name">Field Prompt</label>
-                            <input 
-                                type="text" 
-                                id="name" 
-                                name="name" 
-                                value={customFieldData.field_name} 
-                                onChange={handleCustomFieldChange}
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor='field_type'>Select Field Type</label>
+                            <label htmlFor='field_type'>Select Field</label>
                             <select 
                                 value={selectedField} 
                                 onChange={(e) => setSelectedField(e.target.value)}
@@ -1018,7 +986,7 @@ export const LayoutEditor = () => {
                                 name='field_type'
                             >
                                 <option value="">Select a Field</option>
-                                {availableFields.map(field => (
+                                {currentFields.filter((field) => field.section_id === 0).map((field) => (
                                     <option key={field.id} value={field.id}>{field.name}</option>
                                 ))}
                             </select>
@@ -1029,7 +997,7 @@ export const LayoutEditor = () => {
                                 type="number" 
                                 id="order_id" 
                                 name="order_id" 
-                                value={customFieldData.order_id} 
+                                value={customFieldData.order_id || currentFields.length + 1} 
                                 onChange={handleCustomFieldChange} 
                             />
                         </div>
@@ -1068,16 +1036,25 @@ export const LayoutEditor = () => {
                         <div className="new-template">
                             <h4>Create New Section</h4>
                             <div className='form-group'>
-                                <label htmlFor='name'>Section Name</label>
-                                <input
-                                    type="text" 
-                                    placeholder="Section Name" 
-                                    name="name" 
-                                    value={sectionData.name}
-                                    onChange={(e) => setSectionData({ name: e.target.value })}
-                                />
+                                <label htmlFor='name'>Section Name & Icon</label>
+                                <div className='section-label max'>
+                                    <div className="icon-option" onClick={handleIconClick}>
+                                        {IconMap[editingSection?.icon] ? React.createElement(IconMap[editingSection?.icon]) : <StarOutlineSharp />}
+                                    </div>
+                                    <input
+                                        type="text" 
+                                        placeholder="Section Name" 
+                                        name="name" 
+                                        value={sectionData.name}
+                                        onChange={(e) => setSectionData({ ...sectionData, name: e.target.value })}
+                                    />
+                                </div>
                             </div>
-                            <button className="action" onClick={createNewSection}>Save Section</button>
+                            <div className="form-group">
+                                <label htmlFor='description'>Description</label>
+                                <textarea placeholder="Section Description" name='description' value={sectionData.description} onChange={(e) => setSectionData({...sectionData, description: e.target.value })}/>
+                            </div>
+                            <button className="action" onClick={createNewSection}>{isSaving === 'section' ? <Loader2 className="spinner" /> : "Save Section"}</button>
                         </div>
                     ) : createNew === 'phase' ? (
                         <div className='new-template'>
@@ -1144,7 +1121,7 @@ export const LayoutEditor = () => {
                                         <option value="Protected">Protected</option>
                                     </select>
                                 </div>
-                                <button className="action" onClick={createFolder}>Save Folder</button>
+                                <button className="action" onClick={createFolder}>{isSaving === 'folder' ? <Loader2 className='spinner'/> : "Folder"}</button>
                             </div>
                         ) : (createNew === 'marketing' ? (
                             <div className='new-template'>
@@ -1197,6 +1174,7 @@ export const LayoutEditor = () => {
                                 key={iconKey} 
                                 className={`icon-option ${editingSection?.icon === iconKey ? 'selected' : ''}`} 
                                 onClick={() => handleIconSelect(iconKey)}
+                                title={iconKey}
                             >
                                 {React.createElement(IconMap[iconKey])}
                             </div>

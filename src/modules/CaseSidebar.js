@@ -1,10 +1,23 @@
-import { Dot } from "lucide-react";
+import { Activity, Dot } from "lucide-react";
 import React, { useState, useEffect } from "react";
+
+const Vital = ({ label, value }) => {
+    return (
+        <div className='sidebar-vital'>
+            <span className='subtext'>{label}:</span>
+            <span className='subtext'>
+                {value}
+            </span>
+        </div>
+    );
+};
 
 export const CaseSidebar = ({ id, cases, caseTemplates, caseTypes, formatDate }) => {
     const caseData = cases.filter((c) => c.id === id)[0] ?? {};
 
-    console.log(caseTemplates.filter((template) => template.id === caseData.template_id))
+    console.log(caseTypes);
+
+    console.log("");
 
     return (
         <div className='case-sidebar'>
@@ -33,37 +46,15 @@ export const CaseSidebar = ({ id, cases, caseTemplates, caseTypes, formatDate })
             </div>
             <div className="divider horizontal"></div>
             <div className='case-sidebar-vitals'>
-                <div className='sidebar-vital-header'>Vitals</div>
-                <div className='sidebar-vital'>
-                    <span className='subtext'>Case Type:</span>
-                    <span className='subtext'>
-                        {caseTypes.map((type) => type.id === caseData.case_type_id ? type.name : null)}
-                    </span>
-                </div>
-                <div className='sidebar-vital'>
-                    <span className='subtext'>Intake Date:</span>
-                    <span className='subtext'>
-                        {formatDate(caseData.created_at.split(" ")[0])[0]}
-                    </span>
-                </div>
-                <div className='sidebar-vital'>
-                    <span className='subtext'>Intake Time:</span>
-                    <span className='subtext'>
-                        {formatDate(caseData.created_at)[2]}
-                    </span>
-                </div>
-                <div className='sidebar-vital'>
-                    <span className='subtext'>Incident Date:</span>
-                    <span className='subtext'>
-                        {formatDate(caseData.incident_date)[0]}
-                    </span>
-                </div>
-                <div className='sidebar-vital'>
-                    <span className='subtext'>First Primary:</span>
-                    <span className='subtext'>
-                        {caseData.team?.first_primary}
-                    </span>
-                </div>
+                <div className='sidebar-vital-header'><Activity size={16}/>{" "}Vitals</div>
+                <Vital label='Case Type' value={caseTypes.map((type) => type.id === caseData.case_type_id ? type.name : null)} />
+                <Vital 
+                    label={`Type of ${caseTypes.filter((type) => type.id === caseData.case_type_id)[0].name} Case`}
+                    value={JSON.parse(caseData.lead_updates_data).filter((data) => data.field_name === `Type of ${caseTypes.filter((type) => type.id === caseData.case_type_id)[0].name} Case`)[0]?.value} />
+                <Vital label='Incident Date' value={formatDate(caseData.incident_date)[0]} />
+                <Vital label='First Primary' value={caseData.team?.first_primary} />
+                <Vital label='Referred To (Full Name)' value={caseData.referred_to} />
+                <Vital label='Mediation Date' value={caseData.referred_to} />
             </div>
         </div>
     );

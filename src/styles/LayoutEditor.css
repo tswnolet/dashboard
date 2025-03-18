@@ -77,6 +77,7 @@ header {
     margin: 10px 0;
     width: 100%;
     max-height: 300px;
+    overflow-y: auto;
 }
 
 .group-fields {
@@ -284,8 +285,15 @@ header {
     justify-content: center;
     gap: 15px;
     width: 100%;
-    max-width: 400px;
     position: relative;
+
+    &:not(.max) {
+        max-width: 400px;
+    }
+
+    &.max {
+        max-width: 100%;
+    }
 }
 
 .section-label label {
@@ -346,7 +354,7 @@ header {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    margin-bottom: 10px;
+    margin: 15px;
 }
 
 .icon-option {

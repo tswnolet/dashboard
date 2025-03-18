@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import '../styles/LayoutEditor.css';
 import { createPortal } from "react-dom";
 import { CreateContact } from "./CreateContact";
+import { UserRoundPlus } from "lucide-react";
 
 export const Text = ({ type, placeholder, value, onChange, disable }) => {
     return type === 'text' ? (
@@ -193,7 +194,7 @@ export const Contact = ({ selectedContact, onCreateNewContact, setSelectedContac
                 title="Create new contact"
                 onClick={() => !lead ? onCreateNewContact() : onCreateNewLead()}
             >
-                +
+                <UserRoundPlus size={20} />
             </div>
             {isDropdownOpen && searchResults.length > 0 && createPortal(
                 <ul
@@ -223,3 +224,17 @@ export const Contact = ({ selectedContact, onCreateNewContact, setSelectedContac
         </div>
     );
 };
+
+export const ContactList = () => {
+    const [contactIds, setContactIds] = useState([]);
+    const [contacts, setContacts] = useState(1);
+
+    return (
+        <>
+            {contactIds.map((id, index) => (
+                <Contact />
+            ))}
+            <div className='action' onClick={() => setContactIds([...contactIds, contactIds.length + 1])}>Add Contact</div>
+        </>
+    )
+}

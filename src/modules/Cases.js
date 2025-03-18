@@ -83,9 +83,7 @@ export const Cases = ({ user }) => {
     };
 
     const handleClick = (event, id) => {
-        if (!nameRef.current.contains(event.target)) {
-            setDisplaySidebar(id);
-        }
+        setDisplaySidebar(id);
     }
 
     const fetchCaseTemplates = async () => {

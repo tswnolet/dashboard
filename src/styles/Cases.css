@@ -43,7 +43,7 @@ td.case-name {
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    width: 35%;
+    width: 25%;
     height: 100%;
     position: sticky;
     border-radius: 3px;
@@ -68,6 +68,8 @@ td.case-name {
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
+    text-wrap: wrap;
+    text-align: center;
     gap: 2.5px;
     width: 100%;
     padding: 15px;

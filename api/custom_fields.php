@@ -4,6 +4,7 @@ header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $section_id = $_GET['section_id'] ?? null;
+    $template_id = $_GET['template_id'] ?? null;
 
     $query = "
         SELECT * FROM fields;";
@@ -16,21 +17,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (!isset($_GET['section_id'])) {
         $caseTypes = fetchCaseTypes($conn);
         $customFields = fetchCustomFields($conn);
-        $fieldTypes = fetchFieldTypes($conn);
+        $allCustomFields = [];
+
+        if (isset($template_id)) {
+            $allCustomFields = fetchAllFields($conn, $template_id);
+        }
 
         echo json_encode([
             'success' => true,
             'case_types' => $caseTypes,
             'custom_fields' => $customFields,
-            'fields' => $fieldTypes,
-            'field_types' => $fieldTypes
+            'all_custom_fields' => $allCustomFields,
+            'fields' => $fields
         ]);
         exit;
     }
     
     if (isset($section_id)) {
-        $customFields = fetchCustomFields($conn, $section_id);
-        echo json_encode(['success' => true, 'custom_fields' => $customFields, 'fields' => $fields]);
+        $customFields = fetchCustomFields($conn, $section_id, $template_id);
+        $caseTypes = fetchCaseTypes($conn);
+        echo json_encode(['success' => true, 'case_types' => $caseTypes, 'custom_fields' => $customFields, 'fields' => $fields, 'section_id' => $section_id]);
     }
 }
 
@@ -46,6 +52,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $default_value = $input['default_value'] ?? null;
     $display_when = !empty($input['display_when']) ? $input['display_when'] : null;
     $is_answered = $input['is_answered'] !== "" ? $input['is_answered'] : null ?? null;
+    $section_id = $input['section_id'] ?? null;
+    $template_id = $input['template_id'] ?? null;
 
     if (empty($field_id) || empty($name)) {
         echo json_encode(['success' => false, 'message' => 'Field type and name are required']);
@@ -65,15 +73,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $conn->prepare("
         INSERT INTO custom_fields (
             case_type_id, field_id, name, order_id, required, options, 
-            obsolete, hidden, default_value, display_when, is_answered
+            obsolete, hidden, default_value, display_when, is_answered, section_id, template_id
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
 
     $stmt->bind_param(
-        'iisissiiisi',
+        'iisissiiisiii',
         $case_type_id, $field_id, $name, $order_id, $required, $options,
-        $obsolete, $hidden, $default_value, $display_when, $is_answered
+        $obsolete, $hidden, $default_value, $display_when, $is_answered,
+        $section_id, $template_id
     );
 
     if ($stmt->execute()) {
@@ -98,8 +107,8 @@ function fetchCaseTypes($conn) {
     return $caseTypes;
 }
 
-function fetchCustomFields($conn, $section_id = null) {
-    $where = $section_id ? "WHERE cf.section_id = ?" : "";
+function fetchCustomFields($conn, $section_id = null, $template_id = null) {
+    $where = $template_id ? "WHERE (cf.section_id = ? OR cf.section_id = 0) AND cf.template_id = ?" : "";
     $query = "
         SELECT cf.id, cf.case_type_id, cf.field_id, cf.name, cf.options, cf.default_value, cf.obsolete, cf.display_when, cf.is_answered, cf.section_id, ct.name as case_type, cf.field_id, f.name as field_name, f.type as field_type, 
                cf.order_id, cf.required
@@ -111,7 +120,7 @@ function fetchCustomFields($conn, $section_id = null) {
     ";
     $stmt = $conn->prepare($query);
     if ($section_id) {
-        $stmt->bind_param('i', $section_id);
+        $stmt->bind_param('ii', $section_id, $template_id);
     }
     $stmt->execute();
     $result = $stmt->get_result();
@@ -121,6 +130,20 @@ function fetchCustomFields($conn, $section_id = null) {
         $customFields[] = $row;
     }
     return $customFields;
+}
+
+function fetchAllFields($conn, $template_id) {
+    $sql = "SELECT * FROM custom_fields WHERE template_id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $template_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $fields = [];
+    while ($row = $result->fetch_assoc()) {
+        $fields[] = $row;
+    }
+    return $fields;
 }
 
 function fetchFieldTypes($conn) {
