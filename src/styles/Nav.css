@@ -4,16 +4,25 @@ nav {
   align-items: center;
   flex-direction: column;
   position: fixed;
+  padding: 25px 0;
   top: 0;
   left: 0;
-  width: 75px;
-  height: var(--real-vh, 100vh);
-  padding: 25px 0;
-  border-radius: 0;
   color: var(--text-color);
   background-color: var(--secondary-color);
   z-index: 1001;
   transition: background-color 0.3s, border-radius 0.3s ease, margin 0.3s, color 0.3s ease, width 0.3s ease;
+}
+
+nav:not(.double) {
+  width: 75px;
+  border-radius: 0;
+  height: var(--real-vh, 100vh);
+}
+
+nav.double {
+  border-radius: 8px;
+  margin: 10px;
+  height: calc(var(--real-vh, 100vh) - 20px);
 }
 
 nav button {
@@ -236,6 +245,7 @@ nav.scrolled {
 #nav-logo {
   width: 35px;
   height: 35px;
+  mix-blend-mode: difference;
 
   &:hover {
     cursor: pointer;
@@ -265,7 +275,7 @@ nav.scrolled {
   width: 100%;
   max-width: 300px;
   background: var(--card-color);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--button-box-shadow);
 }
 
 .search-icon {

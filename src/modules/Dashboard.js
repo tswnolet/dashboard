@@ -35,8 +35,6 @@ const Dashboard = ({ setLoggedIn, google = false }) => {
     }, []);
 
     const fetchStats = async (manual = false) => {
-        if (!datesSet) return;
-        
         setRefreshing(true);
         const startTime = Date.now();
 
@@ -65,70 +63,67 @@ const Dashboard = ({ setLoggedIn, google = false }) => {
     };
 
     useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const report = urlParams.get('report');
-        const today = new Date();
-        let start = new Date(today.setDate(today.getDate() - 7)).toISOString().split('T')[0];
-        let end = new Date().toISOString().split('T')[0];
+        if (!datesSet) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const report = urlParams.get('report');
+            const today = new Date();
+            let start = new Date(today.setDate(today.getDate() - 7)).toISOString().split('T')[0];
+            let end = new Date().toISOString().split('T')[0];
 
-        if (report) {
-            switch (report) {
-                case 'today':
-                    start = end = today.toISOString().split('T')[0];
-                    break;
-                case 'week':
-                    start = new Date(today.setDate(today.getDate() - 7)).toISOString().split('T')[0];
-                    end = new Date().toISOString().split('T')[0];
-                    break;
-                case 'workweek':
-                    const dayOfWeek = today.getDay();
-                    const lastFriday = new Date(today);
-                    lastFriday.setDate(today.getDate() - ((dayOfWeek + 2) % 7));
-                    const lastSaturday = new Date(lastFriday);
-                    lastSaturday.setDate(lastFriday.getDate() - 6);
-                    start = lastSaturday.toISOString().split('T')[0];
-                    end = lastFriday.toISOString().split('T')[0];
-                    break;
-                case 'last4weeks':
-                    start = new Date(today.setDate(today.getDate() - 28)).toISOString().split('T')[0];
-                    end = new Date().toISOString().split('T')[0];
-                    break;
-                case 'thismonth':
-                    start = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
-                    end = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
-                    break;
-                case 'lastmonth':
-                    start = new Date(today.getFullYear(), today.getMonth() - 1, 1).toISOString().split('T')[0];
-                    end = new Date(today.getFullYear(), today.getMonth(), 0).toISOString().split('T')[0];
-                    break;
-                case 'thisyear':
-                    start = new Date(today.getFullYear(), 0, 1).toISOString().split('T')[0];
-                    end = new Date().toISOString().split('T')[0];
-                    break;
-                case 'lastyear':
-                    start = new Date(today.getFullYear() - 1, 0, 1).toISOString().split('T')[0];
-                    end = new Date(today.getFullYear() - 1, 11, 31).toISOString().split('T')[0];
-                    break;
-                case 'alltime':
-                    start = null;
-                    end = null;
-                    break;
-                default:
-                    start = end = today.toISOString().split('T')[0];
+            if (report) {
+                switch (report) {
+                    case 'today':
+                        start = end = today.toISOString().split('T')[0];
+                        break;
+                    case 'week':
+                        start = new Date(today.setDate(today.getDate() - 7)).toISOString().split('T')[0];
+                        end = new Date().toISOString().split('T')[0];
+                        break;
+                    case 'workweek':
+                        const dayOfWeek = today.getDay();
+                        const lastFriday = new Date(today);
+                        lastFriday.setDate(today.getDate() - ((dayOfWeek + 2) % 7));
+                        const lastSaturday = new Date(lastFriday);
+                        lastSaturday.setDate(lastFriday.getDate() - 6);
+                        start = lastSaturday.toISOString().split('T')[0];
+                        end = lastFriday.toISOString().split('T')[0];
+                        break;
+                    case 'last4weeks':
+                        start = new Date(today.setDate(today.getDate() - 28)).toISOString().split('T')[0];
+                        end = new Date().toISOString().split('T')[0];
+                        break;
+                    case 'thismonth':
+                        start = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+                        end = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
+                        break;
+                    case 'lastmonth':
+                        start = new Date(today.getFullYear(), today.getMonth() - 1, 1).toISOString().split('T')[0];
+                        end = new Date(today.getFullYear(), today.getMonth(), 0).toISOString().split('T')[0];
+                        break;
+                    case 'thisyear':
+                        start = new Date(today.getFullYear(), 0, 1).toISOString().split('T')[0];
+                        end = new Date().toISOString().split('T')[0];
+                        break;
+                    case 'lastyear':
+                        start = new Date(today.getFullYear() - 1, 0, 1).toISOString().split('T')[0];
+                        end = new Date(today.getFullYear() - 1, 11, 31).toISOString().split('T')[0];
+                        break;
+                    case 'alltime':
+                        start = null;
+                        end = null;
+                        break;
+                    default:
+                        start = end = today.toISOString().split('T')[0];
+                }
             }
-        }
 
-        setStartDate(start);
-        setEndDate(end);
-        setDatesSet(true);
-    }, []);
-
-    useEffect(() => {
-        if (datesSet) {
+            setStartDate(start);
+            setEndDate(end);
+            setDatesSet(true);
             fetchStats();
             setRefreshTrigger(prev => prev + 1);
         }
-    }, [datesSet, startDate, endDate]);
+    }, [datesSet]);
 
     const renderCards = () => {
         const defaultGridSize = {

@@ -79,13 +79,7 @@ export const LayoutEditor = () => {
     };
     
     const handleMouseLeave = () => {
-        if (hoverTimeout) clearTimeout(hoverTimeout);
-    
-        const timeout = setTimeout(() => {
-            setHoveredField(null);
-        }, 500);
-    
-        setHoverTimeout(timeout);
+        setHoveredField(null);
     };
 
     useEffect(() => {

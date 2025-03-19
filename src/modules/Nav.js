@@ -417,6 +417,7 @@ const Nav = ({ theme, changeTheme, logout }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const mainOptionsRef = useRef(null);
+  const [navClass, setNavClass] = useState("");
 
   useEffect(() => {
     setOpenOption(lowerOption ? 1 : 0);
@@ -437,6 +438,11 @@ const Nav = ({ theme, changeTheme, logout }) => {
 
   useEffect(() => {
     document.querySelectorAll(".page-container").forEach((container) => {
+      container.style.margin = expanded ? "0 0 0 175px" : "0";
+      container.style.transition = "margin 0.3s";
+    });
+    
+    document.querySelectorAll(".case-container").forEach((container) => {
       container.style.margin = expanded ? "0 0 0 175px" : "0";
       container.style.transition = "margin 0.3s";
     });
@@ -487,7 +493,7 @@ const Nav = ({ theme, changeTheme, logout }) => {
   });
 
   return (
-    <nav className={expanded ? "expanded" : ""} style={{ width: expanded ? "250px" : "75px" }}>
+    <nav className={`${expanded ? "expanded " : ""}${navClass}`} style={{ width: expanded ? "250px" : "75px" }}>
       <div id="menu">
         <div id="menu-header" style={{ alignItems: expanded ? "flex-start" : "center" }}>
           <div className="nav-toggle" style={{ justifyContent: expanded ? "space-between" : "center" }}>

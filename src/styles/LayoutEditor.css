@@ -73,11 +73,18 @@ header {
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 2.5px;
-    margin: 10px 0;
     width: 100%;
     max-height: 300px;
     overflow-y: auto;
+
+    &:not(.nm) {
+        margin: 10px 0;
+        gap: 2.5px;
+    }
+
+    &.nm {
+        gap: 5px;
+    }
 }
 
 .group-fields {
@@ -327,6 +334,7 @@ header {
 }
 
 .form-group input:not([type='checkbox']) {
+    max-height: 36px;
     min-height: 36px;
 }
 

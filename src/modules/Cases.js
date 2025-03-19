@@ -117,8 +117,12 @@ export const Cases = ({ user }) => {
         fetchCaseTypes();
     }, []);
 
+    useEffect(() => {
+        console.log(displaySidebar, cases);
+    }, [displaySidebar]);
+
     return (
-        <div className='page-container case-container'>
+        <div className='page-container case-page'>
                 <div id='page-header'>
                     <h1>Cases</h1>
                     <button className='action' onClick={() => setCreateCase(true)}>Create Case</button>
@@ -149,10 +153,10 @@ export const Cases = ({ user }) => {
                         <tbody>
                             {cases.map((c, index) => (
                                 <tr key={index} className='case' onClick={(event) => {
-                                    if(displayHeaders.created_at) handleClick(event, displaySidebar === c.id ? null : c.id);
+                                    if(displayHeaders.created_at) handleClick(event, displaySidebar === c.case_id ? null : c.case_id);
                                     else navigate(`/case/${c.id}`);
                                 }}>
-                                    <td className='case-name' title={`Case ID: ${c.id}`} onClick={() => navigate(`/case/${c.id}`)} ref={nameRef}>
+                                    <td className='case-name' title={`Case ID: ${c.id}`} onClick={() => navigate(`/case/${c.case_id}`)} ref={nameRef}>
                                         {c.contact_display.includes('uploads')
                                             ? <img className='contact-initials' src={`https://dalyblackdata.com/api/${c.contact_display}`} alt="Profile" />
                                             : <span className='contact-initials'>{c.contact_display}</span>

@@ -68,9 +68,10 @@ th.td {
     min-width: 34px;
 }
 
-.contact-name-container, .contact-detail-container {
+.phone-number-container, .email-container, .contact-name-container, .contact-detail-container {
     display: flex;
     justify-content: space-between;
+    align-items: flex-end;
     flex-wrap: wrap;
     width: 100%;
     margin-bottom: 15px;
@@ -178,10 +179,28 @@ th.td {
 }
 
 .tag {
-    background-color: var(--card-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
     border-radius: 3px;
     padding: 0 5px;
     font-size: 12.8px;
+    height: 20px;
+    gap: 5px;
+    user-select: none;
+}
+
+.tag.input {
+    color: var(--text-color);
+}
+
+.tag:not(.bright) {
+    background-color: var(--card-color);
+}
+
+.tag.bright {
+    background-color: var(--fill);
+    color: var(--secondary-color);
 }
 
 .tag:not(.caps) {

@@ -98,18 +98,30 @@ export const FileUpload = ({ fetchFiles, currentPath }) => {
 
     return (
         <div className="file-upload-container">
-            <h2>Upload Case Exhibit</h2>
+            <h3>Upload Case Documents</h3>
             <div className="file-upload">
                 <div className="upload-actions">
                     <input type="file" id="fileInput" ref={fileInputRef} onChange={handleFileChange} multiple hidden />
-                    <label htmlFor="fileInput" className="action alt">Choose Files</label>
+                    <label htmlFor="fileInput" className="uploader action secondary">Choose File(s)</label>
 
                     <input type="file" id="folderInput" ref={folderInputRef} onChange={handleFolderChange} webkitdirectory="true" multiple hidden />
-                    <label htmlFor="folderInput" className="action alt">Choose Folder</label>
+                    <label htmlFor="folderInput" className="uploader action secondary">Choose Folder</label>
                 </div>
 
+                {files.length > 0 && (
+                    <div className="file-list">
+                        {files.map((file, index) => index < 5 && (
+                            <span key={index}>{file.webkitRelativePath || file.name}</span>
+                        ))}
+                    </div>
+                )}
+
+                <button className="action upload-button" onClick={() => handleUpload(false)} disabled={isUploading}>
+                    {isUploading ? <Loader2 className="spinner" /> : "Upload"}
+                </button>
+
                 {showFolderInput ? (
-                    <div className="folder-creation">
+                    <div className="folder-creation form-group nm">
                         <input
                             type="text"
                             placeholder="Enter folder name"
@@ -124,18 +136,6 @@ export const FileUpload = ({ fetchFiles, currentPath }) => {
                         <FolderPlus /> New Folder
                     </button>
                 )}
-
-                {files.length > 0 && (
-                    <div className="file-list">
-                        {files.map((file, index) => index < 5 && (
-                            <span key={index}>{file.webkitRelativePath || file.name}</span>
-                        ))}
-                    </div>
-                )}
-
-                <button className="action upload-button" onClick={() => handleUpload(false)} disabled={isUploading}>
-                    {isUploading ? <Loader2 className="spinner" /> : "Upload"}
-                </button>
             </div>
             {message && <p>{message}</p>}
 
@@ -155,8 +155,10 @@ export const FileUpload = ({ fetchFiles, currentPath }) => {
 
 export const FileList = () => {
     const [files, setFiles] = useState([]);
-    const [sortConfig, setSortConfig] = useState({ key: "name", direction: "asc" });
+    const [directories, setDirectories] = useState([]);
     const [filteredFiles, setFilteredFiles] = useState([]);
+    const [fetchingFiles, setFetchingFiles] = useState(false);
+    const [sortConfig, setSortConfig] = useState({ key: "name", direction: "asc" });
     const [searchQuery, setSearchQuery] = useState("");
     const [more, setMore] = useState(null);
     const [currentFolder, setCurrentFolder] = useState("Exhibits");
@@ -166,34 +168,78 @@ export const FileList = () => {
     const menuRef = useRef(null);
     const exhibitRef = useRef(null);
     const [expanded, setExpanded] = useState(true);
-    const [fetchingFiles, setFetchingFiles] = useState(false);
+    const [renderMobile, setRenderMobile] = useState(window.innerWidth < 768);
+    const [displayedFiles, setDisplayedFiles] = useState([]);
+    const [allFiles, setAllFiles] = useState([]);
 
-    const fetchFiles = async (folder = "") => {
+    const isSearching = searchQuery.length > 0;
+
+    useEffect(() => {
+        function handleResize() {
+            if (window.innerWidth < 768) {
+                setRenderMobile(true);
+            } else {
+                setRenderMobile(false);
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            handleResize();
+        });
+
+        return () => {
+            window.removeEventListener('resize', () => {
+                handleResize();
+            });
+        };
+    }, []);
+
+    const fetchFiles = async (folder = "Exhibits") => {
         setFetchingFiles(true);
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/list-files.php?folder=${folder}&time=${new Date().getTime()}`);
+            const response = await fetch(`https://dalyblackdata.com/api/list-files.php?folder=${folder}`);
             const data = await response.json();
-            setFiles(sortFiles([...data]));
-            setFilteredFiles(sortFiles([...data]));
+            setDisplayedFiles(sortFiles([...data])); // Only update displayed files
         } catch (error) {
             console.error("Error fetching files:", error);
         }
         setFetchingFiles(false);
     };
 
-    useEffect(() => {
-        if (!searchQuery) {
-            setFilteredFiles(files);
-        } else {
-            const filtered = files.filter(file => 
-                file.name.toLowerCase().includes(searchQuery.toLowerCase())
-            );
-            setFilteredFiles(filtered);
+    // Fetch all files for search functionality
+    const fetchAllFiles = async () => {
+        try {
+            const response = await fetch(`https://dalyblackdata.com/api/fetch-all-files.php`);
+            const data = await response.json();
+            if (data.success) {
+                setAllFiles(sortFiles([...data.files])); // Store all files separately
+            }
+        } catch (error) {
+            console.error("Error fetching all files:", error);
         }
-    }, [searchQuery, files]);
+    };
 
-    useEffect(() => { fetchFiles(currentFolder); }, [currentFolder]);
+    // Fetch both folder files and all files on mount
+    useEffect(() => {
+        fetchFiles(currentFolder);  // Loads current folder files
+        fetchAllFiles();            // Fetches all files for searching
+    }, [currentFolder]);
 
+    // Handle filtering for search queries
+    useEffect(() => {
+        if (isSearching) {
+            setFilteredFiles(
+                allFiles.filter(
+                    (file) =>
+                        file.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        (file.folder && file.folder.toLowerCase().includes(searchQuery.toLowerCase()))
+                )
+            );
+        } else {
+            setFilteredFiles(displayedFiles);
+        }
+    }, [searchQuery, displayedFiles, allFiles]);
+    
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (menuRef.current && !menuRef.current.contains(event.target)) setMore(null);
@@ -282,6 +328,9 @@ export const FileList = () => {
             if (data.success) {
                 setFiles((prevFiles) => prevFiles.filter(f => 
                     file.isFolder ? f.path !== file.path : f.fileKey !== file.fileKey
+                 ));
+                setDisplayedFiles((prevFiles) => prevFiles.filter(f => 
+                    file.isFolder ? f.path !== file.path : f.fileKey !== file.fileKey
                 ));
             } else {
                 console.error("Error deleting:", data.error);
@@ -314,6 +363,7 @@ export const FileList = () => {
     const handleDoubleClick = async (file) => {
         if (file.isFolder) {
             handleFolderClick(file.path);
+            setActiveFile(null);
             return;
         }
 
@@ -367,25 +417,38 @@ export const FileList = () => {
         <div className="page-container case-library">
             <div id='page-header'>
                 <h2>Case Library</h2>
+                <button className='action' onClick={() => setMinimizeUpload(prev => !prev)}>
+                    {minimizeUpload ? <>Upload <Upload /></> : 'Close Upload'}
+                </button>
             </div>
-            <SearchBar expanded={expanded} setExpanded={setExpanded} setSearchQuery={setSearchQuery}/>
             {!minimizeUpload ? (
                 <FileUpload fetchFiles={fetchFiles} currentPath={currentFolder} />
             ) : (
                 <></>
             )}
-            <button className='action' onClick={() => setMinimizeUpload(prev => !prev)}>
-                {minimizeUpload ? <>Upload <Upload /></> : 'Close Upload'}
-            </button>
+            <SearchBar expanded={expanded} setExpanded={setExpanded} setSearchQuery={setSearchQuery}/>
             {currentFolder !== 'Exhibits' && (
-                <button onClick={handleBackClick} className="action alt">Back</button>
+                <span className='subtext breadcrumb'>
+                    <span onClick={() => setCurrentFolder("Exhibits")}>Exhibits</span>
+                    {currentFolder !== "Exhibits" &&
+                        currentFolder.split("/").map((trail, index, arr) => {
+                            if (index === 0) return null;
+                            const path = arr.slice(0, index + 1).join("/");
+                            return (
+                                <React.Fragment key={path}>
+                                    {" / "}
+                                    <span onClick={() => setCurrentFolder(path)}>{trail}</span>
+                                </React.Fragment>
+                            );
+                        })}
+                </span>
             )}
             {!fetchingFiles ? (
                 <table className='exhibits'>
                     <thead>
                         <tr>
                             <th className='file-name' onClick={() => requestSort('name')}>Name</th>
-                            <th className='file-date' onClick={() => requestSort('lastModified')}>Last Modified</th>
+                            {!renderMobile && <th className='file-date' onClick={() => requestSort('lastModified')}>Last Modified</th>}
                             <th className='file-size' onClick={() => requestSort('size')}>Size</th>
                             <th className='file-actions'>Actions</th>
                         </tr>
@@ -395,8 +458,14 @@ export const FileList = () => {
                             <tr key={index} className={`exhibit${activeFile === index ? ' active-file' : ''}`}
                                 onClick={() => setActiveFile(index)}
                                 onDoubleClick={() => handleDoubleClick(file)}>
-                                <td className='file-name'>{file.isFolder ? <FolderIcon /> : <File />} {file.name}</td>
-                                <td className='file-date' title={file.lastModified ? formatDate(file.lastModified)[1] : '-'}>{file.lastModified ? formatDate(file.lastModified)[0] : '-'}</td>
+                                <td className='file-name'>
+                                    {file.isFolder ? <FolderIcon /> : <File />}
+                                    {isSearching && file.folder ? (
+                                        <span className="file-path">{file.folder}/</span>
+                                    ) : null}
+                                    {file.name}
+                                </td>
+                                {!renderMobile && <td className='file-date' title={file.lastModified ? formatDate(file.lastModified)[1] : '-'}>{file.lastModified ? formatDate(file.lastModified)[0] : '-'}</td>}
                                 <td className='file-size'>{!file.isFolder ? formatSize(file.size) : `${file.size || 0} items`}</td>
                                 <td className='file-actions subtext'>
                                     <span className='file-actions-dots' onClick={(e) => { e.stopPropagation(); setMore(more === index ? null : index); }}>...</span>

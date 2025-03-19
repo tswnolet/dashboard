@@ -24,6 +24,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $stmt2->execute();
         $result2 = $stmt2->get_result();
 
+        $sql3 = "SELECT * FROM vitals WHERE template_id = ?";
+        $stmt3 = $conn->prepare($sql3);
+        $stmt3->bind_param("i", $template_id);
+        $stmt3->execute();
+        $result3 = $stmt3->get_result();
+
         $sections = [];
         while ($row = $result->fetch_assoc()) {
             $sections[] = $row;
@@ -34,7 +40,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $phases[] = $row;
         }
 
-        echo json_encode(['success' => true, 'sections' => $sections, 'phases' => $phases]);
+        $vitals = [];
+        while ($row = $result3->fetch_assoc()) {
+            $vitals[] = $row;
+        }
+
+        echo json_encode(['success' => true, 'sections' => $sections, 'phases' => $phases,'vitals' => $vitals]);
     } else {
         echo json_encode(['success' => false, 'message' => 'No template_id provided']);
         exit;

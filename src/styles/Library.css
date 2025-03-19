@@ -3,7 +3,7 @@ input[type="file"] {
 }
 
 .case-library {
-    gap: 15px;
+    gap: 20px;
 }
 
 .file-upload-container {
@@ -12,6 +12,10 @@ input[type="file"] {
     align-items: center;
     flex-direction: column;
     gap: 10px;
+
+    h3 {
+        margin: 0;
+    }
 }
 
 .exhibits {
@@ -56,14 +60,6 @@ input[type="file"] {
             font-size: 14px;
         }
 
-        .file-name {
-            width: calc(35%);
-            gap: 10px;
-            justify-content: flex-start;
-            text-wrap: nowrap;
-            text-align: left;
-        }
-
         .file-date, .file-size, .file-storage {
             width: 15%;
             text-align: center;
@@ -74,7 +70,7 @@ input[type="file"] {
         }
 
         .file-actions {
-            width: 60px;
+            width: 50px;
         }
 
         .file-actions-dots {
@@ -100,6 +96,7 @@ input[type="file"] {
     height: 45px;
     position: relative;
     transition: background-color 0.3s;
+    user-select: text;
 }
 
 .exhibit.active-file {
@@ -148,9 +145,10 @@ input[type="file"] {
 
 .file-preview {
     position: absolute;
-    top: -150px;
-    background-color: var(--card-color);
+    background-color: var(--secondary-color);
     z-index: 1003;
+    top: 0;
+    border-radius: 3px;
     padding: 25px 50px;
 }
 
@@ -158,8 +156,44 @@ input[type="file"] {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 15px;
+    gap: 5px;
     width: 100%;
+}
+
+@media (min-width: 800px) {
+    .file-name {
+        width: 35%;
+        gap: 10px;
+        justify-content: flex-start;
+        text-wrap: nowrap;
+        text-align: left;
+    }
+
+    .folder-creation {
+        width: 50%;
+
+        button {
+            width: 75%;
+        }
+    }
+}
+
+@media (max-width: 800px) {
+    #page-header h2 {
+        margin-bottom: 0;
+    }
+
+    .file-name {
+        width: 50%;
+        gap: 5px;
+        justify-content: flex-start;
+        text-wrap: nowrap;
+        text-align: left;
+    }
+
+    .upload-actions {
+        flex-direction: column;
+    }
 }
 
 .upload-button {
@@ -189,4 +223,21 @@ input[type="file"] {
 @keyframes spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
+}
+
+.file-list {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+}
+
+.folder-creation {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 125px;
 }

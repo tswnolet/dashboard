@@ -262,8 +262,7 @@ option:checked {
 .weather-select, .multi-select {
     border: 1px solid var(--border-color) !important;
     height: auto !important;
-    scrollbar-color: var(--hover-color) var(--card-color);
-
+    
     option {
         color: var(--text-color);
         background-color: var(--secondary-color);
@@ -349,7 +348,7 @@ button {
     color: var(--subtext-color);
 }
 
-.subtext {
+.subtext:not(.large) {
     font-size: 12px;
 }
 

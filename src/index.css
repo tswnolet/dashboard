@@ -17,7 +17,7 @@
   --svg-fill: rgb(81, 81, 97);
   --border-color: #ddd;
   --line-color: rgba(0,0,0,0.1);
-  --button-box-shadow: 0 0 10px 10px rgba(255, 136, 57, 0.1);
+  --button-box-shadow: 0 0 10px 10px rgba(255, 136, 57, 0.025);
   --large-box-shadow: 0 0 50px 25px rgba(0, 0, 0, 0.1);
   --hover-color: #8b8b8b;
   --context-color: white;
@@ -39,7 +39,7 @@
   --svg-fill: #cccccc;
   --border-color: #333;
   --line-color: rgba(255,255,255,0.1);
-  --button-box-shadow: 0 0 10px 10px rgba(129, 150, 255, 0.025);
+  --button-box-shadow: 0 0 10px 10px rgba(129, 150, 255, 0.05);
   --large-box-shadow: 0 0 25px rgba(255, 255, 255, 0.05);
   --context-color: rgb(0, 0, 0);
   --dark: 255;
@@ -54,6 +54,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--background-color);
+  font-weight: 500 !important;
+  scrollbar-color: var(--hover-color) var(--card-color);
 }
 
 #root {
@@ -201,7 +203,7 @@ input {
   flex-direction: column;
   color: var(--text-color);
   padding: 10px 25px;
-  max-width: 95%;
+  max-width: 100%;
   width: 500px;
   margin: 0;
   gap: 15px;
@@ -219,9 +221,9 @@ input {
 }
 
 .file-upload label {
+  display: flex;
+  justify-content: center;
   cursor: pointer;
-  color: var(--secondary-color);
-  background-color: var(--text-color);
 }
 
 input[type='checkbox']:not(:checked) {
@@ -474,6 +476,14 @@ table:not(.schools) > tbody > tr > td {
 
 .action.alt {
   background-color: var(--text-color);
+}
+
+.action.secondary {
+  color: var(--text-color);
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  width: 100%;
 }
 
 .action:hover {
