@@ -116,13 +116,16 @@ export const Leads = ({ user }) => {
                                         {lead.contact_name}{" "}
                                         {displayHeaders.case_type && (
                                             <span className='subtext'>
-                                                {lead?.preferred_contact != null && Object.values(lead.detail_data).length > 0
-                                                    ? `(${lead.preferred_contact === "email"
-                                                        ? lead.detail_data?.email?.email
-                                                        : lead.preferred_contact === "phone"
-                                                            ? lead.detail_data?.phone?.number
-                                                            : ""})`
-                                                    : ""}
+                                                {
+                                                    lead?.preferred_contact &&
+                                                    lead?.detail_data &&
+                                                    Object.keys(lead.detail_data).length > 0 &&
+                                                    lead.detail_data[lead.preferred_contact]?.email 
+                                                        ? `(${lead.detail_data[lead.preferred_contact]?.email})`
+                                                        : lead.detail_data[lead.preferred_contact]?.number 
+                                                            ? `(${lead.detail_data[lead.preferred_contact]?.number})`
+                                                            : ""
+                                                }
                                             </span>
                                         )}
                                     </td>

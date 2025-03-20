@@ -115,8 +115,8 @@ export const CaseHeader = ({ caseData = {}, fetchCase }) => {
                     </h2>
                     <div className='case-header-meta subtext'>
                         <MetaItem icon={<SquareUser size={16} />} value={contact?.full_name} onClick={() => setEditContact(true)} />
-                        <MetaItem icon={<Phone size={16} />} value={contact?.details?.phone?.number} type='phone' onClick={() => setEditContact(true)} />
-                        <MetaItem icon={<Mail size={16} />} value={contact?.details?.email?.email} type='email' onClick={() => setEditContact(true)} />
+                        <MetaItem icon={<Phone size={16} />} value={contact?.details?.phone?.number} type='phone' />
+                        <MetaItem icon={<Mail size={16} />} value={contact?.details?.email?.email} type='email' />
                     </div>
                 </div>
             </div>
