@@ -139,10 +139,10 @@ td.case-name {
     flex-direction: column;
     gap: 7.5px;
     background-color: var(--secondary-color);
+}
 
-    h2 {
-        margin: 0;
-    }
+.case-header-title {
+    margin: 0;
 }
 
 .case-header, .case-information {
@@ -153,6 +153,7 @@ td.case-name {
 
 .case-information {
     gap: 15px;
+    margin: 10px 0;
 }
 
 .case-information .details {

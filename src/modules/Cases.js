@@ -85,10 +85,6 @@ export const Cases = ({ user }) => {
     const handleClick = (id) => {
         setDisplaySidebar((prevId) => (prevId === id ? null : id));
     };
-
-    useEffect(() => {
-        console.log(displaySidebar);
-    }, [displaySidebar]);
     
     const fetchCaseTemplates = async () => {
         try {
@@ -163,7 +159,7 @@ export const Cases = ({ user }) => {
                                         }
                                         {c.case_name}
                                         {displayHeaders.tags && Array.isArray(JSON.parse(c.tags)) && JSON.parse(c.tags).length > 0 && <span className='tag caps'>
-                                            # {Object.entries(JSON.parse(c.tags)).map(([key, value], index) => value)}
+                                            # {Object.entries(JSON.parse(c.tags)).map(([key, value]) => value)}
                                         </span>}
                                     </td>
                                     <td>{c.phase_name}</td>

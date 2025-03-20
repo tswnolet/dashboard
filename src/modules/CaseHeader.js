@@ -14,7 +14,7 @@ const MetaItem = ({ icon, value, type = null, onClick }) => {
     );
 };
 
-export const CaseHeader = ({ caseData = {}, fetchCases }) => {
+export const CaseHeader = ({ caseData = {}, fetchCase }) => {
     const contact = caseData?.contact || {};
     const caseInfo = caseData?.case || {};
     const [tags, setTags] = useState([]);
@@ -149,7 +149,7 @@ export const CaseHeader = ({ caseData = {}, fetchCases }) => {
                 <EditDetail 
                     setEditContact={setEditContact} 
                     contactData={contact} 
-                    fetchContacts={fetchCases} 
+                    fetchContacts={fetchCase} 
                 />
             )}
         </div>

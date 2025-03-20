@@ -12,7 +12,7 @@ $contact_id = $_POST['id'] ?? null;
 $first_name = $_POST['first_name'] ?? null;
 $middle_name = $_POST['middle_name'] ?? null;
 $last_name = $_POST['last_name'] ?? null;
-$full_name = $_POST['full_name'] ?? null;
+$full_name = ($_POST['first_name'] ? $_POST['first_name'] . ' ' : '') . ($_POST['middle_name']? $_POST['middle_name'] . ' ' : '') . ($_POST['last_name'] ? $_POST['last_name'] : '') ?? null;
 $nickname = $_POST['nickname'] ?? null;
 $prefix = $_POST['prefix'] ?? null;
 $suffix = $_POST['suffix'] ?? null;
@@ -20,7 +20,7 @@ $company_name = $_POST['company_name'] ?? null;
 $job_title = $_POST['job_title'] ?? null;
 $department = $_POST['department'] ?? null;
 $date_of_birth = $_POST['date_of_birth'] ?? null;
-$date_of_death = $_POST['date_of_death'] ?? null;
+$date_of_death = (!empty($_POST['date_of_death']) && $_POST['date_of_death'] !== "null") ? $_POST['date_of_death'] : null;
 $is_company = isset($_POST['is_company']) && $_POST['is_company'] === 'true' ? 1 : 0;
 
 if (!$contact_id) {
@@ -28,16 +28,32 @@ if (!$contact_id) {
     exit;
 }
 
-$sql = "UPDATE contacts SET 
+if ($date_of_death === null) {
+    $sql = "UPDATE contacts SET 
             first_name = ?, middle_name = ?, last_name = ?, full_name = ?, nickname = ?, prefix = ?, suffix = ?, 
-            company_name = ?, job_title = ?, department = ?, date_of_birth = ?, date_of_death = ?, is_company = ?, updated_at = NOW() 
+            company_name = ?, job_title = ?, department = ?, date_of_birth = ?, is_company = ?, updated_at = NOW() 
         WHERE id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param(
-    "sssssssssssiii", 
-    $first_name, $middle_name, $last_name, $full_name, $nickname, $prefix, $suffix, 
-    $company_name, $job_title, $department, $date_of_birth, $date_of_death, $is_company, $contact_id
-);
+
+    $stmt = $conn->prepare($sql);
+
+    $stmt->bind_param("sssssssssssii", 
+        $first_name, $middle_name, $last_name, $full_name, $nickname, $prefix, $suffix, 
+        $company_name, $job_title, $department, $date_of_birth, $is_company, $contact_id
+    );
+} else {
+    $sql = "UPDATE contacts SET 
+        first_name = ?, middle_name = ?, last_name = ?, full_name = ?, nickname = ?, prefix = ?, suffix = ?, 
+        company_name = ?, job_title = ?, department = ?, date_of_birth = ?, date_of_death = ?, is_company = ?, updated_at = NOW() 
+    WHERE id = ?";
+
+    $stmt = $conn->prepare($sql);
+
+    $stmt->bind_param("sssssssssssiii", 
+        $first_name, $middle_name, $last_name, $full_name, $nickname, $prefix, $suffix, 
+        $company_name, $job_title, $department, $date_of_birth, $date_of_death, $is_company, $contact_id
+    );
+}
+
 $updateSuccess = $stmt->execute();
 
 if (!$updateSuccess) {

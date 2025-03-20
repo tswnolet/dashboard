@@ -68,7 +68,7 @@ th.td {
     min-width: 34px;
 }
 
-.phone-number-container, .email-container, .contact-name-container, .contact-detail-container {
+.phone-number-container, .email-container, .contact-name-container, .contact-name-info, .contact-detail-container {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;

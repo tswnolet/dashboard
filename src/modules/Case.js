@@ -36,7 +36,7 @@ export const Case = () => {
     return (
         <div className='case-container'>
             <CaseNav sections={sections}/>
-            <CaseHeader caseData={caseData}/>
+            <CaseHeader caseData={caseData} fetchCase={fetchCase}/>
         </div>
     );
 };

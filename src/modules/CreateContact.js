@@ -128,8 +128,8 @@ export const CreateContact = ({ setCreateContact, fetchContacts }) => {
                         />
                     </div>
                     <div className='contact-name-container'>
-                        {!contactInformation.is_company ? (
-                            <>
+                        {!contactInformation.is_company && (
+                            <div className='contact-name-info'>
                                 <div className="form-group fname">
                                     <label htmlFor="first_name">First Name<span className='required'>*</span></label>
                                     <input type="text" id="first_name" autoFocus value={contactInformation.first_name} onChange={(e) => setContactInformation({ ...contactInformation, first_name: e.target.value })} />
@@ -154,51 +154,41 @@ export const CreateContact = ({ setCreateContact, fetchContacts }) => {
                                     <label htmlFor="suffix">Suffix</label>
                                     <input type="text" id="suffix" value={contactInformation.suffix} onChange={(e) => setContactInformation({ ...contactInformation, suffix: e.target.value })} />
                                 </div>
-                            </>
-                        ) : (
-                            <>
-                                <div className="form-group cname">
-                                    <label htmlFor="company_name">Company Name<span className='required'>*</span></label>
-                                    <input type="text" id="company_name" value={contactInformation.company_name} onChange={(e) => setContactInformation({ ...contactInformation, company_name: e.target.value })} />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="nickname">Nickname</label>
-                                    <input type="text" id="nickname" value={contactInformation.nickname} onChange={(e) => setContactInformation({ ...contactInformation, nickname: e.target.value })} />
-                                </div>
-                            </>
+                            </div>
                         )}
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="company_name">Company Name</label>
-                        <input type="text" id="company_name" value={contactInformation.company_name} onChange={(e) => setContactInformation({ ...contactInformation, company_name: e.target.value })} />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="job_title">Job Title</label>
-                        <input type="text" id="job_title" value={contactInformation.job_title} onChange={(e
-                        ) => setContactInformation({ ...contactInformation, job_title: e.target.value })} />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="department">Department</label>
-                        <input type="text" id="department" value={contactInformation.department} onChange={(e) => setContactInformation({ ...contactInformation, department: e.target.value })} />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="date_of_birth">{!contactInformation.is_company ? "Date of Birth" : "Creation Date"}<span className='required'>*</span></label>
-                        <input type="date" id="date_of_birth" value={contactInformation.date_of_birth} onChange={(e) => setContactInformation({ ...contactInformation, date_of_birth: e.target.value })} />
-                    </div>
-                    {!contactInformation.is_company && (
-                        <div className="form-group">
-                            <label htmlFor="date_of_death">Date of Death</label>
-                            <input type="date" id="date_of_death" value={contactInformation.date_of_death} onChange={(e) => setContactInformation({ ...contactInformation, date_of_death: e.target.value })} />
+                        <div className='divider'></div>
+                        <div className="form-group cname">
+                            <label htmlFor="company_name">Company Name</label>
+                            <input type="text" id="company_name" value={contactInformation.company_name} onChange={(e) => setContactInformation({ ...contactInformation, company_name: e.target.value })} />
                         </div>
-                    )}
-                    <div className='form-group'>
-                        <label htmlFor='preferred_contact_method'>Preferred Contact Method</label>
-                        <select className='default-select' id='preferred_contact_method'>
-                            <option value='' disabled>Select...</option>
-                            <option value='email'>Email</option>
-                            <option value='phone'>Phone</option>
-                            <option value='mail'>Mail</option>
-                        </select>
+                        <div className="form-group">
+                            <label htmlFor="job_title">Job Title</label>
+                            <input type="text" id="job_title" value={contactInformation.job_title} onChange={(e
+                            ) => setContactInformation({ ...contactInformation, job_title: e.target.value })} />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="department">Department</label>
+                            <input type="text" id="department" value={contactInformation.department} onChange={(e) => setContactInformation({ ...contactInformation, department: e.target.value })} />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="date_of_birth">{!contactInformation.is_company ? "Date of Birth" : "Creation Date"}<span className='required'>*</span></label>
+                            <input type="date" id="date_of_birth" value={contactInformation.date_of_birth} onChange={(e) => setContactInformation({ ...contactInformation, date_of_birth: e.target.value })} />
+                        </div>
+                        {!contactInformation.is_company && (
+                            <div className="form-group">
+                                <label htmlFor="date_of_death">Date of Death</label>
+                                <input type="date" id="date_of_death" value={contactInformation.date_of_death} onChange={(e) => setContactInformation({ ...contactInformation, date_of_death: e.target.value })} />
+                            </div>
+                        )}
+                        <div className='form-group'>
+                            <label htmlFor='preferred_contact_method'>Preferred Contact Method</label>
+                            <select className='default-select' id='preferred_contact_method'>
+                                <option value='' disabled>Select...</option>
+                                <option value='email'>Email</option>
+                                <option value='phone'>Phone</option>
+                                <option value='mail'>Mail</option>
+                            </select>
+                        </div>
                     </div>
                     <div className='sub-title'>
                         <h4>Contact Information</h4>
