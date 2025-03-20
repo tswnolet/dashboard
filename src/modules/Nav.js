@@ -373,7 +373,7 @@ const Footer = ({ expanded, navigate, logout, theme, changeTheme, location }) =>
 
         {createNew && (
           <div className="create-new">
-            <div className="create-new-item" onClick={() => navigate("/cases")}>
+            <div className="create-new-item" onClick={() => navigate("/cases?new=true")}>
               <span>Case</span>
             </div>
             <div className="create-new-item" onClick={() => navigate("/intake?new=true")}>

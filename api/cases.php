@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             JOIN users u ON c.created_by = u.id 
             JOIN phases p ON c.phase_id = p.id
             LEFT JOIN contacts con ON c.contact_id = con.id
-            ORDER BY c.updated_at DESC";
+            ORDER BY c.id DESC";
 
     $result = $conn->query($sql);
     $cases = [];
@@ -141,8 +141,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     l.assigned_to,
                     l.status,
                     l.notes,
-                    l.referred_to
-                FROM leads l";
+                    l.referred_to,
+                    c.full_name AS referred_to_name
+                FROM leads l
+                LEFT JOIN contacts c ON l.referred_to = c.id;";
     
     $leadResult = $conn->query($leadSql);
     while ($row = $leadResult->fetch_assoc()) {

@@ -58,13 +58,13 @@
 }
 
 .leads-table th, .cases-table th {
-    width: 100%;
     display: flex;
     align-items: center;
     gap: 10px;
 
     &:not(.case-name) {
         justify-content: center;
+        width: 100%;
     }
 }
 

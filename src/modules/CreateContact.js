@@ -321,5 +321,5 @@ export const CreateContact = ({ setCreateContact, fetchContacts }) => {
                 </form>
             </div>
         </Modal>
-    )
-}
+    );
+};

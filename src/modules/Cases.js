@@ -24,6 +24,10 @@ export const Cases = ({ user }) => {
     const [caseTypes, setCaseTypes] = useState([]);
 
     useEffect(() => {
+        if (new URLSearchParams(window.location.search).get("new") === "true") {
+            setCreateCase(true);
+        }
+
         const updateDisplayHeaders = () => {
             const width = window.innerWidth;
 
@@ -57,35 +61,35 @@ export const Cases = ({ user }) => {
         }
     };
 
-    const formatDate = (date) => {
+    const formatDate = (dateString) => {
+        if (!dateString) return ["Invalid Date", "", ""];
+    
         const months = [
-            "January",
-            "February",
-            "March",
-            "April",
-            "May",
-            "June",
-            "July",
-            "August",
-            "September",
-            "October",
-            "November",
-            "December",
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
         ];
-        const dateObject = new Date(date);
-        return [months[dateObject.getMonth()] + " " + dateObject.getDate() + ", " + dateObject.getFullYear(), 
-                dateObject.toLocaleString(), 
-                dateObject.toLocaleTimeString()];
+    
+        const dateObject = new Date(dateString.replace(" ", "T") + "Z");  
+    
+        return [
+            `${months[dateObject.getUTCMonth()]} ${dateObject.getUTCDate()}, ${dateObject.getUTCFullYear()}`,
+            dateObject.toISOString(),
+            dateObject.toUTCString().split(" ")[4]
+        ];
     };
 
     const handleMouseMove = (event) => {
         setTooltipPos({ x: event.clientX + 10, y: event.clientY });
     };
 
-    const handleClick = (event, id) => {
-        setDisplaySidebar(id);
-    }
+    const handleClick = (id) => {
+        setDisplaySidebar((prevId) => (prevId === id ? null : id));
+    };
 
+    useEffect(() => {
+        console.log(displaySidebar);
+    }, [displaySidebar]);
+    
     const fetchCaseTemplates = async () => {
         try {
             const response = await fetch("https://dalyblackdata.com/api/layout.php");
@@ -116,10 +120,6 @@ export const Cases = ({ user }) => {
         fetchCaseTemplates();
         fetchCaseTypes();
     }, []);
-
-    useEffect(() => {
-        console.log(displaySidebar, cases);
-    }, [displaySidebar]);
 
     return (
         <div className='page-container case-page'>
@@ -153,7 +153,7 @@ export const Cases = ({ user }) => {
                         <tbody>
                             {cases.map((c, index) => (
                                 <tr key={index} className='case' onClick={(event) => {
-                                    if(displayHeaders.created_at) handleClick(event, displaySidebar === c.case_id ? null : c.case_id);
+                                    if(displayHeaders.created_at) handleClick(c.case_id);
                                     else navigate(`/case/${c.id}`);
                                 }}>
                                     <td className='case-name' title={`Case ID: ${c.id}`} onClick={() => navigate(`/case/${c.case_id}`)} ref={nameRef}>
@@ -162,12 +162,12 @@ export const Cases = ({ user }) => {
                                             : <span className='contact-initials'>{c.contact_display}</span>
                                         }
                                         {c.case_name}
-                                        {displayHeaders.tags && c.tags && <span className='tag caps'>
+                                        {displayHeaders.tags && Array.isArray(JSON.parse(c.tags)) && JSON.parse(c.tags).length > 0 && <span className='tag caps'>
                                             # {Object.entries(JSON.parse(c.tags)).map(([key, value], index) => value)}
                                         </span>}
                                     </td>
                                     <td>{c.phase_name}</td>
-                                    {displayHeaders.case_type && <td>{caseTypes.map((type) => type.id === c.case_type_id ? type.name : null)}</td>}
+                                    {displayHeaders.case_type && <td>{caseTypes.find((type) => type.id === c.lead_data.case_type_id)?.name}</td>}
                                     {displayHeaders.created_at && <td>{formatDate(c.create_date)[0]}</td>}
                                     {displayHeaders.last_updated && <td>{formatDate(c.updated_at)[0]}, {formatDate(c.updated_at)[2]}</td>}
                                 </tr>
@@ -180,7 +180,7 @@ export const Cases = ({ user }) => {
                         </div>
                     )}
                     {displaySidebar && (
-                        <CaseSidebar id={displaySidebar} cases={cases} caseTemplates={caseTemplates} caseTypes={caseTypes} formatDate={formatDate} />
+                        <CaseSidebar key={displaySidebar} id={displaySidebar} cases={cases} caseTemplates={caseTemplates} fetchCases={fetchCases} caseTypes={caseTypes} formatDate={formatDate} />
                     )}
                 </div>
             {createCase && <CreateCase user={user} setCreateCase={setCreateCase} fetchCases={fetchCases} caseTemplates={caseTemplates} />}

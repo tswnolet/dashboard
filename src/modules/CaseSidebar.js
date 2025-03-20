@@ -1,26 +1,38 @@
-import { Activity, Dot, Pencil, Loader2 } from "lucide-react";
-import React, { useState, useEffect } from "react";
+import { Activity, Dot, Loader2 } from "lucide-react";
+import React, { useState, useEffect, use } from "react";
+import { useNavigate } from "react-router";
+import { Contact } from "./FieldComponents";
 
-const EditableVital = ({ label, value, field, table, caseId, leadId, updateVital, formatDate }) => {
+const EditableVital = ({ 
+    label, 
+    value, 
+    field, 
+    table, 
+    caseId, 
+    leadId, 
+    updateVital, 
+    formatDate, 
+    options = [], 
+    isContact = false 
+}) => {
     const [editing, setEditing] = useState(false);
     const [inputValue, setInputValue] = useState(value || "");
     const [loading, setLoading] = useState(false);
 
     const isDateField = ["incident_date", "mediation_date", "updated_at", "create_date"].includes(field);
-    
+    const isDropdown = options.length > 0;
+
     useEffect(() => {
         if (isDateField && value) {
-            setInputValue(formatDate(value)[0]);
+            setInputValue(value ? new Date(value).toISOString().slice(0, 10) : ""); 
         } else {
             setInputValue(value || "");
         }
     }, [value]);
 
-    const handleSave = async () => {
-        let newValue = inputValue;
-
-        if (isDateField && inputValue) {
-            newValue = new Date(inputValue).toISOString().slice(0, 10);
+    const handleSave = async (newValue) => {
+        if (isDateField) {
+            newValue = new Date(newValue).toISOString().slice(0, 10);
         }
 
         if (newValue !== value) {
@@ -28,7 +40,6 @@ const EditableVital = ({ label, value, field, table, caseId, leadId, updateVital
             await updateVital(field, newValue, table);
             setLoading(false);
         }
-
         setEditing(false);
     };
 
@@ -36,28 +47,52 @@ const EditableVital = ({ label, value, field, table, caseId, leadId, updateVital
         <div className='sidebar-vital' onDoubleClick={() => setEditing(true)}>
             <span className='subtext'>{label}:</span>
             {editing ? (
-                <input
-                    type={isDateField ? "date" : "text"}
-                    className='vital-input'
-                    value={isDateField ? inputValue.slice(0, 10) : inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onBlur={handleSave}
-                    onKeyDown={(e) => e.key === "Enter" && handleSave()}
-                    autoFocus
-                />
+                isContact ? (
+                    <Contact 
+                        selectedContact={{ id: inputValue, full_name: value }}
+                        setSelectedContact={(contact) => handleSave(contact.id)}
+                        onCreateNewContact={() => console.log("Create new contact clicked")} 
+                    />
+                ) : isDropdown ? (
+                    <select
+                        className='default-select'
+                        value={inputValue}
+                        onChange={(e) => handleSave(e.target.value)}
+                        onBlur={() => setEditing(false)}
+                        autoFocus
+                    >
+                        {options.map((opt) => (
+                            <option key={opt.id} value={opt.id}>
+                                {opt.name}
+                            </option>
+                        ))}
+                    </select>
+                ) : (
+                    <input
+                        type={isDateField ? "date" : "text"}
+                        className='vital-input'
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        onBlur={() => handleSave(inputValue)}
+                        onKeyDown={(e) => e.key === "Enter" && handleSave(inputValue)}
+                        autoFocus
+                    />
+                )
             ) : (
                 <span className='subtext'>
-                    {loading ? <Loader2 className="spinner" /> : inputValue}
+                    {loading ? <Loader2 className="spinner" /> : (isDateField ? formatDate(value)[0] : value)}
                 </span>
             )}
         </div>
     );
 };
 
-export const CaseSidebar = ({ id, cases, caseTemplates, caseTypes, formatDate }) => {
+export const CaseSidebar = ({ id, cases, fetchCases, caseTemplates, caseTypes, formatDate }) => {
     const [caseData, setCaseData] = useState(cases.find((c) => c.case_id === id) ?? {});
     const [leadData, setLeadData] = useState(caseData.lead_data ?? {});
     const [leadUpdates, setLeadUpdates] = useState(leadData.lead_updates_data ?? []);
+
+    const navigate = useNavigate();
 
     const updateVital = async (field, newValue, table) => {
         const payload = {
@@ -88,6 +123,7 @@ export const CaseSidebar = ({ id, cases, caseTemplates, caseTypes, formatDate })
                         )
                     );
                 }
+                fetchCases();
             } else {
                 console.error("Update failed:", result.message);
             }
@@ -98,13 +134,13 @@ export const CaseSidebar = ({ id, cases, caseTemplates, caseTypes, formatDate })
 
     return (
         <div className='case-sidebar'>
-            <div className='case-sidebar-header'>
+            <div className='case-sidebar-header' onClick={() => navigate(`/case/${caseData.case_id}`)}>
                 {caseData.contact_display && caseData.contact_display.includes('uploads')
                     ? <img className='contact-initials large' src={`https://dalyblackdata.com/api/${caseData.contact_display}`} alt="Profile" />
                     : <span className='contact-initials large'>{caseData.contact_display}</span>
                 }
                 <div className="case-info">
-                    <div className='case-name'>{caseData.case_name || "Unknown Case"}</div>
+                    <div>{caseData.case_name || "Unknown Case"}</div>
                     <div className='case-id subtext'>ID: {caseData.case_id}</div>
                 </div>
             </div>
@@ -125,7 +161,6 @@ export const CaseSidebar = ({ id, cases, caseTemplates, caseTypes, formatDate })
 
             <div className='case-sidebar-vitals'>
                 <div className='sidebar-vital-header'><Activity size={16}/>{" "}Vitals</div>
-
                 <EditableVital 
                     label='Case Type' 
                     value={caseTypes.find((type) => type.id === leadData.case_type_id)?.name}
@@ -135,8 +170,8 @@ export const CaseSidebar = ({ id, cases, caseTemplates, caseTypes, formatDate })
                     leadId={leadData.lead_id}
                     updateVital={updateVital}
                     formatDate={formatDate}
+                    options={caseTypes} 
                 />
-
                 <EditableVital 
                     label={`Type of ${caseTypes.find((type) => type.id === leadData.case_type_id)?.name} Case`}
                     value={leadUpdates.find((data) => data.field_name === `Type of ${caseTypes.find((type) => type.id === leadData.case_type_id)?.name} Case`)?.value}
@@ -147,7 +182,6 @@ export const CaseSidebar = ({ id, cases, caseTemplates, caseTypes, formatDate })
                     updateVital={updateVital}
                     formatDate={formatDate}
                 />
-
                 <EditableVital 
                     label='Incident Date' 
                     value={leadData.incident_date}
@@ -158,16 +192,24 @@ export const CaseSidebar = ({ id, cases, caseTemplates, caseTypes, formatDate })
                     updateVital={updateVital}
                     formatDate={formatDate}
                 />
-
+                <EditableVital
+                    label='Primary Attorney'
+                    value={caseData?.team?.first_primary ?? ""}
+                    field="team.first_primary"
+                    table="cases"
+                    caseId={caseData.case_id}
+                    leadId={leadData.lead_id}
+                    updateVital={updateVital}
+                />
                 <EditableVital 
-                    label='Referred To' 
-                    value={leadData.referred_to}
+                    label="Referred To" 
+                    value={leadData.referred_to_name}
                     field="referred_to"
                     table="leads"
                     caseId={caseData.case_id}
                     leadId={leadData.lead_id}
                     updateVital={updateVital}
-                    formatDate={formatDate}
+                    isContact={true}
                 />
             </div>
         </div>

@@ -1,10 +1,11 @@
 import { Badge, Mail, Pen, Pencil, Phone, SquareUser } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
+import { EditDetail } from './EditDetail';
 
-const MetaItem = ({ icon, value, type = null }) => {
+const MetaItem = ({ icon, value, type = null, onClick }) => {
     if (!value) return null;
     return (
-        <div className='item'>
+        <div className='item' onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default' }}>
             {icon}
             {type === 'phone' ? <a href={`tel:${value}`}>{value}</a> 
                 : type === 'email' ? <a href={`mailto:${value}`}>{value}</a> 
@@ -13,15 +14,15 @@ const MetaItem = ({ icon, value, type = null }) => {
     );
 };
 
-export const CaseHeader = ({ caseData = {} }) => {
+export const CaseHeader = ({ caseData = {}, fetchCases }) => {
     const contact = caseData?.contact || {};
     const caseInfo = caseData?.case || {};
     const [tags, setTags] = useState([]);
     const [editingIndex, setEditingIndex] = useState(null);
     const [tagInput, setTagInput] = useState("");
     const tagRef = useRef(null);
+    const [editContact, setEditContact] = useState(false);
 
-    // **Properly Parse Tags from Object to Array**
     useEffect(() => {
         try {
             const parsedTags = caseInfo?.tags ? Object.values(JSON.parse(caseInfo.tags)) : [];
@@ -97,11 +98,9 @@ export const CaseHeader = ({ caseData = {} }) => {
         }
     };
 
-    const contactDisplay = contact?.contact_display && typeof contact?.contact_display === "string"
-        ? contact?.contact_display.includes("uploads")
-            ? <img src={`https://dalyblackdata.com/api/${contact.contact_display}`} alt="Profile" />
-            : contact.contact_display
-        : "N/A";
+    const contactDisplay = contact?.profile_picture
+        ? <img src={`https://dalyblackdata.com/api/${contact.profile_picture}`} alt="Profile" />
+        : <h2>{contact.full_name?.charAt(0) || "N/A"}</h2>;
 
     return (
         <div className='case-header'>
@@ -115,9 +114,9 @@ export const CaseHeader = ({ caseData = {} }) => {
                         <span className='subtext'> ({caseInfo?.id || "N/A"})</span>
                     </h2>
                     <div className='case-header-meta subtext'>
-                        <MetaItem icon={<SquareUser size={16} />} value={contact?.full_name} />
-                        <MetaItem icon={<Phone size={16} />} value={contact?.details?.phone?.number} type='phone' />
-                        <MetaItem icon={<Mail size={16} />} value={contact?.details?.email?.email} type='email' />
+                        <MetaItem icon={<SquareUser size={16} />} value={contact?.full_name} onClick={() => setEditContact(true)} />
+                        <MetaItem icon={<Phone size={16} />} value={contact?.details?.phone?.number} type='phone' onClick={() => setEditContact(true)} />
+                        <MetaItem icon={<Mail size={16} />} value={contact?.details?.email?.email} type='email' onClick={() => setEditContact(true)} />
                     </div>
                 </div>
             </div>
@@ -145,6 +144,14 @@ export const CaseHeader = ({ caseData = {} }) => {
                     </span>
                 </div>
             </div>
+
+            {editContact && (
+                <EditDetail 
+                    setEditContact={setEditContact} 
+                    contactData={contact} 
+                    fetchContacts={fetchCases} 
+                />
+            )}
         </div>
     );
 };

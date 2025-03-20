@@ -19,7 +19,11 @@ $updateQuery = "";
 $params = [];
 $types = "";
 
-if ($table === "cases") {
+if ($table === "leads" && $field === "referred_to") {
+    $updateQuery = "UPDATE leads SET referred_to = ? WHERE id = ?";
+    $params = [$value, $lead_id];
+    $types = "si";
+} elseif ($table === "cases") {
     $updateQuery = "UPDATE cases SET $field = ?, updated_at = NOW() WHERE id = ?";
     $params = [$value, $case_id];
     $types = "si";
