@@ -74,16 +74,20 @@ th.td {
     align-items: flex-end;
     flex-wrap: wrap;
     width: 100%;
-    margin-bottom: 15px;
 }
 
 .contact-name-container {
     align-items: center;
 }
 
+.contact-name-info {
+    margin-bottom: 15px;
+}
+
 .contact-detail-container {
     align-items: end;
-    gap: 15px;
+    gap: 5px;
+    margin-bottom: 15px;
 }
 
 .fname, .mname, .lname {

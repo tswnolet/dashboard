@@ -3,6 +3,7 @@ import '../styles/LayoutEditor.css';
 import { createPortal } from "react-dom";
 import { CreateContact } from "./CreateContact";
 import { UserRoundPlus } from "lucide-react";
+import { Calculate } from "@mui/icons-material";
 
 export const Text = ({ type, placeholder, value, onChange, disable }) => {
     return type === 'text' ? (
@@ -10,6 +11,29 @@ export const Text = ({ type, placeholder, value, onChange, disable }) => {
     ) : (
         <textarea placeholder={placeholder} disabled={disable} value={value || ""} onChange={(e) => onChange(e.target.value)} />
     );
+};
+
+export const NumberInput = ({ type, value, onChange }) => {
+    return (
+        <div className='number-input'>
+            <input 
+                type='number' 
+                inputMode="numeric" 
+                placeholder='0.00' 
+                value={value || ""}
+                onChange={(e) => onChange(e.target.value)}
+            />
+            {type !== 'number' && <span className='number-symbol subtext'>{type === 'currency' ? "$" : '%'}</span>}
+        </div>
+    );
+};
+
+export const DateInput = ({ value, onChange, disable = false }) => {
+    return <input type='date' disabled={disable} value={value || ""} onChange={(e) => onChange(e.target.value)} />;
+};
+
+export const TimeInput = ({ value, onChange }) => {
+    return <input type='time' value={value || ""} onChange={(e) => onChange(e.target.value)} />;
 };
 
 export const Dropdown = ({ options = [], value = "", onChange = () => {} }) => {
@@ -36,6 +60,35 @@ export const Dropdown = ({ options = [], value = "", onChange = () => {} }) => {
     );
 };
 
+export const MultiSelect = ({ options = [], value = [], onChange = () => {} }) => {
+    let parsedOptions = [];
+
+    try {
+        parsedOptions = Array.isArray(options)
+            ? options
+            : options
+                ? JSON.parse(options)
+                : [];
+    } catch (error) {
+        console.error("MultiSelect options parsing error:", error);
+        parsedOptions = [];
+    }
+
+    return (
+        <div className='multi-select'>
+            {parsedOptions.map((option, index) => (
+                <div
+                    key={index}
+                    className={`option${value.includes(option) ? ' active' : ''}`}
+                    onClick={() => onChange(value.includes(option) ? value.filter(v => v !== option) : [...value, option])}
+                >
+                    {option}
+                </div>
+            ))}
+        </div>
+    );
+};
+
 export const Boolean = ({ options, value, onChange }) => {
     let parsedOptions = [];
 
@@ -53,8 +106,8 @@ export const Boolean = ({ options, value, onChange }) => {
             {parsedOptions.map((option, index) => (
                 <div 
                     key={index} 
-                    className={`option${value === option ? ' active' : ''}`} 
-                    onClick={() => onChange(option)}
+                    className={`option${value === index ? ' active' : ''}`} 
+                    onClick={() => onChange(index)}
                 >
                     {option}
                 </div>
@@ -63,23 +116,74 @@ export const Boolean = ({ options, value, onChange }) => {
     );
 };
 
-export const NumberInput = ({ type, value, onChange }) => {
+
+export const Subheader = ({ title }) => {
+    return <h2 className='subheader'>{title}</h2>;
+};
+
+export const Instructions = ({ instructions }) => {
+    return <p className='instructions'>{instructions}</p>;
+};
+
+export const FileUpload = ({ value, onChange }) => {
+    const [file, setFile] = useState(null);
+
+    const handleFileChange = (e) => {
+        const selectedFile = e.target.files[0];
+        setFile(selectedFile);
+        onChange(selectedFile);
+    };
+
     return (
-        <div className='number-input'>
-            <input 
-                type='number' 
-                inputMode="numeric" 
-                placeholder='0.00' 
-                value={value || ""}
-                onChange={(e) => onChange(e.target.value)}
-            />
-            {type !== 'number' && <span className='number-symbol subtext'>{type === 'currency' ? "$" : '%'}</span>}
+        <div className='file-upload'>
+            <input type='file' onChange={handleFileChange} />
+            {file ? <span>{file.name}</span> : <span>{value || "Choose file..."}</span>}
         </div>
     );
 };
 
-export const DateInput = ({ value, onChange, disable = false }) => {
-    return <input type='date' disabled={disable} value={value || ""} onChange={(e) => onChange(e.target.value)} />;
+export const MultiFile = ({ value, onChange }) => {
+    const [files, setFiles] = useState([]);
+
+    const handleFileChange = (e) => {
+        const newFiles = Array.from(e.target.files);
+        setFiles(prevFiles => {
+            const updated = [...prevFiles, ...newFiles];
+            onChange(updated);
+            return updated;
+        });
+    };    
+
+    return (
+        <div className='file-upload'>
+            <input type='file' id='multi-file' multiple onChange={handleFileChange} hidden/>
+            <label htmlFor='multi-file'>Choose files...</label>
+            {files.length > 0 && <div className='file-list'>    
+                {files.map((file, index) => (
+                    <span key={index}>{file.name}</span>
+                ))}
+            </div>}
+        </div>
+    );
+};
+
+export const Calculation = ({ fields = []}) => {
+    const [result, setResult] = useState(0);
+
+    useEffect(() => {
+        if (fields?.length === 0) return setResult(0);
+
+        setResult(fields.reduce((acc, field) => {
+            return acc + Number(field.value || 0);
+        }, 0));
+    }, [fields]);
+
+    return (
+        <div className='number-input'>
+            <input type='text' disabled className='calculation' value={result}/>
+            <span className='number-symbol subtext'><Calculate size={18}/></span>
+        </div>
+    );
 };
 
 export const Contact = ({ selectedContact, onCreateNewContact, setSelectedContact, onCreateNewLead, lead = false }) => {
@@ -225,16 +329,45 @@ export const Contact = ({ selectedContact, onCreateNewContact, setSelectedContac
     );
 };
 
-export const ContactList = () => {
-    const [contactIds, setContactIds] = useState([]);
-    const [contacts, setContacts] = useState(1);
+export const ContactList = ({ onChange }) => {
+    const [contacts, setContacts] = useState([{ id: Date.now(), selectedContact: null }]);
+
+    const handleContactSelect = (index, contact) => {
+        const updated = [...contacts];
+        updated[index].selectedContact = contact;
+        setContacts(updated);
+
+        if (onChange) {
+            onChange(updated.map(c => c.selectedContact?.id).filter(Boolean));
+        }
+    };
+
+    const addContactField = () => {
+        setContacts([...contacts, { id: Date.now(), selectedContact: null }]);
+    };
 
     return (
         <>
-            {contactIds.map((id, index) => (
-                <Contact />
+            {contacts.map((contactItem, index) => (
+                <Contact
+                    key={contactItem.id}
+                    selectedContact={contactItem.selectedContact}
+                    setSelectedContact={(contact) => handleContactSelect(index, contact)}
+                    onCreateNewContact={() => console.log("Create contact UI")}
+                />
             ))}
-            <div className='action' onClick={() => setContactIds([...contactIds, contactIds.length + 1])}>Add Contact</div>
+            <div className='action' onClick={addContactField}>+ Add Another Contact</div>
         </>
+    );
+};
+
+export const Deadline = () => {
+    return (
+        <div className='deadline'>
+            <label>Due</label>
+            <DateInput />
+            <label>Done</label>
+            <DateInput />
+        </div>
     )
 }

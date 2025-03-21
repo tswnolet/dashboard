@@ -44,11 +44,11 @@ export const EditDetail = ({ setEditContact, contactData, fetchContacts }) => {
                 is_company: contactData.is_company === 1
             });
 
-            setPhones(contactData.details?.phone ? [contactData.details.phone] : [{ type: "mobile", number: "" }]);
-            setEmails(contactData.details?.email ? [contactData.details.email] : [{ type: "personal", email: "" }]);
-            setAddresses(contactData.address ? [contactData.address] : [{
+            setPhones(Array.isArray(contactData.details?.phone) ? contactData.details.phone : [{ type: "mobile", number: "" }]);
+            setEmails(Array.isArray(contactData.details?.email) ? contactData.details.email : [{ type: "personal", email: "" }]);
+            setAddresses(Array.isArray(contactData.details?.address) ? contactData.details.address : [{
                 type: "home", line1: "", line2: "", city: "", state: "", postal_code: ""
-            }]);
+            }]);            
 
             setProfilePicture(contactData.profile_picture ? `https://dalyblackdata.com/api/${contactData.profile_picture}` : null);
         }
@@ -64,24 +64,41 @@ export const EditDetail = ({ setEditContact, contactData, fetchContacts }) => {
 
     const updateContact = async () => {
         const formData = new FormData();
-        Object.keys(contactInformation).forEach(key => formData.append(key, contactInformation[key]));
+    
+        Object.entries(contactInformation).forEach(([key, value]) => {
+            formData.append(key, value === "" ? null : value);
+        });
+    
         formData.append('id', contactData.id);
-        formData.append('phones', JSON.stringify(phones));
-        formData.append('emails', JSON.stringify(emails));
-        formData.append('addresses', JSON.stringify(addresses));
-
-        console.log(contactInformation.date_of_death);
-
+    
+        const cleanDetails = (items, fields) => {
+            return items.map(item => {
+                const cleaned = {};
+                fields.forEach(field => {
+                    cleaned[field] = item[field] === "" ? null : item[field];
+                });
+                return cleaned;
+            });
+        };
+    
+        const cleanedPhones = cleanDetails(phones, ["type", "number"]);
+        const cleanedEmails = cleanDetails(emails, ["type", "email"]);
+        const cleanedAddresses = cleanDetails(addresses, ["type", "line1", "line2", "city", "state", "postal_code"]);
+    
+        formData.append('phones', JSON.stringify(cleanedPhones));
+        formData.append('emails', JSON.stringify(cleanedEmails));
+        formData.append('addresses', JSON.stringify(cleanedAddresses));
+    
         if (profilePicture) {
             formData.append('profile_picture', profilePicture);
         }
-
+    
         try {
             const response = await fetch(`https://dalyblackdata.com/api/update-contact.php`, {
                 method: "POST",
                 body: formData
             });
-
+    
             if (response.ok) {
                 fetchContacts();
                 setEditContact(false);
@@ -91,7 +108,7 @@ export const EditDetail = ({ setEditContact, contactData, fetchContacts }) => {
         } catch (error) {
             console.error("Error updating contact:", error);
         }
-    };
+    };    
 
     return (
         <Modal
@@ -237,6 +254,7 @@ export const EditDetail = ({ setEditContact, contactData, fetchContacts }) => {
                             </div>
                         ))}
                     </div>
+                    <div className='divider horizontal'></div>
                     <div className="contact-detail-container">
                         {emails.map((email, index) => (
                             <div key={`email-${index}`} className='email-container'>
@@ -264,6 +282,7 @@ export const EditDetail = ({ setEditContact, contactData, fetchContacts }) => {
                             </div>
                         ))}
                     </div>
+                    <div className='divider horizontal'></div>
                     <div className='contact-detail-container'>
                         {addresses.map((address, index) => (
                             <div key={index} className='address'>

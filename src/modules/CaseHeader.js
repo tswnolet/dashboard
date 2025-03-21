@@ -100,7 +100,7 @@ export const CaseHeader = ({ caseData = {}, fetchCase }) => {
 
     const contactDisplay = contact?.profile_picture
         ? <img src={`https://dalyblackdata.com/api/${contact.profile_picture}`} alt="Profile" />
-        : <h2>{contact.full_name?.charAt(0) || "N/A"}</h2>;
+        : <h2>{contact.first_name?.trim().charAt(0) + contact?.last_name?.trim().charAt(0) || "DB"}</h2>;
 
     return (
         <div className='case-header'>
@@ -115,8 +115,8 @@ export const CaseHeader = ({ caseData = {}, fetchCase }) => {
                     </h2>
                     <div className='case-header-meta subtext'>
                         <MetaItem icon={<SquareUser size={16} />} value={contact?.full_name} onClick={() => setEditContact(true)} />
-                        <MetaItem icon={<Phone size={16} />} value={contact?.details?.phone?.number} type='phone' />
-                        <MetaItem icon={<Mail size={16} />} value={contact?.details?.email?.email} type='email' />
+                        <MetaItem icon={<Phone size={16} />} value={contact?.details?.phone ? contact?.details?.phone[0]?.number : ""} type='phone' />
+                        <MetaItem icon={<Mail size={16} />} value={contact?.details?.email ? contact?.details?.email[0]?.email : ""} type='email' />
                     </div>
                 </div>
             </div>

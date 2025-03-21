@@ -75,8 +75,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id'])) {
         $contactDetailsResult = $contactDetailsQuery->get_result();
         $response['contact']['details'] = [];
         while ($row = $contactDetailsResult->fetch_assoc()) {
-            $response['contact']['details'][$row['detail_type']] = json_decode($row['detail_data'], true);
-        }
+            $type = $row['detail_type'];
+            $data = json_decode($row['detail_data'], true);
+        
+            if (!isset($response['contact']['details'][$type])) {
+                $response['contact']['details'][$type] = [];
+            }
+        
+            $response['contact']['details'][$type][] = $data;
+        }        
     }
     
     if ($caseData['lead_id']) {

@@ -150,7 +150,7 @@ export const Cases = ({ user }) => {
                             {cases.map((c, index) => (
                                 <tr key={index} className='case' onClick={(event) => {
                                     if(displayHeaders.created_at) handleClick(c.case_id);
-                                    else navigate(`/case/${c.id}`);
+                                    else navigate(`/case/${c.case_id}`);
                                 }}>
                                     <td className='case-name' title={`Case ID: ${c.id}`} onClick={() => navigate(`/case/${c.case_id}`)} ref={nameRef}>
                                         {c.contact_display.includes('uploads')

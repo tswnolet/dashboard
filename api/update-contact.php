@@ -8,6 +8,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+function cleanArrayNulls($arr) {
+    foreach ($arr as $key => $value) {
+        if (is_string($value) && trim($value) === '') {
+            $arr[$key] = null;
+        } elseif (is_array($value)) {
+            $arr[$key] = cleanArrayNulls($value);
+        }
+    }
+    return $arr;
+}
+
 $contact_id = $_POST['id'] ?? null;
 $first_name = $_POST['first_name'] ?? null;
 $middle_name = $_POST['middle_name'] ?? null;
@@ -74,6 +85,10 @@ if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] ===
     }
 }
 
+$insertPhoneSQL = "INSERT INTO contact_details (contact_id, detail_type, detail_data) VALUES (?, 'phone', ?)";
+$insertEmailSQL = "INSERT INTO contact_details (contact_id, detail_type, detail_data) VALUES (?, 'email', ?)";
+$insertAddressSQL = "INSERT INTO contact_details (contact_id, detail_type, detail_data) VALUES (?, 'address', ?)";
+
 $phones = isset($_POST['phones']) ? json_decode($_POST['phones'], true) : [];
 $deletePhoneSQL = "DELETE FROM contact_details WHERE contact_id = ? AND detail_type = 'phone'";
 $stmt = $conn->prepare($deletePhoneSQL);
@@ -81,7 +96,7 @@ $stmt->bind_param("i", $contact_id);
 $stmt->execute();
 
 foreach ($phones as $phone) {
-    $insertPhoneSQL = "INSERT INTO contact_details (contact_id, detail_type, detail_data) VALUES (?, 'phone', ?)";
+    $phone = cleanArrayNulls($phone);
     $phoneData = json_encode($phone);
     $stmt = $conn->prepare($insertPhoneSQL);
     $stmt->bind_param("is", $contact_id, $phoneData);
@@ -95,7 +110,7 @@ $stmt->bind_param("i", $contact_id);
 $stmt->execute();
 
 foreach ($emails as $email) {
-    $insertEmailSQL = "INSERT INTO contact_details (contact_id, detail_type, detail_data) VALUES (?, 'email', ?)";
+    $email = cleanArrayNulls($email);
     $emailData = json_encode($email);
     $stmt = $conn->prepare($insertEmailSQL);
     $stmt->bind_param("is", $contact_id, $emailData);
@@ -109,7 +124,7 @@ $stmt->bind_param("i", $contact_id);
 $stmt->execute();
 
 foreach ($addresses as $address) {
-    $insertAddressSQL = "INSERT INTO contact_details (contact_id, detail_type, detail_data) VALUES (?, 'address', ?)";
+    $address = cleanArrayNulls($address);
     $addressData = json_encode($address);
     $stmt = $conn->prepare($insertAddressSQL);
     $stmt->bind_param("is", $contact_id, $addressData);

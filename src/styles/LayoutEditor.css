@@ -112,7 +112,7 @@ header {
     align-items: center;
 }
 
-.form-group input[type='text'], 
+.deadline input, .form-group input[type='text'], 
 .form-group textarea, 
 .form-group select {
     width: 100%;
@@ -123,9 +123,10 @@ header {
     font-size: 14px;
 }
 
-.form-group input[type='text'] {
+.form-group input[type='text'], .deadline input {
     height: 36px;
     padding: 0 10px;
+    max-width: 400px;
 }
 
 .form-group textarea {

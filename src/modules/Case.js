@@ -2,11 +2,26 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { CaseNav } from "./CaseNav";
 import { CaseHeader } from "./CaseHeader";
+import { Section } from "./Section";
 
 export const Case = () => {
     const { id } = useParams();
     const [caseData, setCaseData] = useState({});
     const [sections, setSections] = useState([]);
+    const [activeSection, setActiveSection] = useState(1);
+    const [folders, setFolders] = useState({});
+
+    const fetchDocuments = async () => {
+        try {
+            const response = await fetch(`https://dalyblackdata.com/api/documents.php?case_id=${caseData?.case?.case_id}&${new Date().getTime()}`);
+            const data = await response.json();
+            if (data.success) {
+                setFolders(data.folders || {});
+            }
+        } catch (error) {
+            console.error("Error fetching documents:", error);
+        }
+    };
 
     const fetchCase = async () => {
         try {
@@ -33,10 +48,17 @@ export const Case = () => {
         fetchCase();
     }, []);
 
+    useEffect(() => {
+        fetchDocuments();
+    }, [caseData]);
+
     return (
         <div className='case-container'>
-            <CaseNav sections={sections}/>
-            <CaseHeader caseData={caseData} fetchCase={fetchCase}/>
+            <CaseNav sections={sections} activeSection={activeSection} setActiveSection={setActiveSection} />
+            <div className='case-body'>
+                <CaseHeader caseData={caseData} fetchCase={fetchCase}/>
+                <Section key={activeSection} caseName={caseData?.case?.case_name} folders={folders} caseType={caseData?.lead?.case_type_id} section_id={activeSection} template_id={caseData?.case?.template_id}/>
+            </div>
         </div>
     );
 };
