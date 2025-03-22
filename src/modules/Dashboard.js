@@ -24,6 +24,7 @@ const Dashboard = ({ setLoggedIn, google = false }) => {
     const [titles, setTitles] = useState([]);
     const [filteredTitles, setFilteredTitles] = useState([]);
     const [smallScreen, setSmallScreen] = useState(window.innerWidth < 1025);
+    const report = new URLSearchParams(window.location.search).get('report');
     
     useEffect(() => {
         const handleResize = () => {
@@ -34,14 +35,19 @@ const Dashboard = ({ setLoggedIn, google = false }) => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    const fetchStats = async (manual = false) => {
+    const fetchStats = async (manual = false, customStart = null, customEnd = null) => {
         setRefreshing(true);
         const startTime = Date.now();
 
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/fetch.php${startDate ? ("?startDate=" + startDate + (endDate ? "&endDate=" + endDate : "")) : endDate ? "?endDate=" + endDate : ""}`);
+            const params = [];
+            if (customStart) params.push(`startDate=${customStart}`);
+            if (customEnd) params.push(`endDate=${customEnd}`);
+            const query = params.length ? `?${params.join("&")}` : "";
+
+            const response = await fetch(`https://dalyblackdata.com/api/fetch.php${query}`);
             const result = await response.json();
-            
+
             if (result.success) {
                 const filteredStats = Object.fromEntries(
                     Object.entries(result).filter(([key, value]) => key !== "success" && value !== null && value !== undefined)
@@ -62,68 +68,67 @@ const Dashboard = ({ setLoggedIn, google = false }) => {
         }, Math.max(0, minSpinTime - elapsedTime));
     };
 
-    useEffect(() => {
-        if (!datesSet) {
-            const urlParams = new URLSearchParams(window.location.search);
-            const report = urlParams.get('report');
-            const today = new Date();
-            let start = new Date(today.setDate(today.getDate() - 7)).toISOString().split('T')[0];
-            let end = new Date().toISOString().split('T')[0];
+    const getReportParams = () => {
+        const report = new URLSearchParams(window.location.search).get('report');
+        const today = new Date();
+        let start = null;
+        let end = null;
 
-            if (report) {
-                switch (report) {
-                    case 'today':
-                        start = end = today.toISOString().split('T')[0];
-                        break;
-                    case 'week':
-                        start = new Date(today.setDate(today.getDate() - 7)).toISOString().split('T')[0];
-                        end = new Date().toISOString().split('T')[0];
-                        break;
-                    case 'workweek':
-                        const dayOfWeek = today.getDay();
-                        const lastFriday = new Date(today);
-                        lastFriday.setDate(today.getDate() - ((dayOfWeek + 2) % 7));
-                        const lastSaturday = new Date(lastFriday);
-                        lastSaturday.setDate(lastFriday.getDate() - 6);
-                        start = lastSaturday.toISOString().split('T')[0];
-                        end = lastFriday.toISOString().split('T')[0];
-                        break;
-                    case 'last4weeks':
-                        start = new Date(today.setDate(today.getDate() - 28)).toISOString().split('T')[0];
-                        end = new Date().toISOString().split('T')[0];
-                        break;
-                    case 'thismonth':
-                        start = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
-                        end = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
-                        break;
-                    case 'lastmonth':
-                        start = new Date(today.getFullYear(), today.getMonth() - 1, 1).toISOString().split('T')[0];
-                        end = new Date(today.getFullYear(), today.getMonth(), 0).toISOString().split('T')[0];
-                        break;
-                    case 'thisyear':
-                        start = new Date(today.getFullYear(), 0, 1).toISOString().split('T')[0];
-                        end = new Date().toISOString().split('T')[0];
-                        break;
-                    case 'lastyear':
-                        start = new Date(today.getFullYear() - 1, 0, 1).toISOString().split('T')[0];
-                        end = new Date(today.getFullYear() - 1, 11, 31).toISOString().split('T')[0];
-                        break;
-                    case 'alltime':
-                        start = null;
-                        end = null;
-                        break;
-                    default:
-                        start = end = today.toISOString().split('T')[0];
-                }
+        if (report) {
+            switch (report) {
+                case 'today':
+                    break;
+                case 'week':
+                    start = new Date(today.setDate(today.getDate() - 7)).toISOString().split('T')[0];
+                    break;
+                case 'workweek':
+                    const dayOfWeek = today.getDay();
+                    const lastFriday = new Date(today);
+                    lastFriday.setDate(today.getDate() - ((dayOfWeek + 2) % 7));
+                    const lastSaturday = new Date(lastFriday);
+                    lastSaturday.setDate(lastFriday.getDate() - 6);
+                    start = lastSaturday.toISOString().split('T')[0];
+                    end = lastFriday.toISOString().split('T')[0];
+                    break;
+                case 'last4weeks':
+                    start = new Date(today.setDate(today.getDate() - 28)).toISOString().split('T')[0];
+                    break;
+                case 'thismonth':
+                    start = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+                    end = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
+                    break;
+                case 'lastmonth':
+                    start = new Date(today.getFullYear(), today.getMonth() - 1, 1).toISOString().split('T')[0];
+                    end = new Date(today.getFullYear(), today.getMonth(), 0).toISOString().split('T')[0];
+                    break;
+                case 'thisyear':
+                    start = new Date(today.getFullYear(), 0, 1).toISOString().split('T')[0];
+                    end = new Date(today).toISOString().split('T')[0];
+                    break;
+                case 'lastyear':
+                    start = new Date(today.getFullYear() - 1, 0, 1).toISOString().split('T')[0];
+                    end = new Date(today.getFullYear() - 1, 11, 31).toISOString().split('T')[0];
+                    break;
+                case 'alltime':
+                    start = null;
+                    end = null;
+                    break;
+                default:
+                    break;
             }
-
-            setStartDate(start);
-            setEndDate(end);
-            setDatesSet(true);
-            fetchStats();
-            setRefreshTrigger(prev => prev + 1);
         }
-    }, [datesSet]);
+
+        return { start, end };
+    };
+
+    useEffect(() => {
+        const { start, end } = getReportParams();
+        setStartDate(start);
+        setEndDate(end);
+        setDatesSet(true);
+        fetchStats(false, start, end);
+        setRefreshTrigger(prev => prev + 1);
+    }, [window.location.search]);
 
     const renderCards = () => {
         const defaultGridSize = {
@@ -147,7 +152,7 @@ const Dashboard = ({ setLoggedIn, google = false }) => {
     
         const preferredOrder = [
             "Cases by Location",
-            "Total Settlement",
+            "DB Fees After Suit % / Total Settlement",
             "Cases by Phase",
             "Average Suit Percentage",
             "Cases Opened vs Closed",
@@ -196,7 +201,7 @@ const Dashboard = ({ setLoggedIn, google = false }) => {
                             }}
                             type={cardType}
                             format={Object.entries(data).some(([_, v]) => v % 1 !== 0) || 
-                                    title.includes("Top 5") && !title.includes("Top 5 Winning Attorneys") || 
+                                    title.includes("Top 5") && !title.includes("Top 5 Attorneys by # of Settlements") || 
                                     title.includes("Average Settlement")}
                             secondData={secondData}
                             prevData={prevData}

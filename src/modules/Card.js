@@ -106,7 +106,7 @@ const Card = ({ data, type = "", secondData = null, headers, yAxisLabel, format,
         return sortableData;
     }, [data.data, sortConfig]);
 
-    const exclusions = ["Total Referred", data.title === "Fee Split" || data.title === "Attorney Fee Split" || data.title === "Attorney Settlements" ? "Total Cases" : "", "Average Fee Paid", "Total Settlement", "Settlement Total", "Average Referral Fee"];
+    const exclusions = ["Total Referred", data.title === "Fee Split" || data.title === "Attorney Fee Split" || data.title === "Attorney Settlements" ? "Total Cases" : "", "Average Fee Paid", "DB Fees After Suit % / Total Settlement", "Settlement Total", "Average Referral Fee"];
     
     const requestSort = key => {
         let direction = 'ascending';
@@ -157,7 +157,7 @@ const Card = ({ data, type = "", secondData = null, headers, yAxisLabel, format,
                 }
             </div>
             {type == "" || type == "def" ? (
-                data.title === "Total Settlement"
+                data.title === "DB Fees After Suit % / Total Settlement"
                     ? (
                         <>
                             <div className="value">

@@ -29,7 +29,7 @@ const App = () => {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [showAlert, setShowAlert] = useState(false);
-  const [redirectPath, setRedirectPath] = useState('/dashboard');
+  const [redirectPath, setRedirectPath] = useState('/dashboard?report=thisyear');
   const [user, setUser] = useState(null);
 
   useEffect(() => {

@@ -58,7 +58,7 @@ const PieChartComponent = ({ data, title, formatNumber, format = 'row' }) => {
                     ))}
                 </svg>
                 <div className="pie-text">
-                    <h1>{formatNumber(totalSum)}</h1>
+                    {title === 'Attorney Fee Split' ? <h1>{formatNumber(totalSum, null, "$")}</h1> : <h1>{formatNumber(totalSum)}</h1>}
                     <span style={{ color: "var(--hover-color)" }}>{title === 'Marketing Budget' ? `/ ${formatNumber(FIXED_TOTAL, "e", "$")}` : ''}</span>
                 </div>
             </div>

@@ -75,7 +75,7 @@ function fetchTotalSettlement($conn, $startDate, $endDate) {
     $prevRow = $prevResult->fetch_assoc();
 
     return [
-        "title" => "Total Settlement",
+        "title" => "DB Fees After Suit % / Total Settlement",
         "data" => [
             floatval($row['totalUnadjustedSettlement'] ?? 0),
             floatval($row['totalAdjustedSettlement'] ?? 0)
@@ -468,7 +468,7 @@ function fetchCaseDuration($conn, $startDate, $endDate) {
     }
 
     return [
-        "title" => "Case Duration",
+        "title" => "Average Case Duration",
         "data" => $data,
         "type" => "h-bar",
         "col" => 2,
@@ -790,7 +790,7 @@ function fetchTopSettlements($conn, $startDate, $endDate) {
     }
 
     return [
-        "title" => "Top 5 Settlements",
+        "title" => "Top 5 Settlement Values",
         "data" => $data,
         "type" => "h-bar",
         "col" => 2,
@@ -831,7 +831,7 @@ function fetchTopWinningAttorneys($conn, $startDate, $endDate) {
     }
 
     return [
-        "title" => "Top 5 Winning Attorneys",
+        "title" => "Top 5 Attorneys by # of Settlements",
         "data" => $data,
         "type" => "v-bar",
         "col" => 2,
@@ -1139,7 +1139,7 @@ function fetchAttorneySettlements($conn, $startDate, $endDate) {
         "title" => "Attorney Settlements",
         "data" => $data,
         "type" => "table",
-        "headers" => ["Attorney", "Total Cases", "Total Settlement", "Total Adjusted Settlement"],
+        "headers" => ["Attorney", "Total Cases", "Total Settlement", "DB Fees After Suit %"],
         "col" => 2,
         "row" => $rowCount,
         "prevData" => $prevData,
