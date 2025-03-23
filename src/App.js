@@ -12,7 +12,6 @@ import './styles/Theme.css';
 import './styles/NewCardForm.css';
 import Weather from './modules/Weather';
 import { PrivacyPolicy } from './modules/PrivacyPolicy';
-import GoogleAdsComponent from './modules/GoogleAdsComponent';
 import { WIP } from './modules/WIP';
 import { LayoutEditor } from './modules/LayoutEditor';
 import { Contacts } from './modules/Contacts';
@@ -24,7 +23,7 @@ import { Case } from './modules/Case';
 
 const App = () => {
   const [loading, setLoading] = useState(true);
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(null);
   const [theme, setTheme] = useState(getCookie('theme') || 'light');
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -51,7 +50,7 @@ const App = () => {
 
   const checkUserLoggedIn = async () => {
     setLoggedIn(null);
-
+    
     if (process.env.NODE_ENV === 'development') {
       setLoggedIn(true);
       setUser({ user: 'devuser', user_id: 1 });
@@ -60,7 +59,7 @@ const App = () => {
     }
 
     try {
-      const response = await fetch('/api/session.php', { credentials: 'include' });
+      const response = await fetch('https://dalyblackdata.com/api/session.php', { credentials: 'include' });
       const data = await response.json();
       if (data.isLoggedIn) {
         setLoggedIn(true);
@@ -81,7 +80,7 @@ const App = () => {
     if (process.env.NODE_ENV === 'development') {
         return;
     }
-    await fetch('/api/session.php?close', { method: 'GET' });
+    await fetch('https://dalyblackdata.com/api/session.php?close', { method: 'GET' });
     setLoggedIn(false);
     window.location.href = '/login';
     setShowAlert(true);
@@ -91,7 +90,7 @@ const App = () => {
     setData([...data, newCard]);
   };
 
-  if (loading) {
+  if (loading || loggedIn === null) {
     return <Loading />;
   }
 
@@ -139,7 +138,7 @@ const AppRoutes = ({ setUser, user, loggedIn, setLoggedIn, changeTheme, theme, d
 
   return (
     <Routes>
-      {loggedIn ? (
+      {loggedIn === true ? (
         <>
           <Route path="/nav" element={<></>} />
           <Route path="/dashboard" element={<Dashboard setLoggedIn={setLoggedIn} />} />

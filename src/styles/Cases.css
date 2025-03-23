@@ -229,6 +229,7 @@ td.case-name {
     gap: 15px;
     width: 100%;
     justify-content: flex-start;
+    margin-bottom: 35px;
 
     .form-group {
         min-width: 250px;
@@ -327,9 +328,28 @@ span.remove-tag:hover {
     gap: 10px;
     width: 100%;
     height: 100%;
-    padding: 15px 15px 50px 15px;
+    padding: 15px;
 
     .form-group {
         flex-shrink: 0;
+    }
+}
+
+.form-box:hover {
+    background-color: var(--hover-color);
+}
+
+.sub-section-conditionals {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+@media (min-width: 1024px) {
+    .case-section .form-group {
+        max-width: calc(33.333% - 25px);
     }
 }

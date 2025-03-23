@@ -42,6 +42,7 @@
     font-size: 20px;
     font-weight: bolder;
     cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 .form-box.alt {
@@ -115,6 +116,7 @@ th.td {
 }
 
 .contact-initials {
+    object-fit: cover;
     display: flex;
     justify-content: center;
     align-items: center;

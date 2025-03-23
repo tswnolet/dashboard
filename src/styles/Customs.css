@@ -228,7 +228,8 @@
 }
 
 .subheader {
-    margin: 35px 0 0 0;
+    margin: 0;
+    padding-top: 10px;
     width: 100%;
 }
 
@@ -275,6 +276,14 @@
 
 .deadline {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.deadline-date {
+    display: flex;
     justify-content: flex-start;
     align-items: center;
     gap: 10px;
@@ -287,6 +296,20 @@
     overflow-y: auto;
 }
 
+.table-of-contents {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+
+    h3 {
+        width: 100%;
+        margin: 0;
+    }
+}
+
 @media (min-width: 769px) {
     .form-group.alt.mid {
         display: flex;
@@ -296,6 +319,7 @@
 
     .subtext {
         text-wrap: nowrap;
+        text-decoration: none;
     }
 }
 

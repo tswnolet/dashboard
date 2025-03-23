@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import '../styles/LayoutEditor.css';
 import { createPortal } from "react-dom";
 import { CreateContact } from "./CreateContact";
-import { UserRoundPlus } from "lucide-react";
+import { Check, CheckCheck, UserRoundPlus, X } from "lucide-react";
 import { Calculate } from "@mui/icons-material";
 
 export const Text = ({ type, placeholder, value, onChange, disable }) => {
@@ -28,8 +28,47 @@ export const NumberInput = ({ type, value, onChange }) => {
     );
 };
 
-export const DateInput = ({ value, onChange, disable = false }) => {
-    return <input type='date' disabled={disable} value={value || ""} onChange={(e) => onChange(e.target.value)} />;
+export const DateInput = ({ value = '', onChange, disable = false, checkbox = false }) => {
+    const [isChecked, setIsChecked] = useState(false);
+
+    const today = () => {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    };
+
+    const handleCheckboxClick = () => {
+        const newChecked = !isChecked;
+        setIsChecked(newChecked);
+        if (newChecked) {
+            onChange(today());
+        }
+    };
+
+    const handleInputChange = (e) => {
+        setIsChecked(false);
+        onChange(e.target.value);
+    };
+
+    useEffect(() => {
+        if (value !== today()) {
+            setIsChecked(false);
+        }
+    }, [value]);
+
+    return (
+        <>
+            <input
+                type="date"
+                disabled={disable}
+                value={value}
+                onChange={handleInputChange}
+            />
+            {checkbox && <div className="form-box alt" onClick={handleCheckboxClick}>
+                <input type="checkbox" checked={isChecked} readOnly hidden />
+                {isChecked ? <X size={23} /> : <Check size={23} />}
+            </div>}
+        </>
+    );
 };
 
 export const TimeInput = ({ value, onChange }) => {
@@ -118,7 +157,7 @@ export const Boolean = ({ options, value, onChange }) => {
 
 
 export const Subheader = ({ title }) => {
-    return <h2 className='subheader'>{title}</h2>;
+    return <h2 className='subheader' id={title}>{title}</h2>;
 };
 
 export const Instructions = ({ instructions }) => {
@@ -361,13 +400,43 @@ export const ContactList = ({ onChange }) => {
     );
 };
 
-export const Deadline = () => {
+export const Deadline = ({ value = {}, title, onChange }) => {
+    const handleDateChange = (key) => (newVal) => {
+        onChange({ [key]: newVal });
+    };
+
     return (
+        <>
+        <div>{title}</div>
         <div className='deadline'>
-            <label>Due</label>
-            <DateInput />
-            <label>Done</label>
-            <DateInput />
+            <div className="deadline-date">
+                <label>Due</label>
+                <DateInput value={value.due || ''} onChange={handleDateChange("due")} />
+            </div>
+            <div className="deadline-date">
+                <label>Done</label>
+                <DateInput value={value.done || ''} onChange={handleDateChange("done")} checkbox/>
+            </div>
         </div>
-    )
+        </>
+    );
+};
+
+export const TableOfContents = ({ subheaders = [] }) => {
+    console.log(subheaders);
+    return (
+        <>
+            {subheaders.length > 0 && 
+                <>
+                    <div className='table-of-contents'>
+                        <h3>Table of Contents</h3>
+                        {subheaders.map((header, index) => (
+                            <a href={`#${header.name}`} className='subtext'>{header.name}</a>
+                        ))}
+                    </div>
+                    <div className='divider horizontal'></div>
+                </>
+            }
+        </>
+    );
 }

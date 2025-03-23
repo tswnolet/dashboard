@@ -391,7 +391,7 @@ table:not(.schools) > tbody > tr > td {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(var(--dark),var(--dark),var(--dark),0.05);
+  background-color: var(--border-color);
   transition: width 0.3s, height 0.3s;
 
   &.vertical {
@@ -403,6 +403,7 @@ table:not(.schools) > tbody > tr > td {
 
   &.horizontal {
       height: 1px;
+      min-height: 1px;
       max-width: 100%;
       width: 100%;
   }

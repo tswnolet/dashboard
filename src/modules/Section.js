@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Boolean, Calculation, Contact, ContactList, DateInput, Deadline, Dropdown, FileUpload, Instructions, MultiFile, MultiSelect, NumberInput, Subheader, Text, TimeInput } from "./FieldComponents";
+import { Boolean, Calculation, Contact, ContactList, DateInput, Deadline, Dropdown, FileUpload, Instructions, MultiFile, MultiSelect, NumberInput, Subheader, Text, TimeInput, TableOfContents } from "./FieldComponents";
 import { Folder as FolderIcon, FolderOpen, FolderOutlined } from "@mui/icons-material";
 
 const normalizeValueToIndex = (field, value) => {
@@ -76,118 +76,69 @@ const Documents = ({ folders, caseName }) => {
     );
 };
 
-const Field = ({ field, value, handleFieldChange }) => {
+const Field = ({ field, value, handleFieldChange, conditional = false }) => {
     if (!field) return null;
 
     const renderFieldInput = (field) => {
         switch (field.field_id) {
             case 1:
-                return (
-                    <Text type="text" placeholder={field.name} 
-                    value={value}
-                    onChange={(val) => handleFieldChange(field.id, val)}/>
-                );
+                return <Text type="text" placeholder={field.name} value={value} onChange={(val) => handleFieldChange(field.id, val)} />;
             case 2:
-                return (
-                    <Text type="textarea" placeholder={field.name} 
-                    value={value}
-                    onChange={(val) => handleFieldChange(field.id, val)}/>
-                );
+                return <Text type="textarea" placeholder={field.name} value={value} onChange={(val) => handleFieldChange(field.id, val)} />;
             case 3:
-                return (
-                    <NumberInput type="currency"
-                    value={value}
-                    onChange={(val) => handleFieldChange(field.id, val)}/>
-                );
+                return <NumberInput type="currency" value={value} onChange={(val) => handleFieldChange(field.id, val)} />;
             case 4:
-                return (
-                    <NumberInput type="percent" />
-                );
+                return <NumberInput type="percent" value={value} onChange={(val) => handleFieldChange(field.id, val)}/>;
             case 5:
-                return (
-                    <NumberInput type="number" />
-                );
+                return <NumberInput type="number" value={value} onChange={(val) => handleFieldChange(field.id, val)}/>;
             case 6:
-                return (
-                    <DateInput />
-                );
+                return <DateInput value={value} onChange={(val) => handleFieldChange(field.id, val)}/>;
             case 7:
-                return (
-                    <TimeInput />
-                );
+                return <TimeInput value={value} onChange={(val) => handleFieldChange(field.id, val)}/>;
             case 8:
-                return (
-                    <Contact
-                        selectedContact={value}
-                        setSelectedContact={(contact) => handleFieldChange(field.id, contact?.id || null)}
-                    />
-                );
+                return <Contact selectedContact={value} setSelectedContact={(contact) => handleFieldChange(field.id, contact?.id || null)} />;
             case 9:
-                return (
-                    <ContactList onChange={(ids) => handleFieldChange(field.id, ids)} />
-                );                
+                return <ContactList onChange={(ids) => handleFieldChange(field.id, ids)} />;
             case 10:
-                return (
-                    <Dropdown
-                        options={field.options || "[]"}
-                        value={(() => {
-                            try {
-                                const opts = JSON.parse(field.options || "[]");
-                                return opts[value] ?? "";
-                            } catch {
-                                return "";
-                            }
-                        })()}
-                        onChange={(val) => {
+                return <Dropdown
+                    options={field.options || "[]"}
+                    value={(() => {
+                        try {
                             const opts = JSON.parse(field.options || "[]");
-                            const index = opts.indexOf(val);
-                            handleFieldChange(field.id, index);
-                        }}
-                    />
-                );
+                            return opts[value] ?? "";
+                        } catch {
+                            return "";
+                        }
+                    })()}
+                    onChange={(val) => {
+                        const opts = JSON.parse(field.options || "[]");
+                        const index = opts.indexOf(val);
+                        handleFieldChange(field.id, index);
+                    }}
+                />;
             case 11:
-                return (
-                    <MultiSelect
-                        options={field.options || "[]"}
-                        value={value}
-                        onChange={(val) => handleFieldChange(field.id, val)}
-                    />
-                );                
+                return <MultiSelect options={field.options || "[]"} value={value} onChange={(val) => handleFieldChange(field.id, val)} />;
             case 12:
-                return (
-                    <Boolean
-                        options={field.options || []}
-                        value={value ?? 2}
-                        onChange={(selectedValue) => handleFieldChange(field.id, selectedValue)}
-                    />
-                );
+                return <Boolean options={field.options || []} value={value ?? 2} onChange={(selectedValue) => handleFieldChange(field.id, selectedValue)} />;
             case 13:
-                return (
-                    <Subheader title={field.name} />
-                );
+                return <Subheader title={field.name} />;
             case 14:
-                return (
-                    <Instructions instructions={field.name} />
-                );
+                return <Instructions instructions={field.name} />;
             case 15:
-                return (
-                    <FileUpload />
-                );
+                return <FileUpload />;
             case 16:
-                return (
-                    <MultiFile
-                        value={value}
-                        onChange={(val) => handleFieldChange(field.id, val)}
-                    />
-                );
+                return <MultiFile value={value} onChange={(val) => handleFieldChange(field.id, val)} />;
             case 17:
-                return (
-                    <Calculation />
-                );
+                return <Calculation />;
             case 20:
-                return (
-                    <Deadline />
-                );
+                return <Deadline 
+                            value={value || { due: '', done: '' }}
+                            title={field.name}
+                            onChange={(updated) => handleFieldChange(field.id, {
+                                ...value,
+                                ...updated
+                            })}
+                        />;
             default:
                 return null;
         }
@@ -196,17 +147,13 @@ const Field = ({ field, value, handleFieldChange }) => {
     return (
         <>
             {![13, 14, 20].includes(field.field_id) ? (
-                <div className='form-group nm'>
+                <div className={`form-group nm ${conditional === false ? '' : 'conditional'}`}>
                     <label className='subtext'>{field.name}</label>
                     {renderFieldInput(field)}
                 </div>
-            ) : field.field_id === 20 ? (
-                renderFieldInput(field)
-            ) : (
-                renderFieldInput(field)
-            )}
+            ) : renderFieldInput(field)}
         </>
-    );    
+    );
 };
 
 export const Section = ({ folders, caseName, caseType, section_id, template_id }) => {
@@ -214,114 +161,120 @@ export const Section = ({ folders, caseName, caseType, section_id, template_id }
     const [formData, setFormData] = useState({});
 
     const handleFieldChange = (fieldId, value) => {
-        setFormData((prev) => {
-            const updated = { ...prev, [fieldId]: value };
-            return updated;
-        });
+        setFormData((prev) => ({ ...prev, [fieldId]: value }));
     };
-
-    const visibleFields = fields
-        .filter(f => f.hidden !== 2 && f.obsolete !== 2)
-        .sort((a, b) => a.order_id - b.order_id);
 
     const shouldDisplay = (field) => {
         if (Number(field.case_type_id) !== Number(caseType) && Number(field.case_type_id) !== 0) return false;
-    
+
         const controllingField = fields.find(f => f.id === field.display_when);
         if (!field.display_when || !controllingField) return true;
-    
+
         let controllingValue = formData[field.display_when];
-    
+
         if (field.is_answered === null || field.is_answered === "") {
             return controllingValue !== null && controllingValue !== undefined && controllingValue !== "";
         }
-    
+
         controllingValue = normalizeValueToIndex(controllingField, controllingValue);
-        const validAnswers = field.is_answered
-            .split(',')
-            .map(v => v.trim());
-    
+        const validAnswers = field.is_answered.split(',').map(v => v.trim());
+
         return validAnswers.includes(String(controllingValue));
     };
 
     useEffect(() => {
-        fetchSectionFields();
+        fetch(`https://dalyblackdata.com/api/custom_fields.php?section_id=${section_id}&template_id=${template_id}&${Date.now()}`)
+            .then(res => res.json())
+            .then(data => setFields(data.custom_fields))
+            .catch(error => console.error("Error fetching section fields:", error));
     }, [template_id]);
 
-    const fetchSectionFields = async () => {
-        try {
-            const response = await fetch(`https://dalyblackdata.com/api/custom_fields.php?section_id=${section_id}&template_id=${template_id}&${new Date().getTime()}`);
-            const data = await response.json();
-            setFields(data.custom_fields);
-        } catch (error) {
-            console.error("Error fetching section fields:", error);
+    const dependencyMap = {};
+    fields.forEach(field => {
+        if (field.display_when) {
+            if (!dependencyMap[field.display_when]) dependencyMap[field.display_when] = [];
+            dependencyMap[field.display_when].push(field);
+        }
+    });
+
+    const rendered = new Set();
+    const output = [];
+    let currentSubSection = [];
+
+    const flushSubSection = () => {
+        if (currentSubSection.length > 0) {
+            if (currentSubSection[0].props.field.field_id === 13) {
+                output.push(
+                    <>
+                        {currentSubSection}
+                    </>
+                );
+            } else {
+                output.push(
+                    <div className="sub-section" key={`sub-${output.length}`}>
+                        {currentSubSection}
+                    </div>
+                );
+            }
+            currentSubSection = [];
         }
     };
 
+    useEffect(() => {
+        console.log(formData);
+    }, [formData]);
+
+    fields
+        .filter(f => f.hidden !== 2 && f.obsolete !== 2)
+        .sort((a, b) => a.order_id - b.order_id)
+        .forEach(field => {
+            if (rendered.has(field.id)) return;
+
+            const children = dependencyMap[field.id] || [];
+            const visibleChildren = children.filter(shouldDisplay);
+
+            const fieldEl = (
+                <Field
+                    key={field.id}
+                    field={field}
+                    value={formData[field.id]}
+                    handleFieldChange={handleFieldChange}
+                    conditional={false}
+                />
+            );
+
+            const childrenEls = visibleChildren.map(child => (
+                <Field
+                    key={child.id}
+                    field={child}
+                    value={formData[child.id]}
+                    handleFieldChange={handleFieldChange}
+                    conditional={true}
+                />
+            ));
+
+            if (!shouldDisplay(field)) return;
+
+            rendered.add(field.id);
+            children.forEach(child => rendered.add(child.id));
+
+            if (field.field_id === 13) {
+                flushSubSection();
+                currentSubSection.push(fieldEl, ...childrenEls);
+                flushSubSection();
+            } else {
+                currentSubSection.push(fieldEl, ...childrenEls);
+            }
+        });
+
+    flushSubSection();
+
+    const sectionFields = fields.filter(f => f.hidden !== 2 && f.obsolete !== 2 && f.field_id === 13) ?? [];
+
     return (
         <div className='case-section'>
-            {section_id === 3 ? (
-                <Documents folders={folders} caseName={caseName} />
-            ) : (() => {
-                const result = [];
-                let currentSubSection = null;
-    
-                visibleFields.forEach((field, index) => {
-                    if (!shouldDisplay(field)) return;
-                
-                    const isSubheader = field.field_id === 13;
-                    const nextField = visibleFields[index + 1];
-                    const nextIsSubheader = nextField?.field_id === 13;              
-    
-                    if (isSubheader) {
-                        if (currentSubSection) {
-                            result.push(
-                                <div key={`sub-${index}`} className='sub-section'>
-                                    {currentSubSection}
-                                </div>
-                            );
-                        }
-                        currentSubSection = [<Field
-                            key={field.id}
-                            field={field}
-                            value={formData[field.id]}
-                            handleFieldChange={handleFieldChange}
-                        />];
-                    } else if (currentSubSection) {
-                        currentSubSection.push(<Field
-                            key={field.id}
-                            field={field}
-                            value={formData[field.id]}
-                            handleFieldChange={handleFieldChange}
-                        />);
-                        if (nextIsSubheader || index === fields.length - 1) {
-                            result.push(
-                                <div key={`sub-${index}`} className='sub-section'>
-                                    {currentSubSection}
-                                </div>
-                            );
-                            currentSubSection = null;
-                        }
-                    } else {
-                        result.push(<Field
-                            key={field.id}
-                            field={field}
-                            value={formData[field.id]}
-                            handleFieldChange={handleFieldChange}
-                        />);
-                    }
-                });
-
-                if (currentSubSection) {
-                    result.push(
-                        <div key={`sub-final`} className='sub-section'>
-                            {currentSubSection}
-                        </div>
-                    );
-                }
-    
-                return result;
-            })()}
+            <TableOfContents key={section_id} subheaders={sectionFields}/>
+            {section_id === 3 ? <Documents folders={folders} caseName={caseName} /> : output}
         </div>
-    );    
-}
+    );
+};
