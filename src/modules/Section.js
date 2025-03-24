@@ -156,7 +156,7 @@ const Field = ({ field, value, handleFieldChange, conditional = false }) => {
     );
 };
 
-export const Section = ({ folders, caseName, caseType, section_id, template_id }) => {
+export const Section = ({ folders, lead_id, caseName, caseType, section_id, template_id }) => {
     const [fields, setFields] = useState([]);
     const [formData, setFormData] = useState({});
 
@@ -183,7 +183,7 @@ export const Section = ({ folders, caseName, caseType, section_id, template_id }
     };
 
     useEffect(() => {
-        fetch(`https://dalyblackdata.com/api/custom_fields.php?section_id=${section_id}&template_id=${template_id}&${Date.now()}`)
+        fetch(`https://dalyblackdata.com/api/custom_fields.php?section_id=${section_id}&template_id=${template_id}&lead_id=${lead_id}&${Date.now()}`)
             .then(res => res.json())
             .then(data => setFields(data.custom_fields))
             .catch(error => console.error("Error fetching section fields:", error));
@@ -237,7 +237,7 @@ export const Section = ({ folders, caseName, caseType, section_id, template_id }
                 <Field
                     key={field.id}
                     field={field}
-                    value={formData[field.id]}
+                    value={field.field_value ?? formData[field.id]}
                     handleFieldChange={handleFieldChange}
                     conditional={false}
                 />
@@ -247,7 +247,7 @@ export const Section = ({ folders, caseName, caseType, section_id, template_id }
                 <Field
                     key={child.id}
                     field={child}
-                    value={formData[child.id]}
+                    value={field.field_value ?? formData[child.id]}
                     handleFieldChange={handleFieldChange}
                     conditional={true}
                 />
