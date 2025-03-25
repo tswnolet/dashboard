@@ -25,7 +25,7 @@
     width: 100%;
 }
 
-.lead, .case {
+.lead, .case, .data-cell {
     font-size: 12.8px;
     display: flex;
     justify-content: space-between;
@@ -38,26 +38,26 @@
     border-right: 1px solid var(--border-color);
 }
 
-.lead:first-child, .case:first-child {
+.lead:first-child, .case:first-child, .data-cell:first-child {
     border-radius: 3px 3px 0 0;
     border-top: 1px solid var(--border-color);
 }
 
-.lead:last-child, .case:last-child {
+.lead:last-child, .case:last-child, .data-cell:last-child {
     border-radius: 0 0 3px 3px;
 }
 
-.leads-table thead, .cases-table thead {
+.leads-table thead, .cases-table thead, .data-table thead {
     font-size: 14px;
     width: 100%;
 }
 
-.leads-table tr , .cases-table tr {
+.leads-table tr , .cases-table tr, .data-table tr {
     height: 45px;
     padding: 5px 15px;
 }
 
-.leads-table th, .cases-table th {
+.leads-table th, .cases-table th, .data-table th {
     display: flex;
     align-items: center;
     gap: 10px;

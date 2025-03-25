@@ -57,7 +57,7 @@ export const Case = () => {
             <CaseNav sections={sections} activeSection={activeSection} setActiveSection={setActiveSection} />
             <div className='case-body'>
                 <CaseHeader caseData={caseData} fetchCase={fetchCase}/>
-                <Section key={activeSection} lead_id={caseData?.lead?.id} caseName={caseData?.case?.case_name} folders={folders} caseType={caseData?.lead?.case_type_id} section_id={activeSection} template_id={caseData?.case?.template_id}/>
+                <Section key={activeSection} lead_id={caseData?.lead?.id} id={id} caseName={caseData?.case?.case_name} fetchDocuments={fetchDocuments} folders={folders} caseType={caseData?.lead?.case_type_id} section_id={activeSection} template_id={caseData?.case?.template_id}/>
             </div>
         </div>
     );

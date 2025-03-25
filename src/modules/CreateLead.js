@@ -216,6 +216,13 @@ export const CreateLead = ({ user, setCreateLead }) => {
         }));
     }, [referralContact]);
 
+    useEffect(() => {
+        setFormData({
+            ...formData,
+            custom_fields: {}
+        });
+    }, [formData.case_type]);
+
     return (
         <>
             <Modal 
@@ -310,9 +317,9 @@ export const CreateLead = ({ user, setCreateLead }) => {
                             <textarea id='marketing_notes' placeholder='Marketing Notes...' value={formData.marketing_notes} onChange={(e) => setFormData({ ...formData, marketing_notes: e.target.value })}></textarea>
                         </div>
                     </div>
-                    <div className='sub-title'>
+                    {formData.case_type != '' && <div className='sub-title'>
                         <h4>Case Details</h4>
-                    </div>
+                    </div>}
                     <div className='case-details'>
                         {filteredFields.map((field) => {
                             if (field.hidden === 2) return null;
@@ -325,7 +332,7 @@ export const CreateLead = ({ user, setCreateLead }) => {
                                             <Text
                                                 type="text"
                                                 placeholder={field.name}
-                                                value={formData.custom_fields[field.id] || ""}
+                                                value={formData.custom_fields[field.id] ?? ""}
                                                 onChange={(value) => handleFieldChange(field.id, value)}
                                             />
                                         </div>
@@ -337,7 +344,7 @@ export const CreateLead = ({ user, setCreateLead }) => {
                                             <Text
                                                 type="textarea"
                                                 placeholder={field.name}
-                                                value={formData.custom_fields[field.id] || ""}
+                                                value={formData.custom_fields[field.id] ?? ""}
                                                 onChange={(value) => handleFieldChange(field.id, value)}
                                             />
                                         </div>
@@ -348,7 +355,7 @@ export const CreateLead = ({ user, setCreateLead }) => {
                                             <label>{field.name}</label>
                                             <NumberInput
                                                 type="currency"
-                                                value={formData.custom_fields[field.id] || ""}
+                                                value={formData.custom_fields[field.id] ?? ""}
                                                 onChange={(value) => handleFieldChange(field.id, value)}
                                             />
                                         </div>
@@ -358,7 +365,7 @@ export const CreateLead = ({ user, setCreateLead }) => {
                                         <div className='form-group' key={field.id}>
                                             <label>{field.name}</label>
                                             <DateInput
-                                                value={formData.custom_fields[field.id] || ""}
+                                                value={formData.custom_fields[field.id] ?? ""}
                                                 onChange={(value) => handleFieldChange(field.id, value)}
                                             />
                                         </div>
@@ -379,8 +386,8 @@ export const CreateLead = ({ user, setCreateLead }) => {
                                         <div className='form-group' key={field.id}>
                                             <label>{field.name}</label>
                                             <Dropdown
-                                                options={field.options || "[]"}
-                                                value={formData.custom_fields[field.id] || ""}
+                                                options={field.options ?? "[]"}
+                                                value={formData.custom_fields[field.id] ?? ""}
                                                 onChange={(value) => handleFieldChange(field.id, value)}
                                             />
                                         </div>
@@ -390,8 +397,8 @@ export const CreateLead = ({ user, setCreateLead }) => {
                                         <div className='form-group' key={field.id}>
                                             <label>{field.name}</label>
                                             <Boolean
-                                                options={field.options}
-                                                value={formData.custom_fields[field.id] || "Unknown"}
+                                                options={field.options ?? []}
+                                                value={formData.custom_fields[field.id] ?? 2}
                                                 onChange={(value) => handleFieldChange(field.id, value)}
                                             />
                                         </div>

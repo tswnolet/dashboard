@@ -110,7 +110,7 @@ export const CaseHeader = ({ caseData = {}, fetchCase }) => {
                 </div>
                 <div className='details'>
                     <h2 className='case-header-title'>
-                        {caseInfo?.case_name || "No Case Name"}
+                        {caseInfo?.case_name || "Loading..."}
                         <span className='subtext'> ({caseInfo?.id || "N/A"})</span>
                     </h2>
                     <div className='case-header-meta subtext'>

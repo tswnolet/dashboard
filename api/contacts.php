@@ -9,6 +9,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
     if ($searchQuery) {
         $contacts = searchContacts($conn, $searchQuery);
+    } elseif (isset($_GET['id'])) {
+        $sql = "SELECT * FROM contacts WHERE id = {$_GET['id']}";
+        $result = $conn->query($sql);
+        $contacts = $result->fetch_assoc();
+
+        $contact_id = $contacts['id'];
+        $contacts['phones'] = fetchContactDetails($conn, $contact_id, 'phone');
+        $contacts['emails'] = fetchContactDetails($conn, $contact_id, 'email');
+        $contacts['addresses'] = fetchContactDetails($conn, $contact_id, 'address');
     } else {
         $contacts = fetchAllContacts($conn);
     }
@@ -18,7 +27,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 }
 
 function fetchAllContacts($conn) {
-    $sql = "SELECT * FROM contacts";
+    $where = isset($_GET['id']) ? "WHERE id = {$_GET['id']}" : "";
+    $sql = "SELECT * FROM contacts
+            $where;";
     $result = $conn->query($sql);
     $contacts = [];
 
