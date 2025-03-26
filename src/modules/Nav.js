@@ -141,6 +141,7 @@ const Dropdown = ({
 
 /* Main options Component */
 const MainOptions = ({
+  accessLevel,
   expanded,
   lowerOption,
   setLowerOption,
@@ -170,7 +171,7 @@ const MainOptions = ({
         </div>
       ) : (
         <>
-          <Dropdown
+          {accessLevel === 'global admin' && <Dropdown
             label="Dashboard"
             Icon={RiDashboardLine}
             expanded={expanded}
@@ -193,7 +194,7 @@ const MainOptions = ({
             location={location}
             navigate={navigate}
             setLowerOption={setLowerOption}
-          />
+          />}
           <div
             className={`menu-item ${isActive("/cases") ? "active" : ""}`}
             style={{ justifyContent: expanded ? "flex-start" : "center" }}
@@ -405,7 +406,7 @@ const Footer = ({ expanded, navigate, logout, theme, changeTheme, location }) =>
 };
 
 /* Main Nav Component */
-const Nav = ({ theme, changeTheme, logout }) => {
+const Nav = ({ accessLevel, theme, changeTheme, logout }) => {
   const [expanded, setExpanded] = useState(false);
   const [dropdowns, setDropdowns] = useState({
     dashboard: false,
@@ -492,6 +493,8 @@ const Nav = ({ theme, changeTheme, logout }) => {
     }
   });
 
+  console.log(accessLevel)
+
   return (
     <nav className={`${expanded ? "expanded " : ""}${navClass}`} style={{ width: expanded ? "250px" : "75px" }}>
       <div id="menu">
@@ -515,6 +518,7 @@ const Nav = ({ theme, changeTheme, logout }) => {
         <span className="divider horizontal"></span>
         <div id="menu-navigation" style={lowerOption || openOption === 1 ? { gap: "15px" } : { justifyContent: "space-between" }}>
           <MainOptions
+            accessLevel={accessLevel}
             expanded={expanded}
             lowerOption={lowerOption}
             setLowerOption={setLowerOption}
@@ -527,17 +531,19 @@ const Nav = ({ theme, changeTheme, logout }) => {
             openOption={openOption}
             setOpenOption={setOpenOption}
           />
-          <SubInfo
-            expanded={expanded}
-            location={location}
-            navigate={navigate}
-            setLowerOption={setLowerOption}
-            toggleDropdown={toggleDropdown}
-            dropdowns={dropdowns}
-            activeRoute={activeRoute}
-            openOption={openOption}
-            setOpenOption={setOpenOption}
-          />
+          {(accessLevel === 'global admin' || accessLevel === 'admin') &&
+            <SubInfo
+              expanded={expanded}
+              location={location}
+              navigate={navigate}
+              setLowerOption={setLowerOption}
+              toggleDropdown={toggleDropdown}
+              dropdowns={dropdowns}
+              activeRoute={activeRoute}
+              openOption={openOption}
+              setOpenOption={setOpenOption}
+            />
+          }
         </div>
       </div>
       <Footer

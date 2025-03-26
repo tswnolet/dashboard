@@ -126,7 +126,7 @@ header {
 .form-group input[type='text'], .deadline input {
     height: 36px;
     padding: 0 10px;
-    max-width: 400px;
+    max-width: 100%;
 }
 
 .form-group textarea {

@@ -362,7 +362,7 @@ span.remove-tag:hover {
     flex-direction: column;
     gap: 10px;
     width: 100%;
-    margin-top: 15px;
+    margin: 15px 0;
 
     &:not(.alt) {
         align-items: flex-start;
@@ -380,7 +380,36 @@ span.remove-tag:hover {
 .confirm-add-item {
     display: flex;
     align-items: center;
-    gap: 10px;
+    width: 100%;
+}
+
+ .search-select-input {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    height: 36px;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    background-color: var(--secondary-color);
+    padding: 0 10px;
+    font-size: 14px;
+}
+
+.search-select-dropdown {
+    width: 100%;
+    z-index: 10;
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    background-color: var(--secondary-color);
+    height: 150px;
+    overflow-y: auto;
+    font-size: 14px;
+
+    input {
+        border: none !important;
+        border-bottom: 1px solid var(--border-color) !important;
+    }
 }
 
 @media (min-width: 1024px) {

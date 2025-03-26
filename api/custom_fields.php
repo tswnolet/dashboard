@@ -4,7 +4,7 @@ header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $section_id = $_GET['section_id'] ?? null;
-    $template_id = $_GET['template_id'] ?? null;
+    $template_id = $_GET['template_id'] ?? 1;
     $lead_id = $_GET['lead_id'] ?? null;
 
     $query = "
@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
     if (isset($section_id)) {
         $customFields = fetchCustomFields($conn, $section_id, $template_id);
-        $fieldUpdates = fetchFieldUpdates($conn, $lead_id, $section_id);
+        $fieldUpdates = $lead_id ? fetchFieldUpdates($conn, $lead_id, $section_id) : '';
         $sectionName = sectionName($conn, $section_id);
         echo json_encode([
             'success' => true,
@@ -101,9 +101,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $required = !empty($input['required']) ? 1 : 0;
     $obsolete = !empty($input['obsolete']) ? $input['obsolete'] : 1;
     $hidden = !empty($input['hidden']) ? $input['hidden'] : 1;
+    $add_item = $input['add_item'] ?? null;
     $default_value = $input['default_value'] ?? null;
     $display_when = !empty($input['display_when']) ? $input['display_when'] : null;
-    $is_answered = $input['is_answered'] !== "" ? $input['is_answered'] : null ?? null;
+    $is_answered = $input['is_answered'] !== "" 
+        ? (is_array($input['is_answered']) ? json_encode($input['is_answered']) : $input['is_answered']) 
+        : null;
     $section_id = $input['section_id'] ?? null;
     $template_id = $input['template_id'] ?? null;
 
@@ -125,20 +128,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $conn->prepare("
         INSERT INTO custom_fields (
             case_type_id, field_id, name, order_id, required, options, 
-            obsolete, hidden, default_value, display_when, is_answered, section_id, template_id
+            obsolete, hidden, add_item, default_value, display_when, is_answered, section_id, template_id
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
 
     $stmt->bind_param(
-        'iisissiiisiii',
+        'iisissiiiissii',
         $case_type_id, $field_id, $name, $order_id, $required, $options,
-        $obsolete, $hidden, $default_value, $display_when, $is_answered,
+        $obsolete, $hidden, $add_item, $default_value, $display_when, $is_answered,
         $section_id, $template_id
     );
 
     if ($stmt->execute()) {
-        echo json_encode(['success' => true, 'message' => 'Custom field created successfully']);
+        echo json_encode(['success' => true, 'message' => 'Custom field created successfully', 'is_answered' => $is_answered]);
     } else {
         echo json_encode(['success' => false, 'message' => 'Failed to create custom field', 'error' => $stmt->error]);
     }

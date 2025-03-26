@@ -20,9 +20,11 @@ export const CustomFields = () => {
         options: [],
         obsolete: 1,
         hidden: 1,
+        add_item: null,
         default_value: "",
         display_when: null,
         is_answered: "",
+        is_answer_negated: false,
         section_id: null,
         template_id: 1
     });    
@@ -54,7 +56,7 @@ export const CustomFields = () => {
     }, [newField.field_id, fieldTypes]);
 
     const fieldTypeNeedsOptions = (fieldType) => {
-        return ["list", "multiselect"].includes(fieldType);
+        return ["list", "multiselect", "searchselect"].includes(fieldType);
     };
     
     const isBooleanType = (fieldType) => {
@@ -174,9 +176,11 @@ export const CustomFields = () => {
                     options: [],
                     obsolete: 1,
                     hidden: 1,
+                    add_item: null,
                     default_value: "",
                     display_when: null,
                     is_answered: "",
+                    is_answer_negated: false,
                     section_id: null,
                     template_id: 1
                 });
@@ -382,6 +386,21 @@ export const CustomFields = () => {
                                             {newField.hidden === 2 ? '✓' : ''}
                                         </div>
                                     </div>
+                                    <div className="form-group alt">
+                                        <label htmlFor="add_item">Add Item</label>
+                                        <input 
+                                            type="checkbox" 
+                                            name="add_item"
+                                            checked={newField.add_item === 1}
+                                            onChange={(e) => setNewField({...newField, add_item: e.target.checked ? 1 : null})}
+                                        />
+                                        <div 
+                                            className='checkbox'
+                                            onClick={() => setNewField({...newField, add_item: newField.add_item === 1 ? null : 1})}
+                                        >
+                                            {newField.add_item === 1 ? '✓' : ''}
+                                        </div>
+                                    </div>
                                     <div className="form-group">
                                         <label htmlFor='default_value'>Default Value</label>
                                         {newField.options.length > 0 ? (
@@ -420,18 +439,41 @@ export const CustomFields = () => {
                                             ))}
                                         </select>
                                     </div>
-
                                     <div className='form-group'>
-                                        <label htmlFor='is_answered'>Is Answered As</label>
+                                        <label
+                                            htmlFor='is_answered'
+                                            onClick={() => setNewField(prev => ({
+                                                ...prev,
+                                                is_answered_negated: !prev.is_answered_negated
+                                            }))}
+                                            style={{ cursor: 'pointer' }}
+                                        >
+                                            {newField.is_answered_negated ? "Is Not Answered As" : "Is Answered As"}
+                                        </label>
                                         <select
                                             name="is_answered"
-                                            value={newField.is_answered}
-                                            onChange={handleInputChange}
+                                            multiple
+                                            value={
+                                                Array.isArray(newField.is_answered)
+                                                    ? newField.is_answered.map(v => String(v).replace(/^!/, ''))
+                                                    : [newField.is_answered].filter(Boolean).map(v => String(v).replace(/^!/, ''))
+                                            }
+                                            onChange={(e) => {
+                                                const selectedOptions = Array.from(e.target.selectedOptions, (opt) => {
+                                                    return newField.is_answered_negated ? `!${opt.value}` : opt.value;
+                                                });
+                                                handleInputChange({
+                                                    target: {
+                                                        name: "is_answered",
+                                                        value: selectedOptions
+                                                    }
+                                                });
+                                            }}
                                             className="default-select"
+                                            style={{ height: "auto", minHeight: "40px" }}
                                         >
-                                            <option value="">Select Answer</option>
                                             {displayFieldOptions.map((option, index) => (
-                                                <option key={index} value={index}>{option}</option>
+                                                <option key={index} value={String(index)}>{option}</option>
                                             ))}
                                         </select>
                                     </div>

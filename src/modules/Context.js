@@ -6,7 +6,7 @@ import Alert from "./Alert";
 import '../Context.css';
 import '../index.css';
 
-const Context = ({ setUser, setLoggedIn, setShowAlert, showAlert }) => {
+const Context = ({ setAccessLevel, setUser, setLoggedIn, setShowAlert, showAlert }) => {
   const [formData, setFormData] = useState({ user: '', password: '', confirm_password: '', email: '' });
   const [close, setClose] = useState(false);
   const [error, setError] = useState(null);
@@ -14,7 +14,6 @@ const Context = ({ setUser, setLoggedIn, setShowAlert, showAlert }) => {
   const navigate = useNavigate();
   const isLogin = location.pathname === '/login';
 
-  // Function to handle form submission
   const fetchData = (e) => {
     e.preventDefault();
     fetch(`/api/${isLogin ? 'login' : 'signup'}.php`, {
@@ -31,7 +30,10 @@ const Context = ({ setUser, setLoggedIn, setShowAlert, showAlert }) => {
             setUser(data.name.split(' ')[0]);
             setTimeout(() => {
               setLoggedIn(true);
-              const redirectTo = location.state?.from || '/dashboard';
+              const accessLevel = data.access_level || 'user';
+              const defaultRoute = accessLevel === 'global admin' ? '/dashboard' : '/cases';
+              setAccessLevel(accessLevel);
+              const redirectTo = location.state?.from || defaultRoute;
               navigate(redirectTo);
             }, 2000);
           } else {

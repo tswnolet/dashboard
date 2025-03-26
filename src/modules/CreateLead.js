@@ -4,14 +4,12 @@ import { Contact } from "./FieldComponents";
 import { CreateContact } from "./CreateContact";
 import '../styles/Leads.css';
 import { Text, NumberInput, DateInput, Dropdown, Boolean } from "./FieldComponents";
-import { useMemo } from "react";
-import { Star } from "lucide-react";
-import { StarOutlineSharp, StarRate, StarRateOutlined, StarRateSharp, StarSharp, TheaterComedyTwoTone } from "@mui/icons-material";
 
 export const CreateLead = ({ user, setCreateLead }) => {
     const [createContact, setCreateContact] = useState(false);
     const [selectedContact, setSelectedContact] = useState(null);
     const [referralContact, setReferralContact] = useState(null);
+    const [dbOrigination, setDbOrigination] = useState(null);
     const [caseTypes, setCaseTypes] = useState([]);
     const [marketingSources, setMarketingSources] = useState([]);
     const [caseFields, setCaseFields] = useState([]);
@@ -23,6 +21,7 @@ export const CreateLead = ({ user, setCreateLead }) => {
         incident_date: '',
         marketing_source: '',
         referral_contact: null,
+        db_origination: null,
         marketing_notes: '',
         summary: '',
         case_likelihood: '',
@@ -32,9 +31,43 @@ export const CreateLead = ({ user, setCreateLead }) => {
         notes: '',
         custom_fields: {}
     });
+    const [customFields, setCustomFields] = useState({
+        222: `${new Date().getFullYear()}-${String(new Date().getMonth()).padStart(2, 0)}-${String(new Date().getDate()).padStart(2, 0)}`,
+        223: String(new Date().toLocaleTimeString()).slice(0, 8),
+        224: formData.intake_by,
+        225: formData.marketing_source,
+        226: formData.referral_contact,
+        227: formData.db_origination
+    });
     const [filteredFields, setFilteredFields] = useState([]);
     const [users, setUsers] = useState([]);
     const [statuses, setStatuses] = useState([]);
+
+    const saveFields = async (leadId) => {
+        const field_values = {};
+    
+        for (const [fieldId, value] of Object.entries(customFields)) {
+            field_values[fieldId] = typeof value === 'object' ? JSON.stringify(value) : value;
+        }
+    
+        try {
+            const response = await fetch(`https://dalyblackdata.com/api/custom_fields.php`, {
+                method: 'POST',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    lead_id: leadId,
+                    field_values,
+                }),
+            });
+    
+            const result = await response.json();
+            if (!result.success) {
+                console.error("Error saving custom fields:", result.message);
+            }
+        } catch (error) {
+            console.error("Error posting custom fields:", error);
+        }
+    };    
 
     const fetchUsers = async () => {
         try {
@@ -130,6 +163,7 @@ export const CreateLead = ({ user, setCreateLead }) => {
                     notes: '',
                     custom_fields: {}
                 });
+                await saveFields(data.lead_id);
             } else {
                 console.error("Error creating lead:", data.message);
             }
@@ -137,6 +171,15 @@ export const CreateLead = ({ user, setCreateLead }) => {
             console.error("Error creating lead:", error);
         }
     };
+
+    useEffect(() => {
+        setCustomFields((prev) => ({
+            ...prev,
+            225: formData.marketing_source,
+            226: formData.referral_contact,
+            227: formData.db_origination
+        }));
+    }, [formData]);
 
     const fetchCaseTypes = async () => {
         try {
@@ -215,6 +258,14 @@ export const CreateLead = ({ user, setCreateLead }) => {
             referral_contact: referralContact?.id || null
         }));
     }, [referralContact]);
+
+    useEffect(() => {
+        setFormData((prev) => ({
+            ...prev,
+            referral_contact: null,
+            db_origination: dbOrigination?.id || null
+        }));
+    }, [dbOrigination]);
 
     useEffect(() => {
         setFormData({
@@ -302,12 +353,22 @@ export const CreateLead = ({ user, setCreateLead }) => {
                                 ))}
                             </select>
                         </div>
-                        {marketingSources.some(source => source.id == formData.marketing_source && source.marketing_type === '3') && (
+                        {marketingSources.some(source => source.id == formData.marketing_source && source.marketing_type === '3' && formData.marketing_source != '12') && (
                             <div className='form-group'>
                                 <label>Referral Source</label>
                                 <Contact 
                                     selectedContact={referralContact}
                                     setSelectedContact={setReferralContact}
+                                    onCreateNewContact={() => setCreateContact(true)}
+                                />
+                            </div>
+                        )}
+                        {formData.marketing_source === '12' && (
+                            <div className='form-group'>
+                                <label>DB Origination</label>
+                                <Contact 
+                                    selectedContact={dbOrigination}
+                                    setSelectedContact={setDbOrigination}
                                     onCreateNewContact={() => setCreateContact(true)}
                                 />
                             </div>

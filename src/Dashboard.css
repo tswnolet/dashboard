@@ -31,9 +31,10 @@
     position: relative;
 }
 
-input[type='date']::-webkit-calendar-picker-indicator {
+input[type='date']::-webkit-calendar-picker-indicator, input[type='time'] {
     color-scheme: var(--theme);
     cursor: pointer;
+    accent-color: var(--text-color);
 }
 
 .filter-container {

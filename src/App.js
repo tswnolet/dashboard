@@ -30,6 +30,7 @@ const App = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [redirectPath, setRedirectPath] = useState('/dashboard?report=thisyear');
   const [user, setUser] = useState(null);
+  const [accessLevel, setAccessLevel] = useState(null);
 
   useEffect(() => {
     checkUserLoggedIn();
@@ -50,9 +51,10 @@ const App = () => {
 
   const checkUserLoggedIn = async () => {
     setLoggedIn(null);
-    
+
     if (process.env.NODE_ENV === 'development') {
       setLoggedIn(true);
+      setAccessLevel('global admin');
       setUser({ user: 'devuser', user_id: 1 });
       setLoading(false);
       return;
@@ -96,13 +98,13 @@ const App = () => {
 
   return (
     <Router>
-        <ConditionalNav user={user} loggedIn={loggedIn} changeTheme={changeTheme} theme={theme} logout={logout} data={data} setData={setData} setFilteredData={setFilteredData} />
-        <AppRoutes setUser={setUser} user={user} loggedIn={loggedIn} setLoggedIn={setLoggedIn} changeTheme={changeTheme} theme={theme} data={filteredData} setData={setData} addCard={addCard} logout={logout} setFilteredData={setFilteredData} setShowAlert={setShowAlert} showAlert={showAlert} redirectPath={redirectPath} setRedirectPath={setRedirectPath} />
+        <ConditionalNav accessLevel={accessLevel} user={user} loggedIn={loggedIn} changeTheme={changeTheme} theme={theme} logout={logout} data={data} setData={setData} setFilteredData={setFilteredData} />
+        <AppRoutes accessLevel={accessLevel} setAccessLevel={setAccessLevel} setUser={setUser} user={user} loggedIn={loggedIn} setLoggedIn={setLoggedIn} changeTheme={changeTheme} theme={theme} data={filteredData} setData={setData} addCard={addCard} logout={logout} setFilteredData={setFilteredData} setShowAlert={setShowAlert} showAlert={showAlert} redirectPath={redirectPath} setRedirectPath={setRedirectPath} />
     </Router>
   );
 }
 
-const ConditionalNav = ({ user, loggedIn, changeTheme, theme, logout, data, setData, setFilteredData }) => {
+const ConditionalNav = ({ accessLevel, user, loggedIn, changeTheme, theme, logout, data, setData, setFilteredData }) => {
   const location = useLocation();
   const pathName = location.pathname.substring(1);
 
@@ -120,10 +122,10 @@ const ConditionalNav = ({ user, loggedIn, changeTheme, theme, logout, data, setD
     return null;
   }
 
-  return <Nav title={title || 'Dashboard'} user={user?.user} loggedIn={loggedIn} changeTheme={changeTheme} theme={theme} logout={logout} />;
+  return <Nav title={title || 'Dashboard'} accessLevel={accessLevel} user={user?.user} loggedIn={loggedIn} changeTheme={changeTheme} theme={theme} logout={logout} />;
 };
 
-const AppRoutes = ({ setUser, user, loggedIn, setLoggedIn, changeTheme, theme, data, setData, addCard, logout, setFilteredData, setShowAlert, showAlert, redirectPath, setRedirectPath }) => {
+const AppRoutes = ({ accessLevel, setAccessLevel, setUser, user, loggedIn, setLoggedIn, changeTheme, theme, data, setData, addCard, logout, setFilteredData, setShowAlert, showAlert, redirectPath, setRedirectPath }) => {
   const location = useLocation();
 
   useEffect(() => {
@@ -136,12 +138,12 @@ const AppRoutes = ({ setUser, user, loggedIn, setLoggedIn, changeTheme, theme, d
     return <Loading />;
   }
 
+  console.log(accessLevel);
+
   return (
     <Routes>
       {loggedIn === true ? (
         <>
-          <Route path="/nav" element={<></>} />
-          <Route path="/dashboard" element={<Dashboard setLoggedIn={setLoggedIn} />} />
           <Route path="/cases" element={<Cases user={user} />} />
           <Route path="/case/:id" element={<Case id={":id"} />} />
           <Route path="/intake" element={<Leads user={user} />} />
@@ -156,11 +158,16 @@ const AppRoutes = ({ setUser, user, loggedIn, setLoggedIn, changeTheme, theme, d
           <Route path="/firm-settings/custom-fields" element={<CustomFields />} />
           <Route path="/firm-settings/layout-editor" element={<LayoutEditor />} />
           <Route path='/library' element={<FileList />} />
+          {accessLevel === 'global admin' ? ( 
+            <Route path="/dashboard" element={<Dashboard setLoggedIn={setLoggedIn} />} />
+          ) : (
+            <Route path='/dashboard' element={<Cases user={user} />} />
+          )}
         </>
       ) : (
         <>
-          <Route path="/login" element={<Context setUser={setUser} setLoggedIn={setLoggedIn} setShowAlert={setShowAlert} showAlert={showAlert} />} />
-          <Route path="/signup" element={<Context setLoggedIn={setLoggedIn} setShowAlert={setShowAlert} showAlert={showAlert} />} />
+          <Route path="/login" element={<Context setAccessLevel={setAccessLevel} setUser={setUser} setLoggedIn={setLoggedIn} setShowAlert={setShowAlert} showAlert={showAlert} />} />
+          <Route path="/signup" element={<Context setAccessLevel={setAccessLevel} setLoggedIn={setLoggedIn} setShowAlert={setShowAlert} showAlert={showAlert} />} />
           <Route path="*" element={<Navigate to="/login" state={{ from: location.pathname + location.search }} />} />
         </>
       )}

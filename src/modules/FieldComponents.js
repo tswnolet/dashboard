@@ -3,7 +3,7 @@ import '../styles/LayoutEditor.css';
 import { createPortal } from "react-dom";
 import { CreateContact } from "./CreateContact";
 import { Check, CheckCheck, Dot, DotSquare, UserRoundPlus, X } from "lucide-react";
-import { Calculate, Square, SquareRounded } from "@mui/icons-material";
+import { Calculate, Source, Square, SquareRounded } from "@mui/icons-material";
 
 export const Text = ({ type, placeholder, value, onChange, disable }) => {
     return type === 'text' ? (
@@ -75,25 +75,43 @@ export const TimeInput = ({ value, onChange }) => {
     return <input type='time' value={value || ""} onChange={(e) => onChange(e.target.value)} />;
 };
 
-export const Dropdown = ({ options = [], value = "", onChange = () => {} }) => {
-    let parsedOptions = [];
+export const Dropdown = ({ options = [], value = "", onChange = () => {}, marketing_list = false }) => {
+    const [parsedOptions, setParsedOptions] = useState([]);
 
-    try {
-        parsedOptions = Array.isArray(options)
-            ? options
-            : options 
-                ? JSON.parse(options) 
-                : [];
-    } catch (error) {
-        console.error("Dropdown options parsing error:", error);
-        parsedOptions = [];
-    }
+    useEffect(() => {
+        if (marketing_list) {
+            const fetchMarketingSources = async () => {
+                try {
+                    const response = await fetch(`https://dalyblackdata.com/api/marketing_sources.php?time=${new Date().getTime()}`);
+                    const data = await response.json();
+                    const sources = data.marketing_sources.map(source => source.source_name);
+                    setParsedOptions(sources);
+                } catch (error) {
+                    console.error("Error fetching marketing sources:", error);
+                }
+            };
+
+            fetchMarketingSources();
+        } else {
+            try {
+                const opts = Array.isArray(options)
+                    ? options
+                    : options 
+                        ? JSON.parse(options) 
+                        : [];
+                setParsedOptions(opts);
+            } catch (error) {
+                console.error("Dropdown options parsing error:", error);
+                setParsedOptions([]);
+            }
+        }
+    }, [marketing_list, options]);
 
     return (
-        <select className={`default-select`} value={value || ""} onChange={(e) => onChange(e.target.value)}>
+        <select className="default-select" value={value ?? ""} onChange={(e) => onChange(Number(e.target.value))}>
             <option value="">Select...</option>
             {parsedOptions.map((option, index) => (
-                <option key={index} value={option}>{option}</option>
+                <option key={index} value={index}>{option}</option>
             ))}
         </select>
     );
@@ -114,18 +132,85 @@ export const MultiSelect = ({ options = [], value = [], onChange = () => {} }) =
     }
 
     return (
-        <div className='multi-select'>
+        <div className='multi-select-component'>
             {parsedOptions.map((option, index) => (
                 <div
                     key={index}
-                    className={`option${value.includes(option) ? ' active' : ''}`}
-                    onClick={() => onChange(value.includes(option) ? value.filter(v => v !== option) : [...value, option])}
+                    className={`ms-option${value.includes(index) ? ' active' : ''}`}
+                    onClick={() => onChange(value.includes(index) ? value.filter(v => v !== index) : [...value, index])}
                 >
                     {option}
                 </div>
             ))}
         </div>
     );
+};
+
+export const SearchSelect = ({ value, onChange, options = [], placeholder = "Select an option", disabled = false }) => {
+  const [search, setSearch] = useState('');
+  const [filtered, setFiltered] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const parsedOptions = (() => {
+    try {
+      const parsed = typeof options === 'string' ? JSON.parse(options) : options;
+      return parsed.map((label, index) => ({ label, value: index }));
+    } catch (err) {
+      console.error('Invalid options format for SearchSelect:', err);
+      return [];
+    }
+  })();
+
+  useEffect(() => {
+    const searchLower = search.toLowerCase();
+    const filteredOptions = parsedOptions.filter(opt =>
+      opt.label.toLowerCase().includes(searchLower)
+    );
+    setFiltered(filteredOptions);
+  }, [search, options]);
+
+  const handleSelect = (val) => {
+    onChange(val);
+    setIsOpen(false);
+    setSearch('');
+  };
+
+  const selectedLabel = parsedOptions.find(o => o.value === value)?.label || '';
+
+  return (
+    <div className={`search-select ${disabled ? 'disabled' : ''}`} style={{ position: 'relative' }}>
+      <div
+        className="search-select-input"
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+      >
+        {selectedLabel || placeholder}
+      </div>
+
+      {isOpen && !disabled && (
+        <div className="search-select-dropdown">
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search..."
+          />
+          {filtered.length > 0 ? (
+            filtered.map(opt => (
+              <div
+                key={opt.value}
+                onClick={() => handleSelect(opt.value)}
+                style={{ padding: '8px', cursor: 'pointer', borderBottom: '1px solid var(--border-color)' }}
+              >
+                {opt.label}
+              </div>
+            ))
+          ) : (
+            <div style={{ padding: '8px', color: 'var(--text-color)' }}>No results found</div>
+          )}
+        </div>
+      )}
+    </div>
+  );
 };
 
 export const Boolean = ({ options = [], value, onChange }) => {
@@ -177,11 +262,11 @@ export const FileUpload = ({ value, onChange, lead_id, section_name }) => {
 
     return (
         <div className='file-upload'>
-            <input type='file' onChange={handleFileChange} />
+            <input type='file' id={`file-upload`} onChange={handleFileChange} hidden/>
             {uploading ? (
-                <span>Uploading...</span>
+                <label htmlFor={`file-upload`}>Uploading...</label>
             ) : (
-                <span>{file?.name || uploadedName || "Choose file..."}</span>
+                <label htmlFor={`file-upload`}>{file?.name || uploadedName || "Choose file..."}</label>
             )}
         </div>
     );
@@ -375,11 +460,17 @@ export const Contact = ({ selectedContact = '', onCreateNewContact, setSelectedC
         try {
             const response = await fetch(`https://dalyblackdata.com/api/contacts.php?id=${id}`);
             const data = await response.json();
-            if (data.success) {
+            if (data.contacts.id) {
                 setDisplayContact(data.contacts);
+            } else {
+                const response = await fetch(`https://dalyblackdata.com/api/user.php?id=${id}`);
+                const data = await response.json();
+                if (response.ok) {
+                    setDisplayContact(data.contacts);
+                }
             }
         } catch (error) {
-            console.error("Error fetching contact:", error);
+
         }
     };
 
@@ -580,16 +671,23 @@ export const Deadline = ({ value = [], title, onChange }) => {
     );
 };
 
-export const TableOfContents = ({ subheaders = [], dataChanged, saveFields }) => {
+export const SaveButton = ({ dataChanged, name = "Save", saveFields }) => {
+    return (
+        <button className='action' onClick={saveFields} title={dataChanged ? "Save changes" : "No changes to save"}>
+            {name}
+        </button>
+    );
+};
+
+export const TableOfContents = ({ subheaders = [], dataChanged, cancel = false, saveFields, setAddItemMode }) => {
     return (
         <>
             {subheaders.length > 0 && 
                 <div className='table-of-contents'>
                     <div className='toc-header'>
                         <h3>Table of Contents</h3>
-                        <div className='action' onClick={saveFields} title={dataChanged ? "Save changes" : "No changes to save"}>
-                            <CheckCheck size={16} />
-                        </div>
+                        {cancel ? <button className='action alt' style={{marginRight: "15px"}} onClick={() => setAddItemMode(false)}>Cancel</button> : <></>}
+                        <SaveButton dataChanged={dataChanged} name={cancel ? "Create" : "Save"} saveFields={saveFields}/>
                     </div>
                     {subheaders.map((header, index) => (
                         <a key={`${header}-${index}`} href={`#${header.name}`} className='subtext' title={`Scroll to ${header.name}`}>{header.name}</a>
@@ -603,8 +701,6 @@ export const TableOfContents = ({ subheaders = [], dataChanged, saveFields }) =>
 
 export const DataTable = ({ fields, data }) => {
     const [contactMap, setContactMap] = useState({});
-
-    console.log(fields, data)
 
     useEffect(() => {
         const contactIds = new Set();
@@ -650,7 +746,7 @@ export const DataTable = ({ fields, data }) => {
             <thead>
                 <tr>
                     {fields.map(f => (
-                        <th key={f.id}>{f.name}</th>
+                        <th key={f.id} title={f.name}>{`${f.name?.slice(0,32)}${f.name.length > 32 ? '...' : ''}`}</th>
                     ))}
                 </tr>
             </thead>
@@ -665,8 +761,11 @@ export const DataTable = ({ fields, data }) => {
 
                                         try {
                                             const parsed = JSON.parse(raw);
-                                            if (Array.isArray(parsed)) {
+                                            if (f.field_id === 9 && Array.isArray(parsed)) {
                                                 return parsed.length > 1 ? `${parsed.length} contacts` : `1 contact`;
+                                            }
+                                            if (Array.isArray(parsed)) {
+                                                return parsed.join(', ');
                                             }
                                         } catch {
                                             
@@ -675,8 +774,8 @@ export const DataTable = ({ fields, data }) => {
                                         return raw ?? '';
                                     })()}
                                 </td>
-                            )}
-                        )}
+                            );
+                        })}
                     </tr>
                 ))}
             </tbody>

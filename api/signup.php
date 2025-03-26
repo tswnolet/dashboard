@@ -30,7 +30,6 @@ if ($requestMethod === 'POST') {
     }
 
     $username = strstr($email, '@', true);
-
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
     $checkSql = "SELECT id FROM users WHERE LOWER(email) = LOWER(?) OR LOWER(user) = LOWER(?)";
@@ -40,18 +39,51 @@ if ($requestMethod === 'POST') {
     $stmt->store_result();
 
     if ($stmt->num_rows > 0) {
-        error_log("Username or email already exists: Username = $username, Email = $email");
         echo json_encode(['success' => false, 'error' => 'Username or email already exists']);
         exit;
     }
 
-    $token = bin2hex(random_bytes(16)); // Generate a unique token
-    $dataPreferences = json_encode(["data" => ["all"]]);
+    $nameParts = explode(' ', $name);
+    $first_name = $nameParts[0];
+    $last_name = $nameParts[1] ?? '';
+    $full_name = $name;
 
-    $insertSql = "INSERT INTO users (name, user, email, password, access_level, token, data_preferences) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    $nickname = $username;
+    $company_name = "Daly & Black, P.C.";
+    $contact_type = "employee";
+    $phones = json_encode([["type" => "work", "number" => "7136551405"]]);
+    $emails = json_encode([["type" => "work", "email" => $email]]);
+
+    $contactStmt = $conn->prepare("
+        INSERT INTO contacts (first_name, last_name, full_name, nickname, company_name, contact_type)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ");
+    $contactStmt->bind_param("ssssss", $first_name, $last_name, $full_name, $nickname, $company_name, $contact_type);
+    $contactStmt->execute();
+    $contact_id = $contactStmt->insert_id;
+    $contactStmt->close();
+
+    $insertDetail = function($type, $data) use ($conn, $contact_id) {
+        foreach ($data as $detail) {
+            $jsonData = json_encode($detail);
+            $stmt = $conn->prepare("INSERT INTO contact_details (contact_id, detail_type, detail_data) VALUES (?, ?, ?)");
+            $stmt->bind_param("iss", $contact_id, $type, $jsonData);
+            $stmt->execute();
+            $stmt->close();
+        }
+    };
+
+    $insertDetail('phone', json_decode($phones, true));
+    $insertDetail('email', json_decode($emails, true));
+
+    $token = bin2hex(random_bytes(16));
+    $dataPreferences = json_encode(["data" => ["all"]]);
     $accessLevel = 'no access';
+
+    $insertSql = "INSERT INTO users (name, user, email, password, access_level, token, data_preferences, contact_id) 
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($insertSql);
-    $stmt->bind_param("sssssss", $name, $username, $email, $passwordHash, $accessLevel, $token, $dataPreferences);
+    $stmt->bind_param("sssssssi", $name, $username, $email, $passwordHash, $accessLevel, $token, $dataPreferences, $contact_id);
 
     if ($stmt->execute()) {
         $subject = 'Your data. All in. All the time.';
@@ -128,7 +160,6 @@ if ($requestMethod === 'POST') {
         $userEmailResult = sendEmail($email, $subject, $message);
         error_log("User email result: " . $userEmailResult);
 
-        // Send email to the admin
         $adminSubject = 'New User Signup Notification';
         $adminMessage = "
             <html>

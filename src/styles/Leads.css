@@ -68,6 +68,10 @@
     }
 }
 
+.data-table th, .data-table td {
+    min-width: 150px;
+}
+
 .star-icon:not(.empty) {
     fill: var(--fill) !important;
 }

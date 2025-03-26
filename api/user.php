@@ -6,6 +6,21 @@ header("Content-Type: application/json");
 
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 
+function fetchContactDetails($conn, $contact_id, $detail_type) {
+    $stmt = $conn->prepare("SELECT detail_data FROM contact_details WHERE contact_id = ? AND detail_type = ?");
+    $stmt->bind_param("is", $contact_id, $detail_type);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $details = [];
+    while ($row = $result->fetch_assoc()) {
+        $details[] = json_decode($row['detail_data'], true);
+    }
+
+    $stmt->close();
+    return $details;
+}
+
 if ($requestMethod === 'POST') {
     $input = json_decode(file_get_contents("php://input"), true);
 
@@ -52,6 +67,43 @@ if ($requestMethod === 'POST') {
         echo json_encode(["users" => $users]);
         exit;
     }
+
+    if (isset($_GET['id'])) {
+        $id = $_GET['id'];
+    
+        $sql = 'SELECT * FROM users WHERE id = ?';
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        $stmt->close();
+    
+        if (!$user) {
+            echo json_encode(['success' => false, 'error' => 'User not found']);
+            exit;
+        }
+    
+        $contact_id = $user['contact_id'];
+    
+        $contactSql = "SELECT * FROM contacts WHERE id = ?";
+        $contactStmt = $conn->prepare($contactSql);
+        $contactStmt->bind_param("i", $contact_id);
+        $contactStmt->execute();
+        $contactResult = $contactStmt->get_result();
+        $contact = $contactResult->fetch_assoc();
+        $contactStmt->close();
+    
+        if ($contact) {
+            $contact['phones'] = fetchContactDetails($conn, $contact_id, 'phone');
+            $contact['emails'] = fetchContactDetails($conn, $contact_id, 'email');
+            $contact['addresses'] = fetchContactDetails($conn, $contact_id, 'address');
+        }
+    
+        echo json_encode(['success' => true, 'contacts' => $contact]);
+        exit;
+    }    
+
     if (!isset($_GET['user'])) {
         echo json_encode(["error" => "Username is required"]);
         exit;

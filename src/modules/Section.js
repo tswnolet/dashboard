@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Boolean, Calculation, Contact, ContactList, DateInput, Deadline, Dropdown, FileUpload, Instructions, MultiFile, MultiSelect, NumberInput, Subheader, Text, TimeInput, TableOfContents, DataTable } from "./FieldComponents";
+import { Boolean, Calculation, Contact, ContactList, DateInput, Deadline, Dropdown, FileUpload, Instructions, MultiFile, MultiSelect, NumberInput, Subheader, Text, TimeInput, TableOfContents, DataTable, SaveButton, SearchSelect } from "./FieldComponents";
 import { Folder as FolderIcon, FolderOpen, FolderOutlined } from "@mui/icons-material";
 import { File } from 'lucide-react';
 
@@ -140,21 +140,11 @@ const Field = ({ field, value, handleFieldChange, conditional = false, fieldUpda
                 );
             case 10:
                 return <Dropdown
-                    options={field.options || "[]"}
-                    value={(() => {
-                        try {
-                            const opts = JSON.parse(field.options || "[]");
-                            return opts[value] ?? "";
-                        } catch {
-                            return "";
-                        }
-                    })()}
-                    onChange={(val) => {
-                        const opts = JSON.parse(field.options || "[]");
-                        const index = opts.indexOf(val);
-                        handleFieldChange(field.id, index);
-                    }}
-                />;
+                            options={field.options || "[]"}
+                            value={value}
+                            onChange={(index) => handleFieldChange(field.id, index)}
+                            marketing_list={field.id === 225}
+                        />;
             case 11:
                 return <MultiSelect options={field.options || "[]"} value={value} onChange={(val) => handleFieldChange(field.id, val)} />;
             case 12:
@@ -165,10 +155,10 @@ const Field = ({ field, value, handleFieldChange, conditional = false, fieldUpda
                 return <Instructions instructions={field.name} />;
             case 15:
                 return <FileUpload
-                value={value}
-                onChange={(val) => handleFieldChange(field.id, val)}
-                lead_id={lead_id}
-                section_name={sectionName}
+                    value={value}
+                    onChange={(val) => handleFieldChange(field.id, val)}
+                    lead_id={lead_id}
+                    section_name={sectionName}
                 />
             case 16:
                 return <MultiFile
@@ -196,6 +186,12 @@ const Field = ({ field, value, handleFieldChange, conditional = false, fieldUpda
                                 ...value,
                                 ...updated
                             })}
+                        />;
+            case 22:
+                return <SearchSelect
+                            value={value}
+                            onChange={(val) => handleFieldChange(field.id, val)}
+                            options={field.options}
                         />;
             default:
                 return null;
@@ -229,6 +225,10 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
         setNewData({});
         setDataChanged(false);
     }, [section_id]);
+
+    useEffect(() => {
+        console.log(formData);
+    }, [formData]);
 
     const handleFieldChange = (fieldId, value) => {
     setFormData((prev) => ({ ...prev, [fieldId]: value }));
@@ -299,8 +299,16 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
 
     const saveFields = async () => {
         updateFields(newData);
-        await uploadFiles();
-    };
+    
+        const hasFileUploads = Object.values(formData).some(val =>
+            val instanceof File ||
+            (Array.isArray(val) && val.length && val[0] instanceof File)
+        );
+    
+        if (hasFileUploads) {
+            await uploadFiles();
+        }
+    };    
 
     useEffect(() => {
         setDataChanged(true);
@@ -330,9 +338,24 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
         }
     
         controllingValue = normalizeValueToIndex(controllingField, controllingValue);
-        const validAnswers = field.is_answered.split(',').map(v => v.trim());
     
-        return validAnswers.includes(String(controllingValue));
+        let parsedAnswers = [];
+        try {
+            const parsed = JSON.parse(field.is_answered);
+            if (Array.isArray(parsed)) parsedAnswers = parsed.map(v => String(v));
+            else parsedAnswers = [String(parsed)];
+        } catch {
+            parsedAnswers = String(field.is_answered).split(',').map(v => v.trim());
+        }
+        
+        const isNegated = parsedAnswers.every(answer => String(answer).startsWith('!'));
+        const cleanAnswers = parsedAnswers.map((v) => String(v).replace(/^!/, ''));
+
+        if (isNegated) {
+            return !cleanAnswers.includes(String(controllingValue));
+        } else {
+            return cleanAnswers.includes(String(controllingValue));
+        }
     };
 
     useEffect(() => {
@@ -447,7 +470,7 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
         const uploads = [];
     
         for (const field of fields) {
-            if (formData[field.id] instanceof File) {
+            if (formData[field.id]?.constructor?.name === "File") {
                 const formDataObj = new FormData();
                 formDataObj.append("case_id", id);
                 formDataObj.append("section_name", sectionName);
@@ -480,29 +503,44 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
 
     return (
         <div className='case-section'>
-            <TableOfContents key={section_id} subheaders={!addItemMode ? sectionFields.filter((field) => field.add_item !== 1 && (field.case_type_id === Number(caseType) || field.case_type_id === 0)) : sectionFields} dataChanged={dataChanged} saveFields={saveFields} />
-            {fields.some(f => f.add_item === 1) && (
-                <div className={`add-item-btn-wrapper ${addItemMode ? 'alt' : ''}`}>
-                    {!addItemMode ?
-                        <>
-                            <button className="action alt" onClick={() => setAddItemMode(true)}>
-                                Add Item
-                            </button>
-                            <DataTable fields={addItemFields} data={groupedData}/>
-                        </>
-                    :
-                        <div className='confirm-add-item'>
-                            <button className="action alt" onClick={() => setAddItemMode(false)}>
-                                Cancel
-                            </button>
-                            <button className="action" onClick={() => saveFields()}>
-                                Create
-                            </button>
-                        </div>
-                    }
-                </div>
-            )}
-            {section_id === 3 ? <Documents folders={folders} caseName={caseName} /> : output}
+          {sectionFields.some(field => (field.add_item !== 1 || addItemMode) && (field.case_type_id === Number(caseType) || field.case_type_id === 0)) && (
+            <TableOfContents
+              key={section_id}
+              subheaders={sectionFields.filter(field => (field.add_item !== 1 || addItemMode) && (field.case_type_id === Number(caseType) || field.case_type_id === 0))}
+              dataChanged={dataChanged}
+              cancel={addItemMode}
+              saveFields={saveFields}
+              setAddItemMode={setAddItemMode}
+            />
+          )}
+      
+          {fields.some(f => f.add_item === 1) && (
+            <div className={`add-item-btn-wrapper ${addItemMode ? 'alt' : ''}`}>
+              {!addItemMode ? (
+                <>
+                  <button className="action alt" onClick={() => setAddItemMode(true)}>
+                    Add Item
+                  </button>
+                  <DataTable fields={addItemFields} data={groupedData} />
+                </>
+              ) : (
+                <>
+                  {!sectionFields.some(field => (field.add_item !== 1 || addItemMode) && (field.case_type_id === Number(caseType) || field.case_type_id === 0)) && (
+                    <div className='toc-header' style={{ justifyContent: 'flex-end', marginTop: '15px' }}>
+                      <button className="action alt" onClick={() => setAddItemMode(false)} style={{ marginRight: '15px' }}>
+                        Cancel
+                      </button>
+                      <button className="action" onClick={() => saveFields()}>
+                        Create
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+      
+          {section_id === 3 ? <Documents folders={folders} caseName={caseName} /> : output}
         </div>
-    );
+      );      
 };
