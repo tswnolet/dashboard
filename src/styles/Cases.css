@@ -176,7 +176,7 @@ td.case-name {
 
 .case-nav {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     flex-direction: column;
     overflow-y: auto;
@@ -226,7 +226,7 @@ td.case-name {
 .sub-section{
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 25px 20px;
     width: 100%;
     justify-content: flex-start;
 
@@ -238,7 +238,7 @@ td.case-name {
         margin-bottom: 35px;
     }
 
-    .form-group {
+    .form-group:not(.deadline-group) {
         min-width: 250px;
         box-sizing: border-box;
         flex: 1 1 calc(33.333% - 25px);
@@ -383,37 +383,8 @@ span.remove-tag:hover {
     width: 100%;
 }
 
- .search-select-input {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    height: 36px;
-    color: var(--text-color);
-    border: 1px solid var(--border-color);
-    border-radius: 3px;
-    background-color: var(--secondary-color);
-    padding: 0 10px;
-    font-size: 14px;
-}
-
-.search-select-dropdown {
-    width: 100%;
-    z-index: 10;
-    border: 1px solid var(--border-color);
-    border-radius: 3px;
-    background-color: var(--secondary-color);
-    height: 150px;
-    overflow-y: auto;
-    font-size: 14px;
-
-    input {
-        border: none !important;
-        border-bottom: 1px solid var(--border-color) !important;
-    }
-}
-
 @media (min-width: 1024px) {
-    .case-section .form-group {
-        max-width: calc(33.333% - 25px);
+    .case-section .form-group:not(.deadline-group) {
+        max-width: calc(33.333% - 13.33px);
     }
 }

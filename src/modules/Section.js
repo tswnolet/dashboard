@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Boolean, Calculation, Contact, ContactList, DateInput, Deadline, Dropdown, FileUpload, Instructions, MultiFile, MultiSelect, NumberInput, Subheader, Text, TimeInput, TableOfContents, DataTable, SaveButton, SearchSelect } from "./FieldComponents";
+import { Boolean, Calculation, Contact, ContactList, DateInput, Deadline, Dropdown, FileUpload, Instructions, MultiFile, MultiSelect, NumberInput, Subheader, Text, TimeInput, TableOfContents, DataTable, SaveButton, SearchSelect, DocGen } from "./FieldComponents";
 import { Folder as FolderIcon, FolderOpen, FolderOutlined } from "@mui/icons-material";
 import { File } from 'lucide-react';
 
@@ -178,12 +178,18 @@ const Field = ({ field, value, handleFieldChange, conditional = false, fieldUpda
                         onChange={refreshAfterCalc}
                     />
                 );
+            case 18:
+                return <DocGen
+                            value={value}
+                            onChange={(val) => handleFieldChange(field.id, val)}
+                        />;
             case 20:
+                const parsedValue = typeof value === 'string' ? JSON.parse(value || '{}') : value || {};
                 return <Deadline 
-                            value={value || { due: '', done: '' }}
+                            value={{ due: parsedValue.due || '', done: parsedValue.done || '' }}
                             title={field.name}
                             onChange={(updated) => handleFieldChange(field.id, {
-                                ...value,
+                                ...parsedValue,
                                 ...updated
                             })}
                         />;
@@ -219,6 +225,7 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
     const [dataChanged, setDataChanged] = useState(false);
     const [groupedData, setGroupedData] = useState([]);
     const [sectionName, setSectionName] = useState('');
+    const [selectedRow, setSelectedRow] = useState(null);
 
     useEffect(() => {
         setAddItemMode(false);
@@ -226,20 +233,18 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
         setDataChanged(false);
     }, [section_id]);
 
-    useEffect(() => {
-        console.log(formData);
-    }, [formData]);
-
     const handleFieldChange = (fieldId, value) => {
-    setFormData((prev) => ({ ...prev, [fieldId]: value }));
-    setNewData((prev) => ({
-        ...prev,
-        lead_id,
-        field_values: {
-        ...(prev.field_values || {}),
-        [fieldId]: typeof value === 'object' ? JSON.stringify(value) : value
-        }
-    }));
+        setFormData((prev) => ({ ...prev, [fieldId]: value }));
+        setNewData((prev) => ({
+            ...prev,
+            lead_id,
+            field_values: {
+            ...(prev.field_values || {}),
+            [fieldId]: (value && typeof value === 'object' && !Array.isArray(value))
+                ? JSON.stringify(value)
+                : value
+            }
+        }));
     };
 
     const refreshAfterCalc = () => {
@@ -266,7 +271,7 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
             const { field_id, group_id, value } = update;
     
             if (group_id !== null) {
-                if (!groupedMap[group_id]) groupedMap[group_id] = {};
+                if (!groupedMap[group_id]) groupedMap[group_id] = { group_id };
                 groupedMap[group_id][field_id] = value;
             }
         });
@@ -290,6 +295,7 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
                     setAddItemMode(false);
                     setNewData({});
                     setFormData({});
+                    setSelectedRow(null);   
                 } else {
                     console.error("Failed to update fields:", data.message);
                 }
@@ -298,17 +304,28 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
     };
 
     const saveFields = async () => {
+        if (selectedRow) {
+            newData.group_id = selectedRow.group_id;
+        }
+        
         updateFields(newData);
-    
+        
+        const isFile = (val) =>
+            val &&
+            typeof val === 'object' &&
+            typeof val.name === 'string' &&
+            typeof val.type === 'string' &&
+            typeof val.size === 'number' &&
+            typeof val.lastModified === 'number';
+        
         const hasFileUploads = Object.values(formData).some(val =>
-            val instanceof File ||
-            (Array.isArray(val) && val.length && val[0] instanceof File)
+            isFile(val) || (Array.isArray(val) && val.length && isFile(val[0]))
         );
-    
+        
         if (hasFileUploads) {
             await uploadFiles();
         }
-    };    
+    };
 
     useEffect(() => {
         setDataChanged(true);
@@ -501,46 +518,61 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
         fetchDocuments();
     };
 
+    useEffect(() => {
+        setAddItemMode(selectedRow);
+    }, [selectedRow]);
+
     return (
         <div className='case-section'>
-          {sectionFields.some(field => (field.add_item !== 1 || addItemMode) && (field.case_type_id === Number(caseType) || field.case_type_id === 0)) && (
-            <TableOfContents
-              key={section_id}
-              subheaders={sectionFields.filter(field => (field.add_item !== 1 || addItemMode) && (field.case_type_id === Number(caseType) || field.case_type_id === 0))}
-              dataChanged={dataChanged}
-              cancel={addItemMode}
-              saveFields={saveFields}
-              setAddItemMode={setAddItemMode}
-            />
-          )}
-      
-          {fields.some(f => f.add_item === 1) && (
-            <div className={`add-item-btn-wrapper ${addItemMode ? 'alt' : ''}`}>
-              {!addItemMode ? (
+            {sectionFields.some(field => (field.add_item !== 1 || addItemMode) && (field.case_type_id === Number(caseType) || field.case_type_id === 0)) && (
+                <TableOfContents
+                    key={section_id}
+                    subheaders={sectionFields.filter(field => (field.add_item !== 1 || addItemMode) && (field.case_type_id === Number(caseType) || field.case_type_id === 0))}
+                    dataChanged={dataChanged}
+                    cancel={addItemMode}
+                    saveFields={saveFields}
+                    setAddItemMode={setAddItemMode}
+                />
+            )}
+            {fields.some(f => f.add_item === 1) && (
                 <>
-                  <button className="action alt" onClick={() => setAddItemMode(true)}>
-                    Add Item
-                  </button>
-                  <DataTable fields={addItemFields} data={groupedData} />
+                    {!addItemMode ? (
+                        <div className={`add-item-btn-wrapper ${addItemMode ? 'alt' : ''}`}>
+                            {!selectedRow && <button className="action alt" onClick={() => setAddItemMode(true)}>
+                                Add Item
+                            </button>}
+                            <DataTable
+                                fields={addItemFields}
+                                data={groupedData}
+                                onRowClick={(row) => {
+                                    setSelectedRow(row);
+                                    setFormData(row);
+                                    setAddItemMode(true);
+                                    setNewData({
+                                        lead_id,
+                                        group_id: row.group_id,
+                                        field_values: { ...row }
+                                    });
+                                }}
+                            />
+                        </div>
+                    ) : (
+                        <>
+                            {!sectionFields.some(field => (field.add_item !== 1 || addItemMode) && (field.case_type_id === Number(caseType) || field.case_type_id === 0)) && (
+                                <div className='toc-header' style={{ justifyContent: 'flex-end', marginTop: '15px' }}>
+                                <button className="action alt" onClick={() => {setAddItemMode(false); setSelectedRow(null);}} style={{ marginRight: '15px' }}>
+                                    Cancel
+                                </button>
+                                <button className="action" onClick={() => saveFields()}>
+                                    {selectedRow ? "Save" : "Create"}
+                                </button>
+                                </div>
+                            )}
+                        </>
+                    )}
                 </>
-              ) : (
-                <>
-                  {!sectionFields.some(field => (field.add_item !== 1 || addItemMode) && (field.case_type_id === Number(caseType) || field.case_type_id === 0)) && (
-                    <div className='toc-header' style={{ justifyContent: 'flex-end', marginTop: '15px' }}>
-                      <button className="action alt" onClick={() => setAddItemMode(false)} style={{ marginRight: '15px' }}>
-                        Cancel
-                      </button>
-                      <button className="action" onClick={() => saveFields()}>
-                        Create
-                      </button>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          )}
-      
-          {section_id === 3 ? <Documents folders={folders} caseName={caseName} /> : output}
+            )}
+            {sectionName === "Documents" ? <Documents folders={folders} caseName={caseName} /> : output}
         </div>
       );      
 };

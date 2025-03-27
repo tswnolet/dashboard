@@ -73,9 +73,12 @@ header {
 .form-group {
     display: flex;
     flex-direction: column;
-    width: 100%;
     max-height: 300px;
     overflow-y: auto;
+
+    &:not(.deadline-group) {
+        width: 100%;
+    }
 
     &:not(.nm) {
         margin: 10px 0;

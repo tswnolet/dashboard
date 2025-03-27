@@ -3,7 +3,25 @@ import '../styles/LayoutEditor.css';
 import { createPortal } from "react-dom";
 import { CreateContact } from "./CreateContact";
 import { Check, CheckCheck, Dot, DotSquare, UserRoundPlus, X } from "lucide-react";
-import { Calculate, Source, Square, SquareRounded } from "@mui/icons-material";
+import { Calculate, MarginOutlined, Source, Square, SquareRounded } from "@mui/icons-material";
+import { RiAiGenerate, RiAiGenerate2 } from "react-icons/ri";
+
+const formatDate = (dateString) => {
+    if (!dateString) return ["", "", ""];
+
+    const months = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+
+    const dateObject = new Date(dateString.replace(" ", "T") + "Z");  
+
+    return [
+        `${months[dateObject.getUTCMonth()]} ${dateObject.getUTCDate()}, ${dateObject.getUTCFullYear()}`,
+        dateObject.toISOString(),
+        dateObject.toUTCString().split(" ")[4]
+    ];
+};
 
 export const Text = ({ type, placeholder, value, onChange, disable }) => {
     return type === 'text' ? (
@@ -39,9 +57,8 @@ export const DateInput = ({ value = '', onChange, disable = false, checkbox = fa
     const handleCheckboxClick = () => {
         const newChecked = !isChecked;
         setIsChecked(newChecked);
-        if (newChecked) {
-            onChange(today());
-        }
+        const newValue = newChecked ? today() : '';
+        onChange(newValue);
     };
 
     const handleInputChange = (e) => {
@@ -50,9 +67,7 @@ export const DateInput = ({ value = '', onChange, disable = false, checkbox = fa
     };
 
     useEffect(() => {
-        if (value !== today()) {
-            setIsChecked(false);
-        }
+        setIsChecked(value === today());
     }, [value]);
 
     return (
@@ -63,10 +78,12 @@ export const DateInput = ({ value = '', onChange, disable = false, checkbox = fa
                 value={value}
                 onChange={handleInputChange}
             />
-            {checkbox && <div className="form-box alt" onClick={handleCheckboxClick}>
-                <input type="checkbox" checked={isChecked} readOnly hidden />
-                {isChecked ? <X size={23} /> : <Check size={23} />}
-            </div>}
+            {checkbox && (
+                <div className="form-box alt" onClick={handleCheckboxClick}>
+                    <input type="checkbox" checked={isChecked} readOnly hidden />
+                    {isChecked ? <X size={23} /> : <Check size={23} />}
+                </div>
+            )}
         </>
     );
 };
@@ -150,6 +167,23 @@ export const SearchSelect = ({ value, onChange, options = [], placeholder = "Sel
   const [search, setSearch] = useState('');
   const [filtered, setFiltered] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+  
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+  
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   const parsedOptions = (() => {
     try {
@@ -187,7 +221,7 @@ export const SearchSelect = ({ value, onChange, options = [], placeholder = "Sel
       </div>
 
       {isOpen && !disabled && (
-        <div className="search-select-dropdown">
+        <div className="search-select-dropdown" ref={dropdownRef}>
           <input
             type="text"
             value={search}
@@ -329,7 +363,6 @@ export const Calculation = ({ options, fieldUpdates = [], fields = [], lead_id, 
             const calculated = new Function(`return ${expression}`)();
             setResult(calculated ?? 0);
 
-            console.log(calculated);
         } catch (e) {
             console.error('Calculation error:', e);
             setResult(0);
@@ -647,27 +680,63 @@ export const ContactList = ({ onChange, value = [] }) => {
     );
 };
 
-export const Deadline = ({ value = [], title, onChange }) => {
+export const DocGen = ({ value, onChange }) => {
+    const [selectedTemplate, setSelectedTemplate] = useState(value || "");
+    const [templates, setTemplates] = useState([]);
+
+    useEffect(() => {
+        const fetchTemplates = async () => {
+            try {
+                const response = await fetch(`https://dalyblackdata.com/api/templates.php?time=${new Date().getTime()}`);
+                const data = await response.json();
+                if (data.success) {
+                    setTemplates(data.templates);
+                }
+            } catch (error) {
+                console.error("Error fetching templates:", error);
+            }
+        };
+    }, []);
+
+    return (
+        <div className='doc-gen'>
+            <SearchSelect
+                value={selectedTemplate}
+                onChange={setSelectedTemplate}
+                options={templates.map(t => t.template_name)}
+                placeholder="Select a template..."
+            />
+            <div className='action alt small' onClick={() => onChange(selectedTemplate)}><RiAiGenerate /></div>
+        </div>
+    );
+};
+
+export const Deadline = ({ value, title, onChange }) => {
+    const parsedValue = {
+        due: value?.due || '',
+        done: value?.done || ''
+    };
+
+    console.log(parsedValue);
+
     const handleDateChange = (key) => (newVal) => {
         onChange({ [key]: newVal });
     };
 
-    value = typeof value === 'string' ? JSON.parse(value) : value;
-
     return (
-        <>
-            <div className='deadline-title'>{title}</div>
+        <div className='form-group nm deadline-group'>
+            <label className="subtext deadline-title">{title}</label>
             <div className='deadline'>
                 <div className="deadline-date">
                     <label>Due</label>
-                    <DateInput value={value.due} onChange={handleDateChange("due")} />
+                    <DateInput value={parsedValue.due} onChange={handleDateChange("due")} />
                 </div>
                 <div className="deadline-date">
                     <label>Done</label>
-                    <DateInput value={value.done} onChange={handleDateChange("done")} checkbox/>
+                    <DateInput value={parsedValue.done} onChange={handleDateChange("done")} checkbox />
                 </div>
             </div>
-        </>
+        </div>
     );
 };
 
@@ -699,7 +768,7 @@ export const TableOfContents = ({ subheaders = [], dataChanged, cancel = false, 
     );
 }
 
-export const DataTable = ({ fields, data }) => {
+export const DataTable = ({ fields, data, onRowClick }) => {
     const [contactMap, setContactMap] = useState({});
 
     useEffect(() => {
@@ -741,6 +810,7 @@ export const DataTable = ({ fields, data }) => {
 
     if (!data || data.length === 0) return <p className="subtext">No entries yet.</p>;
 
+
     return (
         <table className="data-table">
             <thead>
@@ -752,7 +822,7 @@ export const DataTable = ({ fields, data }) => {
             </thead>
             <tbody>
                 {data.map((group, index) => (
-                    <tr key={`group-${index}`} className='data-cell'>
+                    <tr key={`group-${index}`} className='data-cell' onClick={() => onRowClick && onRowClick(group)}>
                         {fields.map(f => {
                             return (
                                 <td key={`group-${index}-field-${f.id}`}>
@@ -761,6 +831,17 @@ export const DataTable = ({ fields, data }) => {
 
                                         try {
                                             const parsed = JSON.parse(raw);
+                                            
+                                            if (parsed.due || parsed.done) {
+                                                const due = parsed.due ? `${parsed.due}` : null;
+                                                const done = parsed.done ? <Check size={18} color={'var(--fill)'} style={{ marginLeft: due ? '5px' : '' }} /> : null;
+                                                return (
+                                                    <>
+                                                        {formatDate(due)[0]}
+                                                        {done}
+                                                    </>
+                                                );
+                                            }
                                             if (f.field_id === 9 && Array.isArray(parsed)) {
                                                 return parsed.length > 1 ? `${parsed.length} contacts` : `1 contact`;
                                             }

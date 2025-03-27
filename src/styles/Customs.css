@@ -307,14 +307,13 @@
 
 .deadline-title {
     width: 100%;
-    margin-top: 10px;
 }
 
 .deadline {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 10px;
+    gap: 20px;
     width: 100%;
 }
 
@@ -322,7 +321,19 @@
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    gap: 10px;
+    gap: 5px;
+    width: 100%;
+}
+
+.deadline-group {
+    width: calc(66.66% - 5px);
+}
+
+.doc-gen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
     width: 100%;
 }
 
@@ -370,6 +381,41 @@
     color: var(--secondary-color);
 }
 
+.search-select {
+    width: 100%;
+}
+
+.search-select-input {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    height: 36px;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    background-color: var(--secondary-color);
+    padding: 0 10px;
+    font-size: 14px;
+    width: 100%;
+}
+
+.search-select-dropdown {
+    position: absolute;
+    width: 100%;
+    z-index: 10;
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    background-color: var(--secondary-color);
+    height: 150px;
+    overflow-y: auto;
+    font-size: 14px;
+
+    input {
+        border: none !important;
+        border-bottom: 1px solid var(--border-color) !important;
+    }
+}
+
 .toc-header {
     width: 100%;
     display: flex;
@@ -405,6 +451,15 @@
         width: 100%;
         gap: 7.5px;
     }
+}
+
+.selected-row-details {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
 }
 
 @media (min-width: 769px) {

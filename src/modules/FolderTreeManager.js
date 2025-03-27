@@ -100,7 +100,7 @@ const ReplacementLegend = () => {
                         <p>Case creation day of the month</p>
                     </div>
                     <div className='replace-field'>
-                        <p>{'{{ProjectID}}'}</p>
+                        <p>{'{{CaseID}}'}</p>
                         <p>Case ID</p>
                     </div>
                     <div className='replace-field'>

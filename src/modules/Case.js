@@ -52,6 +52,10 @@ export const Case = () => {
         fetchDocuments();
     }, [caseData]);
 
+    useEffect(() => {
+        console.log(sections[activeSection - 1])
+    }, [activeSection])
+
     return (
         <div className='case-container'>
             <CaseNav sections={sections} activeSection={activeSection} setActiveSection={setActiveSection} />
