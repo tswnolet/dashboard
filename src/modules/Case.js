@@ -53,8 +53,8 @@ export const Case = () => {
     }, [caseData]);
 
     useEffect(() => {
-        console.log(sections[activeSection - 1])
-    }, [activeSection])
+        setActiveSection(sections[0]?.id);
+    }, [sections])
 
     return (
         <div className='case-container'>

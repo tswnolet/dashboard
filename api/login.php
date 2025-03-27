@@ -45,6 +45,7 @@ if ($stmt->execute()) {
     session_start();
     $_SESSION['user_id'] = $userId;
     $_SESSION['name'] = $name;
+    $_SESSION['access_level'] = $accessLevel;
     echo json_encode(['success' => true, 'token' => $token, 'name' => $name, 'access_level' => $accessLevel]);
 } else {
     error_log('Failed to update token');

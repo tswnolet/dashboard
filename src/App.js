@@ -65,6 +65,7 @@ const App = () => {
       const data = await response.json();
       if (data.isLoggedIn) {
         setLoggedIn(true);
+        setAccessLevel(data.access_level);
         setUser(data);
         setCookie('session', 'active', 1);
       } else {
@@ -77,6 +78,10 @@ const App = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    checkUserLoggedIn();
+  }, []);
 
   const logout = async () => {
     if (process.env.NODE_ENV === 'development') {

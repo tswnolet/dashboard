@@ -35,14 +35,14 @@ const Dashboard = ({ setLoggedIn, google = false }) => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    const fetchStats = async (manual = false, customStart = null, customEnd = null) => {
+    const fetchStats = async (manual = false) => {
         setRefreshing(true);
         const startTime = Date.now();
 
         try {
             const params = [];
-            if (customStart) params.push(`startDate=${customStart}`);
-            if (customEnd) params.push(`endDate=${customEnd}`);
+            if (startDate) params.push(`startDate=${startDate}`);
+            if (endDate) params.push(`endDate=${endDate}`);
             const query = params.length ? `?${params.join("&")}` : "";
 
             const response = await fetch(`https://dalyblackdata.com/api/fetch.php${query}`);
@@ -68,13 +68,19 @@ const Dashboard = ({ setLoggedIn, google = false }) => {
         }, Math.max(0, minSpinTime - elapsedTime));
     };
 
+    const clearReportParam = () => {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("report");
+        window.history.replaceState({}, '', url.toString());
+      };
+
     const getReportParams = () => {
         const report = new URLSearchParams(window.location.search).get('report');
         const today = new Date();
         let start = null;
         let end = null;
 
-        if (report) {
+        if (!startDate && !endDate && report) {
             switch (report) {
                 case 'today':
                     break;
@@ -116,6 +122,9 @@ const Dashboard = ({ setLoggedIn, google = false }) => {
                 default:
                     break;
             }
+        } else {
+            start = startDate;
+            end = endDate;
         }
 
         return { start, end };
@@ -126,9 +135,9 @@ const Dashboard = ({ setLoggedIn, google = false }) => {
         setStartDate(start);
         setEndDate(end);
         setDatesSet(true);
-        fetchStats(false, start, end);
+        fetchStats(false);
         setRefreshTrigger(prev => prev + 1);
-    }, [window.location.search]);
+    }, [startDate, endDate, window.location.search]);
 
     const renderCards = () => {
         const defaultGridSize = {
