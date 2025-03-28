@@ -128,13 +128,22 @@
     border-radius: 3px;
 }
 
+.activity-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
 .activity-additional {
     display: flex;
     justify-content: flex-start;
     align-items: center;
     gap: 10px;
     width: 100%;
+    height: 20px;
 }
+
 
 .activity-additional-item {
     display: flex;
@@ -145,5 +154,23 @@
 }
 
 .activity-additional-item:hover {
+    color: var(--fill);
+}
+
+.activity-add {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    height: 20px;
+    transition: color 0.3s;
+
+    span {
+        text-wrap: nowrap;
+        font-size: 12.8px;
+    }
+}
+
+.activity-add:hover {
     color: var(--fill);
 }

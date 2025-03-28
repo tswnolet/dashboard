@@ -102,7 +102,7 @@ export const ActivityFeed = ({ case_id }) => {
                     </button>
                     <SearchBar placeholder="Search" expanded={expanded} setExpanded={setExpanded} setSearchQuery={setSearchQuery} />
                 </div>
-                <AddActivity onClick={() => setAddActivity(true)} setAddActivity={setAddActivity} addActivity={addActivity} />
+                <AddActivity fetchFeed={fetchFeed} case_id={case_id} onClick={() => setAddActivity(true)} setAddActivity={setAddActivity} addActivity={addActivity} />
                 {feed.filter((type) => (type.type == String(activeFeed).toLocaleLowerCase() || activeFeed === 'All') && type != 'No activity found').map((item, index) => (
                     <Activity key={index} data={item} />
                 ))}

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import '../styles/LayoutEditor.css';
 import { createPortal } from "react-dom";
 import { CreateContact } from "./CreateContact";
-import { AlarmClockPlus, Check, CheckCheck, CheckSquare, Dot, DotSquare, Hash, Paperclip, Phone, StickyNote, UserRoundPlus, X } from "lucide-react";
+import { AlarmClockPlus, Check, CheckCheck, CheckSquare, Dot, DotSquare, Hash, Paperclip, Phone, SendHorizonal, StickyNote, UserRoundPlus, X } from "lucide-react";
 import { Calculate, MarginOutlined, Source, Square, SquareRounded } from "@mui/icons-material";
 import { RiAiGenerate, RiAiGenerate2 } from "react-icons/ri";
 import { convertLength } from "@mui/material/styles/cssUtils";
@@ -864,8 +864,51 @@ export const DataTable = ({ fields, data, onRowClick }) => {
     );
 };
 
-export const AddActivity = ({ onClick, addActivity, setAddActivity }) => {
+export const AddActivity = ({ fetchFeed, case_id, onClick, addActivity, setAddActivity }) => {
     const [activeActivityType, setActiveActivityType] = useState(0);
+    const [activityData, setActivityData] = useState({
+        subject: "",
+        content: "",
+        attachments: "",
+        type: "notes",
+        tags: [],
+        case_id: case_id,
+    });
+
+    const handleInputChange = (key) => (value) => {
+        setActivityData((prev) => ({ ...prev, [key]: value, type: activeActivityType === 0 ? "notes" : activeActivityType === 1 ? "tasks" : "calls" }));
+    };
+
+    const handleSubmit = async () => {
+        try {
+            const response = await fetch('https://dalyblackdata.com/api/activity_feed.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(activityData),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                setAddActivity(false);
+                setActivityData({
+                    author: 1,
+                    subject: "",
+                    content: "",
+                    attachments: "",
+                    type: "notes",
+                    tags: [],
+                    case_id: case_id
+                });
+                fetchFeed();
+            } else {
+                console.error("Error adding activity:", data);
+            }
+        } catch (error) {
+            console.error("Error adding activity:", error);
+        }
+    }
 
     return (
         <>
@@ -896,6 +939,7 @@ export const AddActivity = ({ onClick, addActivity, setAddActivity }) => {
                             type='text'
                             onClick={onClick}
                             placeholder="Add a subject"
+                            onChange={(e) => handleInputChange("subject")(e.target.value)}
                         />
                     </div>
                     <div className='form-group activity'>
@@ -904,21 +948,28 @@ export const AddActivity = ({ onClick, addActivity, setAddActivity }) => {
                             type='text'
                             onClick={onClick}
                             placeholder="Add a note"
+                            onChange={(e) => handleInputChange("content")(e.target.value)}
                         />
                     </div>
-                    <div className='activity-additional'>
-                        <div className='activity-additional-item subtext'>
-                            <Hash size={14}/>
-                            <span>Add tags</span>
+                    <div className='activity-actions'>
+                        <div className='activity-additional'>
+                            <div className='activity-additional-item subtext'>
+                                <Hash size={14}/>
+                                <span>Add tags</span>
+                            </div>
+                            <div className='activity-additional-item subtext'>
+                                <Paperclip size={14}/>
+                                <span>Attach a file</span>
+                            </div>
+                            {activeActivityType !== 2 && <div className='activity-additional-item subtext'>
+                                <AlarmClockPlus size={14}/>
+                                <span>Add time</span>
+                            </div>}
                         </div>
-                        <div className='activity-additional-item subtext'>
-                            <Paperclip size={14}/>
-                            <span>Attach a file</span>
+                        <div className='activity-add' onClick={handleSubmit}>
+                            <span className='activity-add-text'>{activeActivityType === 0 ? "Add Note" : activeActivityType === 1 ? "Create Task" : "Log Call"}</span>
+                            <SendHorizonal size={20}/>
                         </div>
-                        {activeActivityType !== 2 && <div className='activity-additional-item subtext'>
-                            <AlarmClockPlus size={14}/>
-                            <span>Add time</span>
-                        </div>}
                     </div>
                     <X size={20} className='exit' onClick={() => setAddActivity(false)} />
                 </div>
