@@ -68,12 +68,6 @@ const Dashboard = ({ setLoggedIn, google = false }) => {
         }, Math.max(0, minSpinTime - elapsedTime));
     };
 
-    const clearReportParam = () => {
-        const url = new URL(window.location.href);
-        url.searchParams.delete("report");
-        window.history.replaceState({}, '', url.toString());
-      };
-
     const getReportParams = () => {
         const report = new URLSearchParams(window.location.search).get('report');
         const today = new Date();

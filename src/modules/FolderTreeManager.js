@@ -14,34 +14,34 @@ const FolderTree = ({ folders, parentId = null, level = 0, openFolders, toggleFo
                 const hasChildren = folders.some((f) => f.parent_folder_id === folder.id);
                 return (
                     <li key={folder.id}>
-                    <span onClick={() => hasChildren && toggleFolder(folder.id)} style={{ cursor: hasChildren ? "pointer" : "default" }}>
-                        {hasChildren ? (openFolders[folder.id] ? <FolderOpenIcon /> : <FolderIcon />) : <FolderOutlined />}
-                        {parentId === 1 ? String(index + 1).padStart(2, "0") : ""} 
-                        {editingFolderId === folder.id ? (
-                        <input
-                            type="text"
-                            value={folder.name}
-                            onChange={(e) => handleFolderNameChange(folder.id, e.target.value)}
-                            onBlur={() => setEditingFolderId(null)}
-                            autoFocus
-                        />
-                        ) : (
-                        <span onDoubleClick={() => setEditingFolderId(folder.id)}>{folder.name}</span>
+                        <span onClick={() => hasChildren && toggleFolder(folder.id)} style={{ cursor: hasChildren ? "pointer" : "default" }}>
+                            {hasChildren ? (openFolders[folder.id] ? <FolderOpenIcon /> : <FolderIcon />) : <FolderOutlined />}
+                            {parentId === 1 ? String(index + 1).padStart(2, "0") : ""} 
+                            {editingFolderId === folder.id ? (
+                                <input
+                                    type="text"
+                                    value={folder.name}
+                                    onChange={(e) => handleFolderNameChange(folder.id, e.target.value)}
+                                    onBlur={() => setEditingFolderId(null)}
+                                    autoFocus
+                                />
+                            ) : (
+                                <span onDoubleClick={() => setEditingFolderId(folder.id)}>{folder.name}</span>
+                            )}
+                            {folder.folder_access === "Protected" ? `(${folder.folder_access})` : null}
+                        </span>
+                        {hasChildren && openFolders[folder.id] && (
+                            <FolderTree
+                                folders={folders}
+                                parentId={folder.id}
+                                level={level + 1}
+                                openFolders={openFolders}
+                                toggleFolder={toggleFolder}
+                                handleFolderNameChange={handleFolderNameChange}
+                                editingFolderId={editingFolderId}
+                                setEditingFolderId={setEditingFolderId}
+                            />
                         )}
-                        {folder.folder_access === "Protected" ? `(${folder.folder_access})` : null}
-                    </span>
-                    {hasChildren && openFolders[folder.id] && (
-                        <FolderTree
-                            folders={folders}
-                            parentId={folder.id}
-                            level={level + 1}
-                            openFolders={openFolders}
-                            toggleFolder={toggleFolder}
-                            handleFolderNameChange={handleFolderNameChange}
-                            editingFolderId={editingFolderId}
-                            setEditingFolderId={setEditingFolderId}
-                        />
-                    )}
                     </li>
                 );
             })}

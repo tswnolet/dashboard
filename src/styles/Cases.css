@@ -180,21 +180,35 @@ td.case-name {
     align-items: center;
     flex-direction: column;
     overflow-y: auto;
-    width: 250px;
     max-height: 100%;
     height: 100%;
     gap: 5px;
     flex-shrink: 0;
-    padding: 15px 0;
     background-color: var(--secondary-color);
     border-left: 1px solid var(--border-color);
     border-right: 1px solid var(--border-color);
     scrollbar-color: var(--hover-color) var(--secondary-color);
-    transition: all 0.3s;
+    transition: width 0.3s;
+
+    &:not(.minimized) {
+        width: 250px;
+    }
 
     h3 {
-        padding: 0 15px;
+        padding: 30px 15px;
+        margin: 0;
         width: 100%;
+        height: 145px;
+        text-wrap: nowrap;
+    }
+}
+
+.case-nav.minimized {
+    padding: 150px 0;
+    width: 67px;
+
+    .case-nav-item {
+        justify-content: center;
     }
 }
 
@@ -206,7 +220,6 @@ td.case-name {
     width: 100%;
     height: 35px;
     flex-shrink: 0;
-    flex-wrap: wrap;
     padding: 0 15px;
     cursor: pointer;
     user-select: none;
@@ -266,7 +279,7 @@ td.case-name {
     justify-content: flex-start;
     align-items: flex-start;
     flex-direction: column;
-    max-height: 100%;
+    height: 100%;
     overflow-y: auto;
     flex-grow: 1;
     overflow-y: auto;
@@ -331,12 +344,15 @@ span.remove-tag:hover {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: center;
+    align-items: flex-start;
     overflow-y: auto;
     gap: 10px;
     width: 100%;
     height: 100%;
-    padding: 0 15px;
+
+    &:not(.full) {
+        padding: 0 15px;
+    }
 
     .form-group {
         flex-shrink: 0;

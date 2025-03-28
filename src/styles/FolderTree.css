@@ -7,6 +7,28 @@
     position: relative;
 }
 
+.document-nav {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-direction: column;
+    list-style: none;
+    width: 250px;
+    height: 100%;
+    margin: 0;
+    padding: 15px;
+    background-color: var(--secondary-color);
+    border-right: 1px solid var(--border-color);
+    color: var(--text-color);
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+    overflow: auto;
+}
+
+.document-nav ul {
+    gap: 5px;
+}
+
 .folder-tree {
     list-style: none;
     position: relative;
@@ -39,13 +61,13 @@
     margin: 0;
 }
 
-.folder-tree li {
+.folder-tree li, .document-nav li {
     position: relative;
-    padding-left: 10px;
+    padding-left: 2.5px;
     cursor: pointer;
 }
 
-.folder-tree li::before {
+.folder-tree li::before, .document-nav li::before {
     content: "";
     position: absolute;
     top: 12px;
@@ -55,7 +77,7 @@
     background: var(--subtext-color);
 }
 
-.folder-tree li::after {
+.folder-tree li::after, .document-nav li::after {
     content: "";
     position: absolute;
     top: 0;
@@ -65,21 +87,35 @@
     background: var(--subtext-color);
 }
 
-.folder-tree li:last-child::after {
-    bottom: 50%;
+.folder-tree li:last-child, .document-nav li:last-child {
+    position: relative;
+}
+
+.folder-tree li:last-child::after, .document-nav li:last-child::after {
+    content: "";
+    position: absolute;
+    left: -20px;
+    top: 0;
+    height: 12px;
+    width: 1px;
+    background: var(--subtext-color);
 }
 
 .folder-tree > li::before,
-.folder-tree > li::after {
+.folder-tree > li::after,
+.document-nav > li::before,
+.document-nav > li::after {
     display: none;
 }
 
 .folder-tree > li > ul > li::before,
-.folder-tree > li > ul > li::after {
+.folder-tree > li > ul > li::after,
+.document-nav > li > ul > li::before,
+.document-nav > li > ul > li::after {
     display: block;
 }
 
-.folder-tree span {
+.folder-tree span, .document-nav span {
     display: flex;
     align-items: center;
     gap: 5px;
@@ -155,6 +191,25 @@
 
 .replace-field p:not(:first-child) {
     font-size: 14px;
+}
+
+.folder-header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+}
+
+.file-entry {
+    list-style: none;
+}
+
+.folder-tree li {
+    padding: 0 5px;
+}
+
+.folder-tree li span:hover {
+    background-color: var(--border-color);
 }
 
 @media (min-width: 769px) {

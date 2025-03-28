@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Boolean, Calculation, Contact, ContactList, DateInput, Deadline, Dropdown, FileUpload, Instructions, MultiFile, MultiSelect, NumberInput, Subheader, Text, TimeInput, TableOfContents, DataTable, SaveButton, SearchSelect, DocGen } from "./FieldComponents";
-import { Folder as FolderIcon, FolderOpen, FolderOutlined } from "@mui/icons-material";
-import { File } from 'lucide-react';
+import { Folder as FolderIcon, FolderOpen as FolderOpenIcon, FolderOutlined } from "@mui/icons-material";
+import { File } from "lucide-react";
 
 const normalizeValueToIndex = (field, value) => {
     if (!field.options) return value;
@@ -23,42 +23,51 @@ const normalizeValueToIndex = (field, value) => {
     return value;
 };
 
-const FolderNode = ({ name, files, caseName, level = 0, children }) => {
+const FolderNode = ({ name, files, caseName, level = 0, subfoldersEl }) => {
     const [open, setOpen] = useState(level === 0);
+    const hasFiles = files && files.length > 0;
+    const hasChildren = subfoldersEl && subfoldersEl.length > 0;
+    const isEmpty = !hasFiles && !hasChildren;
+
+    if (name === 'root') return null;
 
     return (
-        <div className={`folder-node level-${level}`}>
-            <div className='folder-header' onClick={() => setOpen(!open)}>
-                {children ? (
-                    open ? <FolderOpen className='folder-icon' /> : <FolderIcon className='folder-icon' />
+        <li>
+            <span onClick={() => !isEmpty && setOpen(!open)}>
+                {hasChildren ? (
+                    open ? <FolderOpenIcon /> : <FolderIcon />
                 ) : (
-                    <FolderOutlined className='folder-icon' />
+                    <FolderOutlined />
                 )}
                 <span>{caseName && name === "{{Name}}" ? caseName : name}</span>
-            </div>
+            </span>
 
             {open && (
                 <>
-                    {children}
-
-                    {files?.length > 0 && (
-                        <div className='file-list'>
+                    {hasChildren && (
+                        <ul className={`folder-tree level-${level + 1}`}>
+                            {subfoldersEl}
+                        </ul>
+                    )}
+                    {hasFiles && files.filter((file, index) => file.name != "(Folder)").length > 0 && (
+                        <ul className="file-list">
                             {files.map((file, idx) => (
-                                <div className='file-entry' key={idx}>
-                                    <a href={file.url} target="_blank" rel="noopener noreferrer" className='file-link'>
-                                        <File size={16} style={{ marginRight: 8 }} />
-                                        {file.name}
-                                    </a>
-                                    <span className='file-meta subtext'>
-                                        {new Date(file.last_modified).toLocaleDateString()} • {(file.size / 1024).toFixed(1)} KB
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
+                                    <li className="file-entry" key={idx}>
+                                        <a href={file.url} target="_blank" rel="noopener noreferrer" className="file-link">
+                                            <File size={16} style={{ marginRight: 8 }} />
+                                            {file.name}
+                                        </a>
+                                        <span className="file-meta subtext">
+                                            {new Date(file.last_modified).toLocaleDateString()} • {(file.size / 1024).toFixed(1)} KB
+                                        </span>
+                                    </li>
+                                )
+                            )}
+                        </ul>
                     )}
                 </>
             )}
-        </div>
+        </li>
     );
 };
 
@@ -67,7 +76,6 @@ const Documents = ({ folders, caseName }) => {
 
     const buildFolderTree = () => {
         const root = {};
-
         folderEntries.forEach(([path, files]) => {
             const parts = path.split('/');
             let current = root;
@@ -98,16 +106,19 @@ const Documents = ({ folders, caseName }) => {
                     files={fileList}
                     caseName={caseName}
                     level={level}
-                >
-                    {renderTree(subfolders, level + 1)}
-                </FolderNode>
+                    subfoldersEl={renderTree(subfolders, level + 1)}
+                />
             );
         });
     };
 
     const folderTree = buildFolderTree();
 
-    return <div className="documents">{renderTree(folderTree)}</div>;
+    return (
+        <ul className="document-nav">
+            {renderTree(folderTree)}
+        </ul>
+    );
 };
 
 const Field = ({ field, value, handleFieldChange, conditional = false, fieldUpdates, fields, lead_id, refreshAfterCalc, sectionName }) => {
@@ -523,7 +534,7 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
     }, [selectedRow]);
 
     return (
-        <div className='case-section'>
+        <div className={`case-section ${sectionName === "Documents" ? "full" : ""}`}>
             {sectionFields.some(field => (field.add_item !== 1 || addItemMode) && (field.case_type_id === Number(caseType) || field.case_type_id === 0)) && (
                 <TableOfContents
                     key={section_id}
