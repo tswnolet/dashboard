@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Boolean, Calculation, Contact, ContactList, DateInput, Deadline, Dropdown, FileUpload, Instructions, MultiFile, MultiSelect, NumberInput, Subheader, Text, TimeInput, TableOfContents, DataTable, SaveButton, SearchSelect, DocGen } from "./FieldComponents";
-import { Folder as FolderIcon, FolderOpen as FolderOpenIcon, FolderOutlined } from "@mui/icons-material";
-import { File } from "lucide-react";
+import { Folder as FolderIcon, FolderOutlined } from "@mui/icons-material";
+import { File, FolderOpenIcon } from "lucide-react";
+import { ActivityFeed } from './ActivityFeed';
 
 const normalizeValueToIndex = (field, value) => {
     if (!field.options) return value;
@@ -534,7 +535,7 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
     }, [selectedRow]);
 
     return (
-        <div className={`case-section ${sectionName === "Documents" ? "full" : ""}`}>
+        <div className={`case-section ${sectionName === "Documents" || sectionName === 'Activity Feed' ? "full" : ""}`}>
             {sectionFields.some(field => (field.add_item !== 1 || addItemMode) && (field.case_type_id === Number(caseType) || field.case_type_id === 0)) && (
                 <TableOfContents
                     key={section_id}
@@ -583,7 +584,7 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
                     )}
                 </>
             )}
-            {sectionName === "Documents" ? <Documents folders={folders} caseName={caseName} /> : output}
+            {sectionName === "Documents" ? <Documents folders={folders} caseName={caseName} /> : sectionName === 'Activity Feed' ? <ActivityFeed case_id={id} /> : output}
         </div>
       );      
 };

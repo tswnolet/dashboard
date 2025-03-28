@@ -143,8 +143,6 @@ const AppRoutes = ({ accessLevel, setAccessLevel, setUser, user, loggedIn, setLo
     return <Loading />;
   }
 
-  console.log(accessLevel);
-
   return (
     <Routes>
       {loggedIn === true ? (

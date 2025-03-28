@@ -493,8 +493,6 @@ const Nav = ({ accessLevel, theme, changeTheme, logout }) => {
     }
   });
 
-  console.log(accessLevel)
-
   return (
     <nav className={`${expanded ? "expanded " : ""}${navClass}`} style={{ width: expanded ? "250px" : "75px" }}>
       <div id="menu">

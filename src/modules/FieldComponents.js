@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef } from "react";
 import '../styles/LayoutEditor.css';
 import { createPortal } from "react-dom";
 import { CreateContact } from "./CreateContact";
-import { Check, CheckCheck, Dot, DotSquare, UserRoundPlus, X } from "lucide-react";
+import { AlarmClockPlus, Check, CheckCheck, CheckSquare, Dot, DotSquare, Hash, Paperclip, Phone, StickyNote, UserRoundPlus, X } from "lucide-react";
 import { Calculate, MarginOutlined, Source, Square, SquareRounded } from "@mui/icons-material";
 import { RiAiGenerate, RiAiGenerate2 } from "react-icons/ri";
+import { convertLength } from "@mui/material/styles/cssUtils";
 
 const formatDate = (dateString) => {
     if (!dateString) return ["", "", ""];
@@ -810,7 +811,6 @@ export const DataTable = ({ fields, data, onRowClick }) => {
 
     if (!data || data.length === 0) return <p className="subtext">No entries yet.</p>;
 
-
     return (
         <table className="data-table">
             <thead>
@@ -831,7 +831,7 @@ export const DataTable = ({ fields, data, onRowClick }) => {
 
                                         try {
                                             const parsed = JSON.parse(raw);
-                                            
+
                                             if (parsed.due || parsed.done) {
                                                 const due = parsed.due ? `${parsed.due}` : null;
                                                 const done = parsed.done ? <Check size={18} color={'var(--fill)'} style={{ marginLeft: due ? '5px' : '' }} /> : null;
@@ -863,3 +863,66 @@ export const DataTable = ({ fields, data, onRowClick }) => {
         </table>
     );
 };
+
+export const AddActivity = ({ onClick, addActivity, setAddActivity }) => {
+    const [activeActivityType, setActiveActivityType] = useState(0);
+
+    return (
+        <>
+            {!addActivity ? 
+                <div className='form-group activity'>
+                    <input
+                        type='text'
+                        onClick={onClick}
+                        placeholder="Add New Activity"
+                    />
+                </div>
+            : (
+                <div className='add-activity'>
+                    <div className='activity-type-container'>
+                        <div className='activity-type' onClick={() => setActiveActivityType(0)} style={{ backgroundColor: "var(--fill)"}}>
+                            <StickyNote size={20} color='var(--secondary-color)'/> {activeActivityType === 0 ? "Add a note" : ""}
+                        </div>
+                        <div className='activity-type' onClick={() => setActiveActivityType(1)} style={{ backgroundColor: "var(--fill-3)"}}>
+                            <CheckSquare size={20} color='var(--secondary-color)'/> {activeActivityType === 1 ? "Assign a task" : ""}
+                        </div>
+                        <div className='activity-type' onClick={() => setActiveActivityType(2)} style={{ backgroundColor: "var(--fill-4)"}}>
+                            <Phone size={20} color='var(--secondary-color)'/> {activeActivityType === 2 ? "Log a phone call" : ""}
+                        </div>
+                    </div>
+                    <div className='form-group activity'>
+                        <label className='activity-type-label subtext'>Subject</label>
+                        <input
+                            type='text'
+                            onClick={onClick}
+                            placeholder="Add a subject"
+                        />
+                    </div>
+                    <div className='form-group activity'>
+                        <label className='activity-type-label subtext'>Content</label>
+                        <textarea
+                            type='text'
+                            onClick={onClick}
+                            placeholder="Add a note"
+                        />
+                    </div>
+                    <div className='activity-additional'>
+                        <div className='activity-additional-item subtext'>
+                            <Hash size={14}/>
+                            <span>Add tags</span>
+                        </div>
+                        <div className='activity-additional-item subtext'>
+                            <Paperclip size={14}/>
+                            <span>Attach a file</span>
+                        </div>
+                        {activeActivityType !== 2 && <div className='activity-additional-item subtext'>
+                            <AlarmClockPlus size={14}/>
+                            <span>Add time</span>
+                        </div>}
+                    </div>
+                    <X size={20} className='exit' onClick={() => setAddActivity(false)} />
+                </div>
+            )}
+        </>
+    );
+}

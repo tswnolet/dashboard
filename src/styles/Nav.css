@@ -276,6 +276,7 @@ nav.scrolled {
   max-width: 300px;
   background: var(--card-color);
   box-shadow: var(--button-box-shadow);
+  border: 1px solid var(--border-color);
 }
 
 .search-icon {

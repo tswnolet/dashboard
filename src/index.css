@@ -27,6 +27,8 @@
   --graph-color: #624b8f;
   --fill: rgb(40, 57, 85);
   --fill-2: #f4bc41;
+  --fill-3: #442208;
+  --fill-4: #262533;
 }
 
 .dark {
@@ -45,7 +47,9 @@
   --dark: 255;
   --graph-color: #ede8ff;
   --fill: #f4bc41;
-  --fill-2: rgb(40, 57, 85);
+  --fill-2: #283955;
+  --fill-3: #BABFE0;
+  --fill-4: #C8C4BF;
 }
 
 body {

@@ -81,7 +81,9 @@ header {
     }
 
     &:not(.nm) {
-        margin: 10px 0;
+        &:not(.activity) {
+            margin: 10px 0;
+        }
         gap: 2.5px;
     }
 

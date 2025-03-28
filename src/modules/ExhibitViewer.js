@@ -199,33 +199,30 @@ export const FileList = () => {
         try {
             const response = await fetch(`https://dalyblackdata.com/api/list-files.php?folder=${folder}`);
             const data = await response.json();
-            setDisplayedFiles(sortFiles([...data])); // Only update displayed files
+            setDisplayedFiles(sortFiles([...data]));
         } catch (error) {
             console.error("Error fetching files:", error);
         }
         setFetchingFiles(false);
     };
 
-    // Fetch all files for search functionality
     const fetchAllFiles = async () => {
         try {
             const response = await fetch(`https://dalyblackdata.com/api/fetch-all-files.php`);
             const data = await response.json();
             if (data.success) {
-                setAllFiles(sortFiles([...data.files])); // Store all files separately
+                setAllFiles(sortFiles([...data.files]));
             }
         } catch (error) {
             console.error("Error fetching all files:", error);
         }
     };
 
-    // Fetch both folder files and all files on mount
     useEffect(() => {
-        fetchFiles(currentFolder);  // Loads current folder files
-        fetchAllFiles();            // Fetches all files for searching
+        fetchFiles(currentFolder);
+        fetchAllFiles();
     }, [currentFolder]);
 
-    // Handle filtering for search queries
     useEffect(() => {
         if (isSearching) {
             setFilteredFiles(

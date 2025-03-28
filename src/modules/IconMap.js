@@ -1,4 +1,4 @@
-import { Check, StarOutlineSharp, StarSharp, Add, Close, Dashboard, Cases, MedicalInformation, MedicalInformationOutlined, Help, LabelImportant, NotificationImportant, Calculate, Update, NotificationImportantOutlined, NotificationsActiveOutlined, Money, MoneyOutlined, MoreTime, Receipt, GavelRounded, CloseOutlined } from "@mui/icons-material";
+import { Check, StarOutlineSharp, StarSharp, Add, Close, Dashboard, Cases, MedicalInformation, MedicalInformationOutlined, Help, LabelImportant, NotificationImportant, CalculateOutlined, Update, NotificationImportantOutlined, NotificationsActiveOutlined, Money, MoneyOutlined, MoreTime, Receipt, GavelRounded, CloseOutlined } from "@mui/icons-material";
 import { Activity, FileText, Folder, Home, User, Settings, Bell, Calendar, Clipboard, Cloud, Code, DollarSign, Edit, Eye, File, Heart, Image, Lock, Mail, MapPin, MessageCircle, Phone, Shield, ShoppingCart, Star, Tag, Trash, Truck, Users, Video, Section, SectionIcon, LucideSection, TrashIcon, Eraser, Edit2, Trash2, Archive, Briefcase, BriefcaseBusiness, ShieldCheck, Banknote, CreditCard, Handshake, CheckCheck, HandCoins, ReceiptIcon, Link, Clock, ClockAlert, Search, ArrowUp, ArrowUpDown, BookX, FileStack, BookUser, UserSearch, EqualApproximately, ArrowUpRight } from "lucide-react";
 import { RiMoneyDollarBoxLine, RiNotificationBadgeLine, RiSuitcase2Line } from "react-icons/ri";
 import { BriefcaseSolid, CreditCardCheck, Notification } from "@mynaui/icons-react";
@@ -11,7 +11,7 @@ export const IconMap = {
     "Book User": BookUser,
     "Book X": BookX,
     "Calendar": Calendar,
-    "Calculation": Calculate,
+    "Calculation": CalculateOutlined,
     "Case": BriefcaseBusiness,
     "Chain": Link,
     "Clipboard": Clipboard,
