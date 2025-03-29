@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 'content' => $row['content'],
                 'attachments' => json_decode($row['attachments'], true),
                 'tags' => json_decode($row['tags'], true),
-                'task_id' => $row['task'],
+                'task' => $row['task'],
                 'pinned' => $row['pinned'],
                 'hidden' => $row['hidden']
             ];

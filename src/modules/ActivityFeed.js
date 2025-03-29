@@ -38,12 +38,13 @@ const FeedItem = ({ type, setActiveFeed, activeFeed }) => {
     );
 };
 
-const Activity = ({ data }) => {
+const Activity = ({ data, user }) => {
     return (
         <div className="activity-feed-item">
             <div className="activity-feed-item-header subtext">
                 <span className="activity-feed-item-author">{data.author}</span>
                 <span className="activity-feed-item-date">{new Date(data.creation_date).toLocaleDateString()}</span>
+                {data.task && <span className="activity-feed-item-task">Assigned to: {user}</span>}
             </div>
             {Array.isArray(data.tags) && data.tags.length > 0 && 
                 <div className='activity-feed-tags'>
@@ -68,6 +69,7 @@ export const ActivityFeed = ({ case_id }) => {
     const [expanded, setExpanded] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [addActivity, setAddActivity] = useState(false);
+    const [users, setUsers] = useState([]);
 
     const fetchFeed = async () => {
         try {
@@ -78,9 +80,22 @@ export const ActivityFeed = ({ case_id }) => {
             console.error("Error fetching activity feed:", error);
         }
     }
+    
+    const fetchUsers = async () => {
+        try {
+            const response = await fetch(`https://dalyblackdata.com/api/user.php?time=${new Date().getTime()}`);
+            const data = await response.json();
+            if (response.ok) {
+                setUsers(data.users);
+            }
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        }
+    }
 
     useEffect(() => {
         fetchFeed();
+        fetchUsers();
     }, []);
 
     return (
@@ -102,9 +117,9 @@ export const ActivityFeed = ({ case_id }) => {
                     </button>
                     <SearchBar placeholder="Search" expanded={expanded} setExpanded={setExpanded} setSearchQuery={setSearchQuery} />
                 </div>
-                <AddActivity fetchFeed={fetchFeed} case_id={case_id} onClick={() => setAddActivity(true)} setAddActivity={setAddActivity} addActivity={addActivity} />
+                <AddActivity fetchFeed={fetchFeed} case_id={case_id} onClick={() => setAddActivity(true)} setAddActivity={setAddActivity} addActivity={addActivity} users={users} />
                 {feed.filter((type) => (type.type == String(activeFeed).toLocaleLowerCase() || activeFeed === 'All') && type != 'No activity found').map((item, index) => (
-                    <Activity key={index} data={item} />
+                    <Activity key={index} data={item} user={users.find((user) => String(user.id) === String(item.task))?.name || "Unknown"} />
                 ))}
             </div>
         </div>

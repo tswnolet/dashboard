@@ -864,7 +864,7 @@ export const DataTable = ({ fields, data, onRowClick }) => {
     );
 };
 
-export const AddActivity = ({ fetchFeed, case_id, onClick, addActivity, setAddActivity }) => {
+export const AddActivity = ({ users, fetchFeed, case_id, onClick, addActivity, setAddActivity }) => {
     const [activeActivityType, setActiveActivityType] = useState(0);
     const [activityData, setActivityData] = useState({
         subject: "",
@@ -951,6 +951,17 @@ export const AddActivity = ({ fetchFeed, case_id, onClick, addActivity, setAddAc
                             onChange={(e) => handleInputChange("content")(e.target.value)}
                         />
                     </div>
+                    {activeActivityType === 1 && (
+                        <div className='form-group activity'>
+                            <label className='activity-type-label subtext'>Assign to</label>
+                            <SearchSelect
+                                value={activityData.task}
+                                onChange={(val) => handleInputChange("task")(val)}
+                                options={users.map(u => u.name)}
+                                placeholder="Select a user..."
+                            />
+                        </div>
+                    )}
                     <div className='activity-actions'>
                         <div className='activity-additional'>
                             <div className='activity-additional-item subtext'>

@@ -70,7 +70,7 @@ if ($requestMethod === 'POST') {
 
     if (isset($_GET['id'])) {
         $id = $_GET['id'];
-    
+
         $sql = 'SELECT * FROM users WHERE id = ?';
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $id);
@@ -78,14 +78,14 @@ if ($requestMethod === 'POST') {
         $result = $stmt->get_result();
         $user = $result->fetch_assoc();
         $stmt->close();
-    
+
         if (!$user) {
             echo json_encode(['success' => false, 'error' => 'User not found']);
             exit;
         }
-    
+
         $contact_id = $user['contact_id'];
-    
+
         $contactSql = "SELECT * FROM contacts WHERE id = ?";
         $contactStmt = $conn->prepare($contactSql);
         $contactStmt->bind_param("i", $contact_id);
@@ -93,40 +93,43 @@ if ($requestMethod === 'POST') {
         $contactResult = $contactStmt->get_result();
         $contact = $contactResult->fetch_assoc();
         $contactStmt->close();
-    
+
         if ($contact) {
             $contact['phones'] = fetchContactDetails($conn, $contact_id, 'phone');
             $contact['emails'] = fetchContactDetails($conn, $contact_id, 'email');
             $contact['addresses'] = fetchContactDetails($conn, $contact_id, 'address');
         }
-    
+
         echo json_encode(['success' => true, 'contacts' => $contact]);
         exit;
-    }    
+    }
 
-    if (!isset($_GET['user'])) {
-        echo json_encode(["error" => "Username is required"]);
+    if (isset($_GET['user'])) {
+        $user = $conn->real_escape_string($_GET['user']);
+
+        $sql = "SELECT COUNT(*) AS user_exists FROM users WHERE user = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $user);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+
+        echo json_encode(["exists" => $row['user_exists'] > 0]);
         exit;
     }
 
-    $user = $conn->real_escape_string($_GET['user']);
+    $sql = "SELECT id, name FROM users";
+    $result = $conn->query($sql);
 
-    $sql = "SELECT COUNT(*) AS user_exists FROM users WHERE user = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $user);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $row = $result->fetch_assoc();
-
-    if ($row['user_exists'] > 0) {
-        echo json_encode(["exists" => true]);
-    } else {
-        echo json_encode(["exists" => false]);
+    $users = [];
+    while ($row = $result->fetch_assoc()) {
+        $users[] = $row;
     }
-} else {
-    http_response_code(405);
-    echo json_encode(["error" => "Method not allowed"]);
+
+    echo json_encode(["users" => $users]);
+    exit;
 }
+
 
 $conn->close();
 ?>
