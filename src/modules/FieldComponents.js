@@ -913,11 +913,11 @@ export const AddActivity = ({ users, fetchFeed, case_id, onClick, addActivity, s
     
             if (Array.isArray(activityData.attachments)) {
                 activityData.attachments.forEach((file) => {
-                    if (file instanceof File) {
+                    if (file && typeof file.name === "string" && typeof file.size === "number") {
                         formData.append("attachment[]", file);
                     }
                 });
-            }
+            }            
     
             const response = await fetch("https://dalyblackdata.com/api/activity_feed.php", {
                 method: "POST",

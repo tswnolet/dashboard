@@ -87,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = is_array($files['name']) ? $files['name'][$i] : $files['name'];
             $tmp = is_array($files['tmp_name']) ? $files['tmp_name'][$i] : $files['tmp_name'];
             $originalName = basename($name);
-            $key = "cases/{$case_id}/{{Name}}/Call Log/{$originalName}";
+            $key = $type === 'calls' ? "cases/{$case_id}/{{Name}}/Call Log/{$originalName}" : "cases/{$case_id}/{{Name}}/Notes/{$originalName}";
 
             try {
                 $s3->putObject([
