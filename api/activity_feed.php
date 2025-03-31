@@ -63,6 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $case_id = $_POST['case_id'] ?? null;
     $type = $_POST['type'] ?? 'note';
+    $due_date = $_POST['due_date'] ?? 'note';
     $subject = $_POST['subject'] ?? '';
     $content = $_POST['content'] ?? '';
     $tags = isset($_POST['tags']) ? json_encode(json_decode($_POST['tags'], true)) : null;
@@ -102,6 +103,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'key' => $key,
                     'url' => $s3->getObjectUrl($bucket, $key)
                 ];
+
+                // Insert file information into the files table
+                $fileSql = "INSERT INTO files (author_id, case_id, file_name, file_path) VALUES (?, ?, ?, ?)";
+                $fileStmt = $conn->prepare($fileSql);
+                $fileStmt->bind_param("iiss", $author, $case_id, $originalName, $key);
+                $fileStmt->execute();
+                $fileStmt->close();
             } catch (Aws\Exception\AwsException $e) {
                 echo json_encode(['success' => false, 'message' => 'S3 Upload failed: ' . $e->getMessage()]);
                 exit;
@@ -165,7 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $data = json_decode(file_get_contents('php://input'), true);
     $id = $data['id'] ?? null;
-    $pin = $data['pin'] ?? null;
+    $pin = $data['pin'] ?? $_SESSION['user_id'] ?? null;
     $action = $data['action'] ?? 'toggle';
 
     if (!$id || ($pin === null)) {

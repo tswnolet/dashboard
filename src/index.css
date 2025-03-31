@@ -263,7 +263,6 @@ tr {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100%;
   }
 }
 
@@ -368,7 +367,7 @@ table:not(.schools) > tbody > tr > td {
   display: block;
 }
 
-#weather-table tr, td {
+#weather-table tr, #weather-table td {
   display: flex;
   justify-content: center;
   align-items: center;

@@ -34,7 +34,7 @@ function useOutsideClick(ref, callback) {
 }
 
 /* SearchBar Component */
-export const SearchBar = ({ expanded, setExpanded, setSearchQuery }) => {
+export const SearchBar = ({ placeholder = null, expanded, setExpanded, setSearchQuery, autofocus = false }) => {
   const containerRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -56,10 +56,11 @@ export const SearchBar = ({ expanded, setExpanded, setSearchQuery }) => {
         ref={inputRef}
         type="text"
         name='search-bar'
-        placeholder="Search"
+        placeholder={placeholder || "Search"}
         className="search-input"
         onChange={(e) => setSearchQuery(e.target.value)}
         style={{ display: expanded ? "block" : "none" }}
+        autofocus={autofocus}
       />
     </div>
   );

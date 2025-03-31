@@ -13,10 +13,10 @@
     align-items: flex-start;
     flex-direction: column;
     list-style: none;
-    width: 250px;
+    width: 350px;
     height: 100%;
     margin: 0;
-    padding: 15px;
+    padding: 15px 0 0 15px;
     background-color: var(--secondary-color);
     border-right: 1px solid var(--border-color);
     color: var(--text-color);
@@ -64,7 +64,6 @@
 
 .folder-tree li, .document-nav li {
     position: relative;
-    padding-left: 2.5px;
     cursor: pointer;
 }
 
@@ -116,7 +115,11 @@
     display: block;
 }
 
-.folder-tree span, .document-nav span {
+.folder-tree > li > span {
+    padding: 2.5px 5px;
+}
+
+.folder-tree span, .document-nav .folder-node {
     display: flex;
     align-items: center;
     gap: 5px;
@@ -205,12 +208,34 @@
     list-style: none;
 }
 
-.folder-tree li {
-    padding: 0 5px;
+.folder-node:hover {
+    background-color: var(--border-color);
 }
 
-.folder-tree li span:hover {
-    background-color: var(--border-color);
+.folder-node {
+    padding: 0 5px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.folder-node svg {
+    width: 16px;
+}
+
+.folder {
+    user-select: none;
+    cursor: pointer;
+}
+
+.document-breadcrumbs {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 5px;
+    user-select: none;
+}
+
+.document-breadcrumbs > span:not(:last-child) {
+    text-decoration: underline;
 }
 
 @media (min-width: 769px) {

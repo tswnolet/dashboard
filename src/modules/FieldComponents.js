@@ -93,7 +93,7 @@ export const TimeInput = ({ value, onChange }) => {
     return <input type='time' value={value || ""} onChange={(e) => onChange(e.target.value)} />;
 };
 
-export const Dropdown = ({ options = [], value = "", onChange = () => {}, marketing_list = false }) => {
+export const Dropdown = ({ placeholder = null, options = [], value = "", onChange = () => {}, marketing_list = false }) => {
     const [parsedOptions, setParsedOptions] = useState([]);
 
     useEffect(() => {
@@ -127,7 +127,7 @@ export const Dropdown = ({ options = [], value = "", onChange = () => {}, market
 
     return (
         <select className="default-select" value={value ?? ""} onChange={(e) => onChange(Number(e.target.value))}>
-            <option value="">Select...</option>
+            <option value="" disabled={placeholder}>{placeholder || 'Select...'}</option>
             {parsedOptions.map((option, index) => (
                 <option key={index} value={index}>{option}</option>
             ))}
@@ -870,6 +870,7 @@ export const DataTable = ({ fields, data, onRowClick }) => {
 
 export const AddActivity = ({ users, fetchFeed, case_id, onClick, addActivity, setAddActivity }) => {
     const [activeActivityType, setActiveActivityType] = useState(0);
+    const [attachFile, setAttachFile] = useState(false);
     const [activityData, setActivityData] = useState({
         subject: "",
         content: "",
@@ -944,7 +945,7 @@ export const AddActivity = ({ users, fetchFeed, case_id, onClick, addActivity, s
         } catch (error) {
             console.error("Error adding activity:", error);
         }
-    };       
+    };
 
     return (
         <>
@@ -987,12 +988,12 @@ export const AddActivity = ({ users, fetchFeed, case_id, onClick, addActivity, s
                             onChange={(e) => handleInputChange("content")(e.target.value)}
                         />
                     </div>
-                    <MultiFile
+                    {attachFile && <MultiFile
                         value={activityData.attachments}
                         onChange={(val) => handleInputChange("attachments")(val)}
                         lead_id={case_id}
                         sectionName="Activity Feed"
-                    />
+                    />}
                     {activeActivityType === 1 && (
                         <div className="activity-task-info">
                             <div className='form-group task-assign activity'>
@@ -1051,9 +1052,9 @@ export const AddActivity = ({ users, fetchFeed, case_id, onClick, addActivity, s
                                 <Hash size={14}/>
                                 <span>Add tags</span>
                             </div>
-                            <div className='activity-additional-item subtext'>
+                            <div className='activity-additional-item subtext' onClick={() => setAttachFile(!attachFile)}>
                                 <Paperclip size={14}/>
-                                <span>Attach a file</span>
+                                <span>{!attachFile ? 'Attach a' : 'Remove'} file</span>
                             </div>
                             {activeActivityType !== 2 && <div className='activity-additional-item subtext'>
                                 <AlarmClockPlus size={14}/>

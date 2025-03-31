@@ -12,11 +12,26 @@
     align-items: flex-start;
     flex-direction: column;
     gap: 5px;
-    width: 200px;
     flex-shrink: 0;
     background-color: var(--secondary-color);
     border-right: 1px solid var(--border-color);
     height: 100%;
+}
+
+.feed-types:not(.mobile) {
+    width: 200px;
+
+    .feed-type {
+        justify-content: flex-start;
+    }
+}
+
+.feed-types.mobile {
+    width: 65px;
+
+    .feed-type {
+        justify-content: center;
+    }
 }
 
 .feed-title {
@@ -29,7 +44,6 @@
     padding: 0 15px;
     height: 35px;
     display: flex;
-    justify-content: flex-start;
     align-items: center;
     font-size: 14px;
     transition: color 0.3s, background-color 0.3s;

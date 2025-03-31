@@ -27,7 +27,7 @@ const Context = ({ setAccessLevel, setUser, setLoggedIn, setShowAlert, showAlert
           if (isLogin) {
             localStorage.setItem('token', data.token);
             setClose(true);
-            setUser(data.name.split(' ')[0]);
+            setUser(data);
             setTimeout(() => {
               setLoggedIn(true);
               const accessLevel = data.access_level || 'user';

@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { IconMap } from "./IconMap";
 
 export const CaseNav = ({ sections, activeSection, setActiveSection }) => {
     const [minimize, setMinimize] = useState(sections.some(
         (section) => section.id === activeSection && (section.name === "Documents" || section.name === "Activity Feed")
     ) || window.innerWidth <= 768);
+    const hoverTimeout = useRef(null);
 
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth <= 768) {
                 setMinimize(true);
+                handleLeave();
             } else {
                 setMinimize(false);
             }
@@ -43,8 +45,26 @@ export const CaseNav = ({ sections, activeSection, setActiveSection }) => {
         }
     }, [activeSection, sections]);
 
+    const handleHover = () => {
+        if (window.innerWidth > 768) {
+            clearTimeout(hoverTimeout.current);
+            hoverTimeout.current = setTimeout(() => {
+                setMinimize(false);
+            }, 500);
+        }
+    };
+    
+    const handleLeave = () => {
+        clearTimeout(hoverTimeout.current);
+        handleMinimize();
+    };
+
     return (
-        <div className={`case-nav ${minimize ? 'minimized' : ''}`} onMouseOver={() => setMinimize(false)} onMouseLeave={() => handleMinimize()}>
+        <div
+            className={`case-nav ${minimize ? 'minimized' : ''}`}
+            onMouseOver={handleHover}
+            onMouseLeave={handleLeave}
+        >
             {!minimize && <h3>Case Sections</h3>}
             {sections?.map((section, index) => (
                 <div key={index} title={section.name} className={`case-nav-item subtext large ${activeSection === section.id ? 'active' : ''} ${index === 0 ? ' s1' : ''}`} onClick={() => setActiveSection(section.id)}>

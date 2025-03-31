@@ -33,12 +33,12 @@ import { file } from "jszip";
   };
   
 
-const FeedItem = ({ type, setActiveFeed, activeFeed, notifications }) => {
+const FeedItem = ({ type, setActiveFeed, activeFeed, notifications, mobile }) => {
     return (
         <div className={`feed-type${activeFeed === type ? ' active' : ''}`} onClick={() => setActiveFeed(type)}>
             <span className='feed-type-text'>
-                {iconMap[type]}{type}
-                {type === 'Reminders' && (notifications.reminder > 0 || notifications.priority > 0) &&
+                {iconMap[type]}{!mobile && type}
+                {!mobile && type === 'Reminders' && (notifications.reminder > 0 || notifications.priority > 0) &&
                     <div className='tasks-notis'>
                         {notifications.priority > 0 && <Notification count={notifications.priority} type='priority' />}
                         {notifications.reminder > 0 && <Notification count={notifications.reminder} type='reminder' />}
@@ -98,8 +98,6 @@ const Activity = ({ data, user_id, user, fetchFeed }) => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
-
-    console.log(data.attachments);
 
     return (
         <div className="activity-feed-item">
@@ -187,6 +185,20 @@ export const ActivityFeed = ({ case_id, user_id }) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [addActivity, setAddActivity] = useState(false);
     const [users, setUsers] = useState([]);
+    const [mobile, setMobile] = useState(false);
+
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth <= 768) {
+                setMobile(true);
+            } else {
+                setMobile(false);
+            }
+        };
+        handleResize();
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
     const today = new Date().toDateString();
 
@@ -250,14 +262,14 @@ export const ActivityFeed = ({ case_id, user_id }) => {
 
     return (
         <div className='activity-feed'>
-            <div className='feed-types'>
-                <FeedItem type="All" setActiveFeed={setActiveFeed} activeFeed={activeFeed} />
-                <FeedItem type="Notes" setActiveFeed={setActiveFeed} activeFeed={activeFeed} />
-                <FeedItem type="Emails" setActiveFeed={setActiveFeed} activeFeed={activeFeed} />
-                <FeedItem type="Faxes" setActiveFeed={setActiveFeed} activeFeed={activeFeed} />
-                <FeedItem type="Phone Calls" setActiveFeed={setActiveFeed} activeFeed={activeFeed} />
-                <FeedItem type="Texts" setActiveFeed={setActiveFeed} activeFeed={activeFeed} />
-                <FeedItem type="Tasks" setActiveFeed={setActiveFeed} activeFeed={activeFeed} />
+            <div className={`feed-types${mobile ? ' mobile' : ''}`}>
+                <FeedItem type="All" setActiveFeed={setActiveFeed} activeFeed={activeFeed} mobile={mobile} />
+                <FeedItem type="Notes" setActiveFeed={setActiveFeed} activeFeed={activeFeed} mobile={mobile} />
+                <FeedItem type="Emails" setActiveFeed={setActiveFeed} activeFeed={activeFeed} mobile={mobile} />
+                <FeedItem type="Faxes" setActiveFeed={setActiveFeed} activeFeed={activeFeed} mobile={mobile} />
+                <FeedItem type="Phone Calls" setActiveFeed={setActiveFeed} activeFeed={activeFeed} mobile={mobile} />
+                <FeedItem type="Texts" setActiveFeed={setActiveFeed} activeFeed={activeFeed} mobile={mobile} />
+                <FeedItem type="Tasks" setActiveFeed={setActiveFeed} activeFeed={activeFeed} mobile={mobile} />
                 <FeedItem
                     type="Reminders"
                     setActiveFeed={setActiveFeed}
@@ -266,18 +278,17 @@ export const ActivityFeed = ({ case_id, user_id }) => {
                         reminder: feed.filter((data) => (
                             data.deadline?.due &&
                             Array.isArray(data.deadline.assignees) &&
-                            data.deadline.assignees.includes(Number(user_id))
-                        )
-                            ? new Date(data.deadline.due) >= new Date().setDate(new Date().getDate() + 7) 
-                            : null).length,
+                            data.deadline.assignees.map(Number).includes(Number(user_id)) &&
+                            new Date(data.deadline.due) > new Date().setDate(new Date().getDate() + 7)
+                        )).length,
                         priority: feed.filter((data) => (
                             data.deadline?.due &&
                             Array.isArray(data.deadline.assignees) &&
-                            data.deadline.assignees.includes(Number(user_id))
-                        ) 
-                            ? new Date(data.deadline.due) <=  new Date().setDate(new Date().getDate() + 7)
-                            : null).length,
+                            data.deadline.assignees.map(Number).includes(Number(user_id)) &&
+                            new Date(data.deadline.due) <= new Date().setDate(new Date().getDate() + 7)
+                        )).length,
                     }}
+                    mobile={mobile}
                 />
             </div>
             <div className='feed'>

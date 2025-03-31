@@ -1,5 +1,6 @@
 <?php
 require 'vendor/autoload.php';
+require 'db.php';
 
 use Aws\S3\S3Client;
 use Aws\Exception\AwsException;
@@ -12,14 +13,17 @@ $s3 = new S3Client($config);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $caseId = $_POST['case_id'] ?? null;
-    $sectionName = $_POST['section_name'] ?? null;
+    $targetPath = $_POST['target_path'] ?? null;
+    $userId = $_POST['user_id'] ?? null;
 
-    if (!$caseId || !$sectionName || !isset($_FILES['file'])) {
+    if (!$caseId || !$targetPath || !isset($_FILES['file']) || !$userId) {
         echo json_encode(['success' => false, 'message' => 'Missing required parameters']);
         exit;
     }
 
-    $sectionFolder = "cases/{$caseId}/{{Name}}/{$sectionName}/";
+    $sanitizedPath = trim($targetPath, '/');
+    $sanitizedPath = preg_replace('#^\{\{Name\}\}/?#', '', $sanitizedPath);
+    $uploadFolder = $sanitizedPath === '' ? "cases/{$caseId}/{{Name}}/" : "cases/{$caseId}/{{Name}}/{$sanitizedPath}/";
 
     try {
         $files = $_FILES['file'];
@@ -30,24 +34,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'tmp_name' => [$files['tmp_name']],
             ];
         }
-        
+
         foreach ($files['tmp_name'] as $index => $tmpFile) {
             $originalName = basename($files['name'][$index]);
-            $key = $sectionFolder . $originalName;
-        
+            $key = $uploadFolder . $originalName;
+
             $s3->putObject([
                 'Bucket' => $bucket,
                 'Key' => $key,
                 'SourceFile' => $tmpFile,
                 'ACL' => 'private',
             ]);
-        }        
+
+            $stmt = $conn->prepare("INSERT INTO files (author_id, case_id, file_name, file_path) VALUES (?, ?, ?, ?)");
+            $stmt->bind_param("iiss", $userId, $caseId, $originalName, $key);
+            $stmt->execute();
+        }
 
         echo json_encode(['success' => true, 'message' => 'Files uploaded']);
     } catch (AwsException $e) {
         echo json_encode([
             'success' => false,
             'message' => $e->getMessage()
+        ]);
+    } catch (Exception $e) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Database error: ' . $e->getMessage()
         ]);
     }
 

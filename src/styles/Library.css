@@ -96,7 +96,12 @@ input[type="file"] {
     height: 45px;
     position: relative;
     transition: background-color 0.3s;
+    cursor: pointer;
     user-select: text;
+}
+
+.exhibit:hover {
+    background-color: var(--border-color);
 }
 
 .exhibit.active-file {

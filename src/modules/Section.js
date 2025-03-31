@@ -3,6 +3,8 @@ import { Boolean, Calculation, Contact, ContactList, DateInput, Deadline, Dropdo
 import { Folder as FolderIcon, FolderOutlined } from "@mui/icons-material";
 import { File, FolderOpenIcon } from "lucide-react";
 import { ActivityFeed } from './ActivityFeed';
+import { DocumentSection } from './DocumentSection';
+import '../styles/Documents.css';
 
 const normalizeValueToIndex = (field, value) => {
     if (!field.options) return value;
@@ -24,24 +26,40 @@ const normalizeValueToIndex = (field, value) => {
     return value;
 };
 
-const FolderNode = ({ name, files, caseName, level = 0, subfoldersEl }) => {
+const FolderNode = ({ name, files, caseName, level = 0, subfoldersEl, onClick, isActive, shouldOpen }) => {
     const [open, setOpen] = useState(level === 0);
     const hasFiles = files && files.length > 0;
     const hasChildren = subfoldersEl && subfoldersEl.length > 0;
     const isEmpty = !hasFiles && !hasChildren;
 
+    useEffect(() => {
+        if (shouldOpen) {
+            setOpen(shouldOpen);
+        }
+    }, [shouldOpen]);
+
     if (name === 'root') return null;
 
     return (
         <li>
-            <span onClick={() => !isEmpty && setOpen(!open)}>
+            <div
+                className={`folder-node ${isActive ? 'active' : ''}`}
+                onClick={() => {
+                    if (!isActive) {
+                        onClick && onClick();
+                        if (!isEmpty) setOpen(true);
+                    } else {
+                        if (!isEmpty) setOpen(!open);
+                    }
+                }}
+            >
                 {hasChildren ? (
-                    open ? <FolderOpenIcon /> : <FolderIcon />
+                    open ? <FolderOpenIcon/> : <FolderIcon/>
                 ) : (
-                    <FolderOutlined />
+                    <FolderOutlined/>
                 )}
                 <span>{caseName && name === "{{Name}}" ? caseName : name}</span>
-            </span>
+            </div>
 
             {open && (
                 <>
@@ -50,30 +68,16 @@ const FolderNode = ({ name, files, caseName, level = 0, subfoldersEl }) => {
                             {subfoldersEl}
                         </ul>
                     )}
-                    {hasFiles && files.filter((file, index) => file.name != "(Folder)").length > 0 && (
-                        <ul className="file-list">
-                            {files.map((file, idx) => (
-                                    <li className="file-entry" key={idx}>
-                                        <a href={file.url} target="_blank" rel="noopener noreferrer" className="file-link">
-                                            <File size={16} style={{ marginRight: 8 }} />
-                                            {file.name}
-                                        </a>
-                                        <span className="file-meta subtext">
-                                            {new Date(file.last_modified).toLocaleDateString()} • {(file.size / 1024).toFixed(1)} KB
-                                        </span>
-                                    </li>
-                                )
-                            )}
-                        </ul>
-                    )}
                 </>
             )}
         </li>
     );
 };
 
-const Documents = ({ fetchDocuments, folders, caseName }) => {
+const Documents = ({ fetchDocuments, folders, caseName, case_id, user_id }) => {
+    const [currentFolder, setCurrentFolder] = useState(null);
     const folderEntries = Object.entries(folders);
+    const [docNav, setDocNav] = useState(true);
 
     const buildFolderTree = () => {
         const root = {};
@@ -95,14 +99,36 @@ const Documents = ({ fetchDocuments, folders, caseName }) => {
 
     useEffect(() => {
         fetchDocuments();
-    }, [])
+    }, []);
+        
+    useEffect(() => {
+        if (folders && Object.keys(folders).length > 0) {
+            const nameFolder = Object.keys(folders).find((key) => key.includes("{{Name}}"));
+            if (nameFolder) {
+                const subfolderTree = Object.fromEntries(
+                    Object.entries(folders)
+                        .filter(([key]) => key.startsWith(`${nameFolder}/`))
+                        .map(([key, value]) => {
+                            const sub = key.replace(`${nameFolder}/`, "").split("/")[0];
+                            return [sub, value];
+                        })
+                );
+                setCurrentFolder({
+                    path: nameFolder,
+                    files: folders[nameFolder] || [],
+                    subfolders: subfolderTree,
+                });
+            }
+        }
+    }, [folders]);      
 
-    const renderTree = (tree, level = 0) => {
+    const renderTree = (tree, level = 0, parentPath = '') => {
         return Object.entries(tree).map(([folderName, data]) => {
             const subfolders = Object.fromEntries(
                 Object.entries(data).filter(([key]) => key !== '__files')
             );
             const fileList = data.__files || [];
+            const fullPath = parentPath ? `${parentPath}/${folderName}` : folderName;
 
             return (
                 <FolderNode
@@ -111,7 +137,10 @@ const Documents = ({ fetchDocuments, folders, caseName }) => {
                     files={fileList}
                     caseName={caseName}
                     level={level}
-                    subfoldersEl={renderTree(subfolders, level + 1)}
+                    subfoldersEl={renderTree(subfolders, level + 1, fullPath)}
+                    onClick={() => setCurrentFolder({ path: fullPath, files: fileList, subfolders })}
+                    isActive={currentFolder?.path === fullPath}
+                    shouldOpen={currentFolder?.path?.startsWith(fullPath)}
                 />
             );
         });
@@ -120,9 +149,56 @@ const Documents = ({ fetchDocuments, folders, caseName }) => {
     const folderTree = buildFolderTree();
 
     return (
-        <ul className="document-nav">
-            {renderTree(folderTree)}
-        </ul>
+        <div className="documents-container">
+            {docNav && <ul className="document-nav">
+                {renderTree(folderTree)}
+            </ul>}
+            {currentFolder && (
+                <DocumentSection
+                    folderName={currentFolder.path}
+                    files={currentFolder.files}
+                    subfolders={currentFolder.subfolders}
+                    caseName={caseName}
+                    onFolderClick={(subfolderName) => {
+                        const nextPath = `${currentFolder.path}/${subfolderName}`;
+                        const fullEntry = folders[nextPath];
+                        const subfolderTree = Object.fromEntries(
+                            Object.entries(folders)
+                                .filter(([key]) => key.startsWith(`${nextPath}/`))
+                                .map(([key, value]) => {
+                                    const sub = key.replace(`${nextPath}/`, '').split('/')[0];
+                                    return [sub, value];
+                                })
+                        );
+                        setCurrentFolder({
+                            path: nextPath,
+                            files: fullEntry || [],
+                            subfolders: subfolderTree
+                        });
+                    }}
+                    onBreadcrumbClick={(path) => {
+                        const subfolderTree = Object.fromEntries(
+                            Object.entries(folders)
+                                .filter(([key]) => key.startsWith(`${path}/`))
+                                .map(([key, value]) => {
+                                    const sub = key.replace(`${path}/`, '').split('/')[0];
+                                    return [sub, value];
+                                })
+                        );
+                        setCurrentFolder({
+                            path,
+                            files: folders[path] || [],
+                            subfolders: subfolderTree
+                        });
+                    }}
+                    setDocNav={setDocNav}
+                    docNav={docNav}
+                    case_id={case_id}
+                    user_id={user_id}
+                    fetchDocuments={fetchDocuments}
+                />
+            )}
+        </div>
     );
 };
 
@@ -534,9 +610,24 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
         fetchDocuments();
     };
 
+    console.log(folders);
+
     useEffect(() => {
         setAddItemMode(selectedRow);
     }, [selectedRow]);
+
+    const staticSections = ['Documents', 'Activity Feed'];
+    if (staticSections.includes(sectionName)) {
+        return (
+            <div className={`case-section full`}>
+            {sectionName === 'Documents' ? (
+                <Documents fetchDocuments={fetchDocuments} folders={folders} caseName={caseName} case_id={id} user_id={user_id}/>
+            ) : (
+                <ActivityFeed case_id={id} user_id={user_id} />
+            )}
+            </div>
+        );
+    }
 
     return (
         <div className={`case-section ${sectionName === "Documents" || sectionName === 'Activity Feed' ? "full" : ""}`}>
@@ -588,7 +679,6 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
                     )}
                 </>
             )}
-            {sectionName === "Documents" ? <Documents fetchDocuments={fetchDocuments} folders={folders} caseName={caseName} /> : sectionName === 'Activity Feed' ? <ActivityFeed case_id={id} user_id={user_id}/> : output}
         </div>
       );      
 };
