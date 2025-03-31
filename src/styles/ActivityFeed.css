@@ -13,6 +13,7 @@
     flex-direction: column;
     gap: 5px;
     width: 200px;
+    flex-shrink: 0;
     background-color: var(--secondary-color);
     border-right: 1px solid var(--border-color);
     height: 100%;
@@ -40,15 +41,24 @@
     justify-content: flex-start;
     align-items: center;
     gap: 10px;
+    position: relative;
 }
 
 .feed-type:hover {
     background-color: var(--border-color);
+
+    .notification.priority {
+        border: 2px solid var(--border-color);
+    }
 }
 
 .feed-type.active {
     color: var(--fill);
     background-color: var(--border-color);
+
+    .notification.priority {
+        border: 2px solid var(--border-color);
+    }
 }
 
 .activity-feed-item {
@@ -56,6 +66,7 @@
     justify-content: center;
     align-items: flex-start;
     flex-direction: column;
+    position: relative;
     background-color: var(--secondary-color);
     border-radius: 3px;
     gap: 5px;
@@ -68,6 +79,53 @@
     justify-content: flex-start;
     align-items: center;
     gap: 10px;
+    user-select: none;
+}
+
+.activity-task-info {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.task-assign {
+    width: calc(50% - 5px);
+}
+
+.call-log {
+    width: calc(33.33% - (20px / 3));
+}
+
+.files {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+}
+
+.file {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 250px;
+    flex-wrap: wrap;
+    padding: 5px;
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.activity-call-info {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    flex-wrap: wrap;
 }
 
 .activity-feed-item-content {
@@ -174,4 +232,102 @@
 
 .activity-add:hover {
     color: var(--fill);
+}
+
+.activity-feed-item-menu {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 5px;
+    top: 10px;
+    right: 12.5px;
+    position: absolute;
+}
+
+.activity-feed-item-options {
+    cursor: pointer;
+    transition: color 0.3s, background-color 0.3s;
+}
+
+.activity-feed-item-options:hover {
+    color: var(--fill);
+    background-color: var(--border-color);
+    border-radius: 3px;
+}
+
+.activity-feed-item-options-menu {
+    user-select: none;
+    padding: 10px;
+    background-color: var(--card-color);
+    box-shadow: var(--button-box-shadow);
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    font-size: 14px;
+    z-index: 1002;
+}
+
+.activity-feed-item-option {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 5px 10px;
+    width: 100%;
+    color: var(--text-color);
+    transition: color 0.3s, background-color 0.3s;
+    cursor: pointer;
+}
+
+.activity-feed-item-option:hover {
+    background-color: var(--hover-color);
+    color: var(--secondary-color);
+    border-radius: 3px;
+}
+
+.activity-feed-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+
+    span {
+        padding: 0 5px;
+    }
+}
+
+.activity-menu-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    height: 25px;
+}
+
+.activity-feed-item-pin {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+}
+
+.activity-pin {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 25px;
+    height: 25px;
+    border-radius: 3px;
+    background-color: var(--fill);
+    color: var(--secondary-color);
+    cursor: pointer;
+    transition: scale 0.3s, background-color 0.3s;
+}
+
+.activity-pin:hover {
+    scale: 1.1;
+}
+
+.activity-pin.case-pin {
+    background-color: var(--text-color);
+    color: var(--secondary-color);
 }

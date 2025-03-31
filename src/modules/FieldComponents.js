@@ -72,7 +72,7 @@ export const DateInput = ({ value = '', onChange, disable = false, checkbox = fa
     }, [value]);
 
     return (
-        <>
+        <div className="date-input">
             <input
                 type="date"
                 disabled={disable}
@@ -85,7 +85,7 @@ export const DateInput = ({ value = '', onChange, disable = false, checkbox = fa
                     {isChecked ? <X size={23} /> : <Check size={23} />}
                 </div>
             )}
-        </>
+        </div>
     );
 };
 
@@ -165,87 +165,91 @@ export const MultiSelect = ({ options = [], value = [], onChange = () => {} }) =
 };
 
 export const SearchSelect = ({ value, onChange, options = [], placeholder = "Select an option", disabled = false }) => {
-  const [search, setSearch] = useState('');
-  const [filtered, setFiltered] = useState([]);
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
+    const [search, setSearch] = useState('');
+    const [filtered, setFiltered] = useState([]);
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef(null);
 
-  useEffect(() => {
-    if (!isOpen) return;
-  
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isOpen]);
+
+    const parsedOptions = (() => {
+        try {
+            const opts = typeof options === 'string' ? JSON.parse(options) : options;
+
+            if (Array.isArray(opts)) {
+                return opts.map((label, index) => ({ label, value: index.toString() }));
+            } else if (typeof opts === 'object') {
+                return Object.entries(opts).map(([key, label]) => ({ label, value: key }));
+            }
+
+            return [];
+        } catch (err) {
+            console.error('Invalid options format for SearchSelect:', err);
+            return [];
+        }
+    })();
+
+    useEffect(() => {
+        const searchLower = search.toLowerCase();
+        const filteredOptions = parsedOptions.filter(opt =>
+            opt.label.toLowerCase().includes(searchLower)
+        );
+        setFiltered(filteredOptions);
+    }, [search, options]);
+
+    const handleSelect = (val) => {
+        onChange(val);
         setIsOpen(false);
-      }
+        setSearch('');
     };
-  
-    document.addEventListener('mousedown', handleClickOutside);
-    
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen]);
 
-  const parsedOptions = (() => {
-    try {
-      const parsed = typeof options === 'string' ? JSON.parse(options) : options;
-      return parsed.map((label, index) => ({ label, value: index }));
-    } catch (err) {
-      console.error('Invalid options format for SearchSelect:', err);
-      return [];
-    }
-  })();
+    const selectedLabel = parsedOptions.find(o => o.value === value?.toString())?.label || '';
 
-  useEffect(() => {
-    const searchLower = search.toLowerCase();
-    const filteredOptions = parsedOptions.filter(opt =>
-      opt.label.toLowerCase().includes(searchLower)
-    );
-    setFiltered(filteredOptions);
-  }, [search, options]);
+    return (
+        <div className={`search-select ${disabled ? 'disabled' : ''}`} style={{ position: 'relative' }}>
+            <div
+                className="search-select-input"
+                onClick={() => !disabled && setIsOpen(!isOpen)}
+            >
+                {selectedLabel || placeholder}
+            </div>
 
-  const handleSelect = (val) => {
-    onChange(val);
-    setIsOpen(false);
-    setSearch('');
-  };
-
-  const selectedLabel = parsedOptions.find(o => o.value === value)?.label || '';
-
-  return (
-    <div className={`search-select ${disabled ? 'disabled' : ''}`} style={{ position: 'relative' }}>
-      <div
-        className="search-select-input"
-        onClick={() => !disabled && setIsOpen(!isOpen)}
-      >
-        {selectedLabel || placeholder}
-      </div>
-
-      {isOpen && !disabled && (
-        <div className="search-select-dropdown" ref={dropdownRef}>
-          <input
-            type="text"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search..."
-          />
-          {filtered.length > 0 ? (
-            filtered.map(opt => (
-              <div
-                key={opt.value}
-                onClick={() => handleSelect(opt.value)}
-                style={{ padding: '8px', cursor: 'pointer', borderBottom: '1px solid var(--border-color)' }}
-              >
-                {opt.label}
-              </div>
-            ))
-          ) : (
-            <div style={{ padding: '8px', color: 'var(--text-color)' }}>No results found</div>
-          )}
+            {isOpen && !disabled && (
+                <div className="search-select-dropdown" ref={dropdownRef}>
+                    <input
+                        type="text"
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                        placeholder="Search..."
+                    />
+                    {filtered.length > 0 ? (
+                        filtered.map(opt => (
+                        <div
+                            key={opt.value}
+                            onClick={() => handleSelect(opt.value)}
+                            style={{ padding: '8px', cursor: 'pointer', borderBottom: '1px solid var(--border-color)' }}
+                        >
+                            {opt.label}
+                        </div>
+                        ))
+                    ) : (
+                        <div style={{ padding: '8px', color: 'var(--text-color)' }}>No results found</div>
+                    )}
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export const Boolean = ({ options = [], value, onChange }) => {
@@ -873,34 +877,66 @@ export const AddActivity = ({ users, fetchFeed, case_id, onClick, addActivity, s
         type: "notes",
         tags: [],
         case_id: case_id,
+        contact: { id: null },
     });
 
+    const userMap = users.reduce((acc, user) => {
+        acc[user.id] = user.name;
+        return acc;
+      }, {});
+      
     const handleInputChange = (key) => (value) => {
         setActivityData((prev) => ({ ...prev, [key]: value, type: activeActivityType === 0 ? "notes" : activeActivityType === 1 ? "tasks" : "calls" }));
     };
 
     const handleSubmit = async () => {
         try {
-            const response = await fetch('https://dalyblackdata.com/api/activity_feed.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(activityData),
+            const formData = new FormData();
+            formData.append("case_id", activityData.case_id);
+            formData.append("type", activityData.type);
+            formData.append("subject", activityData.subject);
+            formData.append("content", activityData.content);
+            formData.append("tags", JSON.stringify(activityData.tags || []));
+            if (activityData.task) {
+                formData.append("task", activityData.task);
+                formData.append("due_date", activityData.due_date || "")
+            }
+    
+            if (activityData.type === 'calls') {
+                formData.append("date", activityData.date || "");
+                formData.append("start_time", activityData.start_time || "");
+                formData.append("end_time", activityData.end_time || "");
+                if (activityData.contact?.id) {
+                    formData.append("contact_id", activityData.contact.id);
+                }
+            }
+    
+            if (Array.isArray(activityData.attachments)) {
+                activityData.attachments.forEach((file) => {
+                    if (file instanceof File) {
+                        formData.append("attachment[]", file);
+                    }
+                });
+            }
+    
+            const response = await fetch("https://dalyblackdata.com/api/activity_feed.php", {
+                method: "POST",
+                body: formData,
             });
-
+    
             const data = await response.json();
             if (data.success) {
                 setAddActivity(false);
                 setActivityData({
-                    author: 1,
                     subject: "",
                     content: "",
-                    attachments: "",
+                    attachments: [],
                     type: "notes",
                     tags: [],
-                    case_id: case_id
+                    case_id: case_id,
+                    contact: { id: null },
                 });
+                setActiveActivityType(0);
                 fetchFeed();
             } else {
                 console.error("Error adding activity:", data);
@@ -908,7 +944,7 @@ export const AddActivity = ({ users, fetchFeed, case_id, onClick, addActivity, s
         } catch (error) {
             console.error("Error adding activity:", error);
         }
-    }
+    };       
 
     return (
         <>
@@ -917,7 +953,7 @@ export const AddActivity = ({ users, fetchFeed, case_id, onClick, addActivity, s
                     <input
                         type='text'
                         onClick={onClick}
-                        placeholder="Add New Activity"
+                        placeholder="Add new activity..."
                     />
                 </div>
             : (
@@ -951,17 +987,64 @@ export const AddActivity = ({ users, fetchFeed, case_id, onClick, addActivity, s
                             onChange={(e) => handleInputChange("content")(e.target.value)}
                         />
                     </div>
+                    <MultiFile
+                        value={activityData.attachments}
+                        onChange={(val) => handleInputChange("attachments")(val)}
+                        lead_id={case_id}
+                        sectionName="Activity Feed"
+                    />
                     {activeActivityType === 1 && (
-                        <div className='form-group activity'>
-                            <label className='activity-type-label subtext'>Assign to</label>
-                            <SearchSelect
-                                value={activityData.task}
-                                onChange={(val) => handleInputChange("task")(val)}
-                                options={users.map(u => u.name)}
-                                placeholder="Select a user..."
-                            />
+                        <div className="activity-task-info">
+                            <div className='form-group task-assign activity'>
+                                <label className='activity-type-label subtext'>Assign to</label>
+                                <SearchSelect
+                                    value={activityData.task}
+                                    onChange={(val) => handleInputChange("task")(Number(val))}
+                                    options={userMap}
+                                    placeholder="Select a user..."
+                                />
+                            </div>
+                            <div className='form-group task-assign activity'>
+                                <label className='activity-type-label subtext'>Due date</label>
+                                <DateInput
+                                    value={activityData.due_date}
+                                    onChange={(val) => handleInputChange("due_date")(val)}
+                                />
+                            </div>
                         </div>
                     )}
+                    {activeActivityType === 2 && (
+                        <div className='activity-call-info'>
+                            <div className='form-group call-log activity'>
+                                <label className="activity-type-label subtext">Date</label>
+                                <DateInput
+                                    value={activityData.date}
+                                    onChange={(val) => handleInputChange("date")(val)}
+                                />
+                            </div>
+                            <div className='form-group call-log activity'>
+                                <label className="activity-type-label subtext">Start Time</label>
+                                <TimeInput
+                                    value={activityData.start_time}
+                                    onChange={(val) => handleInputChange("start_time")(val)}
+                                />
+                            </div>
+                            <div className='form-group call-log activity'>
+                                <label className="activity-type-label subtext">End Time</label>
+                                <TimeInput
+                                    value={activityData.end_time}
+                                    onChange={(val) => handleInputChange("end_time")(val)}
+                                />
+                            </div>
+                            <div className='form-group activity'>
+                                <label className="activity-type-label subtext">Contact</label>
+                                <Contact
+                                    selectedContact={activityData.contact.id}
+                                    setSelectedContact={(contact) => handleInputChange("contact")(contact)}
+                                    onCreateNewContact={() => handleInputChange("contact")({ id: 0 })}
+                                />
+                            </div>
+                        </div>)}
                     <div className='activity-actions'>
                         <div className='activity-additional'>
                             <div className='activity-additional-item subtext'>
@@ -982,9 +1065,27 @@ export const AddActivity = ({ users, fetchFeed, case_id, onClick, addActivity, s
                             <SendHorizonal size={20}/>
                         </div>
                     </div>
-                    <X size={20} className='exit' onClick={() => setAddActivity(false)} />
+                    <X size={20} className='exit' onClick={() => {setAddActivity(false); setActiveActivityType(0);}} />
                 </div>
             )}
         </>
     );
 }
+
+export const Notification = ({ count, type }) => {
+    return (
+        <>
+            {count > 0 && <div className={`notification ${type}`}>
+                {count}
+            </div>}
+        </>
+    )
+}
+
+export const File = ({ file, onClick }) => {
+    return (
+        <div className='file subtext' onClick={onClick}>
+            {file?.name}
+        </div>
+    );
+};

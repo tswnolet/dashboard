@@ -127,6 +127,14 @@
     margin: 0 20px;
 }
 
+.date-input {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+}
+
 .contact-input {
     display: flex;
     justify-content: flex-start;
@@ -325,7 +333,7 @@
     width: 100%;
 }
 
-.deadline-group {
+.deadline-group:not(.standard) {
     width: calc(66.66% - 5px);
 }
 
@@ -431,9 +439,11 @@
     display: flex;
     background-color: var(--secondary-color);
     border-radius: 3px;
+    max-width: 450px;
     padding: 10px;
     gap: 10px;
     position: relative;
+    border: 1px solid var(--border-color);
 }
 
 .contact-display {
@@ -469,6 +479,46 @@
     align-items: flex-start;
     flex-direction: column;
     padding: 15px;
+}
+
+.tasks-notis {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    position: absolute;
+    gap: 2.5px;
+    height: 100%;
+    top: 0;
+    left: calc(100%);
+}
+
+.notification {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 10px;
+    border-radius: 50%;
+    transition: color 0.3s, background-color 0.3s, border 0.3s;
+}
+
+.notification.reminder {
+    background-color: var(--fill);
+    color: var(--secondary-color);
+    margin-left: 28px;
+    width: 15px;
+    height: 15px;
+    margin-top: 2px;
+    position: absolute;
+    z-index: 0;
+}
+
+.notification.priority {
+    background-color: var(--priority-color);
+    color: var(--secondary-color);
+    z-index: 1;
+    width: 19px;
+    height: 19px;
+    border: 2px solid var(--secondary-color);
 }
 
 @media (min-width: 769px) {

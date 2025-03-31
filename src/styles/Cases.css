@@ -261,10 +261,12 @@ td.case-name {
     }
 
     .form-group:not(.deadline-group) {
-        min-width: 250px;
-        box-sizing: border-box;
-        flex: 1 1 calc(33.333% - 25px);
-        overflow-y: visible;
+        .form-group:not(.activity) {
+            min-width: 250px;
+            box-sizing: border-box;
+            flex: 1 1 calc(33.333% - 25px);
+            overflow-y: visible;
+        }
 
         input,
         select,

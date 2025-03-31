@@ -4,7 +4,7 @@ import { CaseNav } from "./CaseNav";
 import { CaseHeader } from "./CaseHeader";
 import { Section } from "./Section";
 
-export const Case = () => {
+export const Case = ({ user_id }) => {
     const { id } = useParams();
     const [caseData, setCaseData] = useState({});
     const [sections, setSections] = useState([]);
@@ -61,7 +61,7 @@ export const Case = () => {
             <CaseNav sections={sections} activeSection={activeSection} setActiveSection={setActiveSection} />
             <div className='case-body'>
                 <CaseHeader caseData={caseData} fetchCase={fetchCase}/>
-                <Section key={activeSection} lead_id={caseData?.lead?.id} id={id} caseName={caseData?.case?.case_name} fetchDocuments={fetchDocuments} folders={folders} caseType={caseData?.lead?.case_type_id} section_id={activeSection} template_id={caseData?.case?.template_id}/>
+                <Section key={activeSection} user_id={user_id} lead_id={caseData?.lead?.id} id={id} caseName={caseData?.case?.case_name} fetchDocuments={fetchDocuments} folders={folders} caseType={caseData?.lead?.case_type_id} section_id={activeSection} template_id={caseData?.case?.template_id}/>
             </div>
         </div>
     );

@@ -148,7 +148,7 @@ const AppRoutes = ({ accessLevel, setAccessLevel, setUser, user, loggedIn, setLo
       {loggedIn === true ? (
         <>
           <Route path="/cases" element={<Cases user={user} />} />
-          <Route path="/case/:id" element={<Case id={":id"} />} />
+          <Route path="/case/:id" element={<Case id={":id"} user_id={user.user_id}/>} />
           <Route path="/intake" element={<Leads user={user} />} />
           <Route path="/contacts" element={<Contacts />} />
           <Route path="/client-portal" element={<WIP />} />

@@ -77,7 +77,11 @@ header {
     overflow-y: auto;
 
     &:not(.deadline-group) {
-        width: 100%;
+        &:not(.task-assign) {
+            &:not(.call-log) {
+                width: 100%;
+            }
+        }
     }
 
     &:not(.nm) {

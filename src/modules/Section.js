@@ -72,7 +72,7 @@ const FolderNode = ({ name, files, caseName, level = 0, subfoldersEl }) => {
     );
 };
 
-const Documents = ({ folders, caseName }) => {
+const Documents = ({ fetchDocuments, folders, caseName }) => {
     const folderEntries = Object.entries(folders);
 
     const buildFolderTree = () => {
@@ -92,6 +92,10 @@ const Documents = ({ folders, caseName }) => {
 
         return root;
     };
+
+    useEffect(() => {
+        fetchDocuments();
+    }, [])
 
     const renderTree = (tree, level = 0) => {
         return Object.entries(tree).map(([folderName, data]) => {
@@ -228,7 +232,7 @@ const Field = ({ field, value, handleFieldChange, conditional = false, fieldUpda
     );
 };
 
-export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseType, section_id, template_id }) => {
+export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseType, section_id, template_id, user_id }) => {
     const [fields, setFields] = useState([]);
     const [fieldUpdates, setFieldUpdates] = useState([]);
     const [formData, setFormData] = useState({});
@@ -584,7 +588,7 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
                     )}
                 </>
             )}
-            {sectionName === "Documents" ? <Documents folders={folders} caseName={caseName} /> : sectionName === 'Activity Feed' ? <ActivityFeed case_id={id} /> : output}
+            {sectionName === "Documents" ? <Documents fetchDocuments={fetchDocuments} folders={folders} caseName={caseName} /> : sectionName === 'Activity Feed' ? <ActivityFeed case_id={id} user_id={user_id}/> : output}
         </div>
       );      
 };
