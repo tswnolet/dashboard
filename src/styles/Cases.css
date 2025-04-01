@@ -353,11 +353,9 @@ span.remove-tag:hover {
 
 .case-section {
     display: flex;
-    flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
     overflow-y: auto;
-    gap: 10px;
     width: 100%;
     height: 100%;
 
@@ -368,6 +366,11 @@ span.remove-tag:hover {
     .form-group {
         flex-shrink: 0;
     }
+}
+
+.case-section:not(.horizontal) {
+    flex-direction: column;
+    gap: 10px;
 }
 
 .form-box:hover {

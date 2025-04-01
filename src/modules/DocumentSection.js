@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ArrowRight, ChevronRight, File, FolderOpenIcon, X } from "lucide-react";
+import { ArrowRight, ChevronRight, File, FolderOpenIcon, Upload, X } from "lucide-react";
 import { SearchBar } from "./Nav";
 import { Dropdown, MultiFile } from "./FieldComponents";
 
@@ -9,6 +9,7 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
     const [searchQuery, setSearchQuery] = useState("");
     const [searchType, setSearchType] = useState("");
     const [uploadingFile, setUploadingFile] = useState(null);
+    const [uploadWaiting, setUploadWaiting] = useState(false);
 
     const formatSize = (size) => {
         if (!size) return "0 KB";
@@ -48,6 +49,8 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
     const handleFileSet = async (files) => {
         if (!files || files.length === 0) return;
     
+        setUploadWaiting(true);
+
         for (let file of files) {
             const formData = new FormData();
             formData.append("case_id", case_id);
@@ -64,6 +67,7 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
                 const result = await response.json();
                 if (result.success) {
                     fetchDocuments();
+                    setUploadWaiting(false);
                 } else {
                     console.warn(`Upload failed for ${file.name}: ${result.message}`);
                 }
@@ -71,9 +75,9 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
                 console.error("Upload error:", error);
             }
         }
-    
-        alert("Upload(s) complete");
     };
+
+    const [testButton, setTestButton] = useState(false);
 
     return (
         <div className="document-section">
@@ -93,8 +97,9 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
                     value={uploadingFile}
                     onChange={setUploadingFile}
                     lead_id={case_id}
+                    upload={() => handleFileSet(uploadingFile)}
+                    uploadWaiting={uploadWaiting}
                 />
-                <button className="form-box alt" onClick={() => handleFileSet(uploadingFile)}>Upload</button>
             </div>
             <div className="subtext document-breadcrumbs">
                 {folderParts.map((part, index) => {
@@ -127,24 +132,24 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
                         <tbody>
                             {hasSubfolders && Object.keys(subfolders).map((subfolderName, index) => (
                                 <tr key={`sub-${index}`} onDoubleClick={() => onFolderClick && onFolderClick(subfolderName)} className="exhibit">
-                                    <td className='file-name folder'>
+                                    <td className='file-name folder subtext'>
                                         <FolderOpenIcon size={16} style={{ marginRight: 6 }} />
                                         {subfolderName}
                                     </td>
-                                    <td className='file-date folder'>-</td>
-                                    <td className="file-size subtext folder">
+                                    <td className='file-date folder subtext'>-</td>
+                                    <td className="file-size folder subtext">
                                         {getItemCount(subfolders[subfolderName])} item{getItemCount(subfolders[subfolderName]) !== 1 ? 's' : ''}
                                     </td>
                                 </tr>
                             ))}
                             {filteredFiles.map((file, index) => (
                                 <tr key={`file-${index}`} className="exhibit">
-                                    <td className='file-name'>
+                                    <td className='file-name subtext'>
                                         <File size={16} style={{ marginRight: 6 }} />
-                                        <a href={file.url} target="_blank" rel="noopener noreferrer">{file.name}</a>
+                                        <a href={file.url} target="_blank" rel="noopener noreferrer" title={file.name} className="subtext">{file.name.length > 35 ? `${String(file.name).split(".")[0].slice(0, 35)}(...).${String(file.name).split(".")[1]}` : file.name}</a>
                                     </td>
-                                    <td className='file-date'>{file.last_modified ? formatDate(file.last_modified) : "-"}</td>
-                                    <td className='file-size'>{formatSize(file.size)}</td>
+                                    <td className='file-date subtext'>{file.last_modified ? formatDate(file.last_modified) : "-"}</td>
+                                    <td className='file-size subtext'>{formatSize(file.size)}</td>
                                 </tr>
                             ))}
                         </tbody>

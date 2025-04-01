@@ -149,7 +149,7 @@ const Documents = ({ fetchDocuments, folders, caseName, case_id, user_id }) => {
     const folderTree = buildFolderTree();
 
     return (
-        <div className="documents-container">
+        <>
             {docNav && <ul className="document-nav">
                 {renderTree(folderTree)}
             </ul>}
@@ -198,7 +198,7 @@ const Documents = ({ fetchDocuments, folders, caseName, case_id, user_id }) => {
                     fetchDocuments={fetchDocuments}
                 />
             )}
-        </div>
+        </>
     );
 };
 
@@ -610,8 +610,6 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
         fetchDocuments();
     };
 
-    console.log(folders);
-
     useEffect(() => {
         setAddItemMode(selectedRow);
     }, [selectedRow]);
@@ -619,18 +617,20 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
     const staticSections = ['Documents', 'Activity Feed'];
     if (staticSections.includes(sectionName)) {
         return (
-            <div className={`case-section full`}>
-            {sectionName === 'Documents' ? (
-                <Documents fetchDocuments={fetchDocuments} folders={folders} caseName={caseName} case_id={id} user_id={user_id}/>
-            ) : (
-                <ActivityFeed case_id={id} user_id={user_id} />
-            )}
+            <div className={`case-section full horizontal`}>
+                {sectionName === 'Documents' ? (
+                    <Documents fetchDocuments={fetchDocuments} folders={folders} caseName={caseName} case_id={id} user_id={user_id}/>
+                ) : (
+                    <ActivityFeed case_id={id} user_id={user_id} />
+                )}
             </div>
         );
     }
 
+    console.log(sectionName);
+
     return (
-        <div className={`case-section ${sectionName === "Documents" || sectionName === 'Activity Feed' ? "full" : ""}`}>
+        <div className='case-section'>
             {sectionFields.some(field => (field.add_item !== 1 || addItemMode) && (field.case_type_id === Number(caseType) || field.case_type_id === 0)) && (
                 <TableOfContents
                     key={section_id}

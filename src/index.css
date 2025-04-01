@@ -205,20 +205,37 @@ input {
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
+  flex-direction: row-reverse;
   color: var(--text-color);
-  padding: 10px 25px;
+  padding: 5px 25px;
+  min-height: 36px;
   max-width: 100%;
-  width: 500px;
   margin: 0;
   gap: 15px;
-  border: 1px dashed var(--border-color);
   border-radius: 4px;
-  background-color: var(--secondary-color);
+  text-wrap: nowrap;
+  cursor: pointer;
+  transition: color 0.3s, background-color 0.3s, width 0.3s, border 0.3s;
 
   input {
     width: 200px;
   }
+}
+
+.file-upload:not(.expanded) {
+  width: 100px;
+  background-color: var(--text-color);
+  border: 1px solid transparent;
+  label {
+    color: var(--secondary-color);
+  }
+}
+
+.file-upload.expanded {
+  width: 250px;
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+  border: 1px dashed var(--border-color);
 }
 
 .file-upload input[type="file"] {
@@ -229,6 +246,25 @@ input {
   display: flex;
   justify-content: center;
   cursor: pointer;
+}
+
+.file-list {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.upload {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--text-color);
+  color: var(--secondary-color);
+  border: none;
+  border-radius: 3px;
+  padding: 0 10px;
+  height: 26px;
 }
 
 input[type='checkbox']:not(:checked) {

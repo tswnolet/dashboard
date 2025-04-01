@@ -2,10 +2,11 @@ import React, { useState, useEffect, useRef } from "react";
 import '../styles/LayoutEditor.css';
 import { createPortal } from "react-dom";
 import { CreateContact } from "./CreateContact";
-import { AlarmClockPlus, Check, CheckCheck, CheckSquare, Dot, DotSquare, Hash, Paperclip, Phone, SendHorizonal, StickyNote, UserRoundPlus, X } from "lucide-react";
-import { Calculate, MarginOutlined, Source, Square, SquareRounded } from "@mui/icons-material";
+import { AlarmClockPlus, Check, CheckCheck, CheckSquare, CloudUpload, Dot, DotSquare, Hash, Loader, Loader2, Paperclip, Phone, SendHorizonal, StickyNote, Upload, UserRoundPlus, X } from "lucide-react";
+import { Calculate, MarginOutlined, Refresh, Source, Square, SquareRounded } from "@mui/icons-material";
 import { RiAiGenerate, RiAiGenerate2 } from "react-icons/ri";
 import { convertLength } from "@mui/material/styles/cssUtils";
+import Loading from "./Loading";
 
 const formatDate = (dateString) => {
     if (!dateString) return ["", "", ""];
@@ -311,24 +312,70 @@ export const FileUpload = ({ value, onChange, lead_id, section_name }) => {
     );
 };
 
-export const MultiFile = ({ value, onChange, lead_id, sectionName }) => {
+export const MultiFile = ({ value, onChange, lead_id, sectionName, upload = null, uploadWaiting }) => {
     const [files, setFiles] = useState([]);
+    const [uploading, setUploading] = useState(false);
+    const [startWait, setStartWait] = useState(false);
+    const fileInputRef = useRef(null);
 
     const handleFileChange = (e) => {
         const selectedFiles = Array.from(e.target.files);
         setFiles(selectedFiles);
         onChange?.(selectedFiles);
+
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
     };
 
+    useEffect(() => {
+        if (!uploadWaiting && startWait) {
+            setFiles([]);
+            setStartWait(false);
+        }
+    }, [uploadWaiting]);
+
     return (
-        <div className='file-upload'>
-            <input type='file' id='multi-file' multiple onChange={handleFileChange} hidden/>
-            <label htmlFor='multi-file'>Choose files...</label>
-            {files.length > 0 && <div className='file-list'>
-                {files.map((file, index) => (
-                    <span key={index}>{file.name}</span>
-                ))}
-            </div>}
+        <div className={`file-upload${uploading ? ' expanded' : ''}`} onClick={() => setUploading(true)}>
+            <input
+                type='file'
+                id='multi-file'
+                multiple
+                onChange={handleFileChange}
+                ref={fileInputRef}
+                hidden
+            />
+            {files.length === 0 ? (
+                <label
+                    htmlFor='multi-file'
+                    className='subtext'
+                    onClick={(e) => {
+                        if (!uploading) {
+                            e.preventDefault();
+                        }
+                    }}
+                >
+                    {uploading ? 'Upload Files...' : 'Upload'}
+                </label>
+            ) : (
+                upload != null && (
+                    <button className='upload' onClick={() => { upload(); setStartWait(true); }}>
+                        {!startWait ? <CloudUpload size={18} /> : startWait === 'done' ? <Check /> : <Loader2 className="spinner" />}
+                    </button>
+                )
+            )}
+            {files.length > 0 && (
+                <div className='file-list subtext'>
+                    {files.map((file, index) => {
+                        const fileName = String(file.name).split(".");
+                        return (
+                            <span key={index}>
+                                {fileName[0].length > 15 ? `${fileName[0].slice(0, 15)}(...)` : fileName[0]}.{fileName[1]}
+                            </span>
+                        );
+                    })}
+                </div>
+            )}
         </div>
     );
 };

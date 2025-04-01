@@ -13,6 +13,9 @@
     align-items: flex-start;
     flex-direction: column;
     list-style: none;
+    position: sticky;
+    top: 0;
+    flex-shrink: 0;
     width: 350px;
     height: 100%;
     margin: 0;
