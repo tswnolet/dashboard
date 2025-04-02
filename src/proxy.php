@@ -1,4 +1,5 @@
 <?php
+require 'headers.php';
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
@@ -7,7 +8,7 @@ $API_KEY = "8b95d7f1";
 $FORM_URL = "https://dalyblack.leaddocket.com/Opportunities/Form/14?apikey=$API_KEY";
 
 function fetchLeadDetails($id) {
-    $url = "https://dalyblack.leaddocket.com/api/leads/$id";
+    $url = "https://dalyblack.leaddocket.com/leads/$id";
     $headers = [
         "accept: application/json",
         "api_key: f6fb37e9-58c9-418d-95a6-f867f8516850"

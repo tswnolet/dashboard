@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { ArrowRight, ChevronRight, File, FolderOpenIcon, Upload, X } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { ArrowRight, ChevronRight, Download, File, FolderOpenIcon, Trash, Upload, X } from "lucide-react";
 import { SearchBar } from "./Nav";
 import { Dropdown, MultiFile } from "./FieldComponents";
 
@@ -10,6 +10,9 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
     const [searchType, setSearchType] = useState("");
     const [uploadingFile, setUploadingFile] = useState(null);
     const [uploadWaiting, setUploadWaiting] = useState(false);
+    const [activeFile, setActiveFile] = useState(null);
+    const [more, setMore] = useState(null);
+    const menuRef = useRef(null);
 
     const formatSize = (size) => {
         if (!size) return "0 KB";
@@ -59,7 +62,7 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
             formData.append("file", file);
     
             try {
-                const response = await fetch("https://dalyblackdata.com/api/documents.php", {
+                const response = await fetch("https://api.casedb.co/documents.php", {
                     method: "POST",
                     body: formData,
                 });
@@ -77,7 +80,30 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
         }
     };
 
-    const [testButton, setTestButton] = useState(false);
+    const handleDownload = async (file) => {
+        try {
+            const response = await fetch(file.url);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", file.name);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Download error:", error);
+        }
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) setMore(null);
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     return (
         <div className="document-section">
@@ -127,11 +153,12 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
                                 <th className='file-name'>Name</th>
                                 <th className='file-date'>Last Modified</th>
                                 <th className='file-size'>Size</th>
+                                <th className='file-actions'>...</th>
                             </tr>
                         </thead>
                         <tbody>
                             {hasSubfolders && Object.keys(subfolders).map((subfolderName, index) => (
-                                <tr key={`sub-${index}`} onDoubleClick={() => onFolderClick && onFolderClick(subfolderName)} className="exhibit">
+                                <tr key={`sub-${index}`} onClick={() => setActiveFile(prev => prev !== `${index}sub` ? `${index}sub` : null)} onDoubleClick={() => onFolderClick && onFolderClick(subfolderName)} className={`exhibit ${`${index}sub` === activeFile ? 'active-file' : ''}`}>
                                     <td className='file-name folder subtext'>
                                         <FolderOpenIcon size={16} style={{ marginRight: 6 }} />
                                         {subfolderName}
@@ -140,16 +167,42 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
                                     <td className="file-size folder subtext">
                                         {getItemCount(subfolders[subfolderName])} item{getItemCount(subfolders[subfolderName]) !== 1 ? 's' : ''}
                                     </td>
+                                    <td className='file-actions subtext'>
+                                        <span className='file-actions-dots' onClick={(e) => { e.stopPropagation(); setMore(more === `${index}sub` ? null : `${index}sub`); }}>...</span>
+                                        {more === `${index}sub` && (
+                                            <div className='file-actions-menu' ref={menuRef}>
+                                                <span className='file-actions-menu-child' onClick={() => handleDownload(subfolderName)}>
+                                                    <span>Download</span><Download />
+                                                </span>
+                                                <span className="file-actions-menu-child" onClick={() => {}}>
+                                                    <span>Delete</span><Trash />
+                                                </span>
+                                            </div>
+                                        )}
+                                    </td>
                                 </tr>
                             ))}
                             {filteredFiles.map((file, index) => (
-                                <tr key={`file-${index}`} className="exhibit">
+                                <tr key={`file-${index}`} onClick={() => setActiveFile(prev => prev !== index ? index : null)} className={`exhibit ${index === activeFile ? 'active-file' : ''}`}>
                                     <td className='file-name subtext'>
                                         <File size={16} style={{ marginRight: 6 }} />
                                         <a href={file.url} target="_blank" rel="noopener noreferrer" title={file.name} className="subtext">{file.name.length > 35 ? `${String(file.name).split(".")[0].slice(0, 35)}(...).${String(file.name).split(".")[1]}` : file.name}</a>
                                     </td>
                                     <td className='file-date subtext'>{file.last_modified ? formatDate(file.last_modified) : "-"}</td>
                                     <td className='file-size subtext'>{formatSize(file.size)}</td>
+                                    <td className='file-actions subtext'>
+                                        <span className='file-actions-dots' onClick={(e) => { e.stopPropagation(); setMore(more === index ? null : index); }}>...</span>
+                                        {more === index && (
+                                            <div className='file-actions-menu' ref={menuRef}>
+                                                <span className='file-actions-menu-child' onClick={() => handleDownload(file)}>
+                                                    <span>Download</span><Download />
+                                                </span>
+                                                <span className="file-actions-menu-child" onClick={() => console.log(file)}>
+                                                    <span>Delete</span><Trash />
+                                                </span>
+                                            </div>
+                                        )}
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>

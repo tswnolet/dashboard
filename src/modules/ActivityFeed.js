@@ -59,7 +59,7 @@ const Activity = ({ data, user_id, user, fetchFeed }) => {
 
     const pinNote = (pin, action) => {
         try {
-            fetch(`https://dalyblackdata.com/api/activity_feed.php`, {
+            fetch(`https://api.casedb.co/activity_feed.php`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -204,7 +204,7 @@ export const ActivityFeed = ({ case_id, user_id }) => {
 
     const fetchFeed = async () => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/activity_feed.php?case_id=${case_id}&${new Date().getTime()}`);
+            const response = await fetch(`https://api.casedb.co/activity_feed.php?case_id=${case_id}&${new Date().getTime()}`);
             const data = await response.json();
             setFeed(data.feed_updates);
         } catch (error) {
@@ -214,7 +214,7 @@ export const ActivityFeed = ({ case_id, user_id }) => {
     
     const fetchUsers = async () => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/user.php?time=${new Date().getTime()}`);
+            const response = await fetch(`https://api.casedb.co/user.php?time=${new Date().getTime()}`);
             const data = await response.json();
             if (response.ok) {
                 setUsers(data.users);

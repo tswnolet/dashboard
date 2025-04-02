@@ -45,7 +45,7 @@ const Dashboard = ({ setLoggedIn, google = false }) => {
             if (endDate) params.push(`endDate=${endDate}`);
             const query = params.length ? `?${params.join("&")}` : "";
 
-            const response = await fetch(`https://dalyblackdata.com/api/fetch.php${query}`);
+            const response = await fetch(`https://api.casedb.co/fetch.php${query}`);
             const result = await response.json();
 
             if (result.success) {

@@ -1,4 +1,5 @@
 <?php
+require './headers.php';
 require './db.php';
 header('Content-Type: application/json');
 session_start();
@@ -103,13 +104,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'key' => $key,
                     'url' => $s3->getObjectUrl($bucket, $key)
                 ];
-
-                // Insert file information into the files table
-                $fileSql = "INSERT INTO files (author_id, case_id, file_name, file_path) VALUES (?, ?, ?, ?)";
-                $fileStmt = $conn->prepare($fileSql);
-                $fileStmt->bind_param("iiss", $author, $case_id, $originalName, $key);
-                $fileStmt->execute();
-                $fileStmt->close();
             } catch (Aws\Exception\AwsException $e) {
                 echo json_encode(['success' => false, 'message' => 'S3 Upload failed: ' . $e->getMessage()]);
                 exit;

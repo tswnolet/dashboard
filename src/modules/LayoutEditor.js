@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import "../styles/LayoutEditor.css";
 import Modal from "./Modal";
 import FolderTreeManager from "./FolderTreeManager";
-import { Boolean, Contact, DateInput, Dropdown, NumberInput, Text } from "./FieldComponents";
+import { Boolean, Calculation, Contact, ContactList, DateInput, Deadline, DocGen, Dropdown, FileUpload, Instructions, MultiFile, MultiSelect, NumberInput, SearchSelect, Subheader, Text, TimeInput } from "./FieldComponents";
 import { IconMap } from "./IconMap";
-import { StarOutlineSharp, Close, Archive } from "@mui/icons-material";
+import { StarOutlineSharp, Close, Archive, SettingsVoice } from "@mui/icons-material";
 import { Edit, Loader2, Trash2 } from "lucide-react";
 
 const Vital = ({ vital, description }) => {
@@ -49,7 +49,7 @@ export const LayoutEditor = () => {
     const [phaseData, setPhaseData] = useState({ phase: "", description: "", template_id: 0, order_id: 0 });
     const [editPhase, setEditPhase] = useState(null);
     const [dragging, setDragging] = useState(null);
-    const [vitalData, setVitalData] = useState({ name: "", description: "", icon: "", order_id: 0 });
+    const [vitalData, setVitalData] = useState({ name: '', description: ''});
     const [folderData, setFolderData] = useState({ name: "", parent_folder_id: 0, folder_access: "Standard" });
     const [folders, setFolders] = useState([]);
     const [fieldTypes, setFieldTypes] = useState([]);
@@ -71,6 +71,7 @@ export const LayoutEditor = () => {
     const [caseTypes, setCaseTypes] = useState([]);
     const [currentSection, setCurrentSection] = useState(null);
     const [allFields, setAllFields] = useState([]);
+    const [vitals, setVitals] = useState([]);
     
     const handleMouseEnter = (fieldId) => {
         if (hoverTimeout) clearTimeout(hoverTimeout);
@@ -93,7 +94,7 @@ export const LayoutEditor = () => {
 
     const fetchFolderStructure = async (templateId) => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/folder-templates.php?template_id=${templateId}&time=${new Date().getTime()}`);
+            const response = await fetch(`https://api.casedb.co/folder-templates.php?template_id=${templateId}&time=${new Date().getTime()}`);
             const data = await response.json();
             setFolders(data.folders || []);
         } catch (error) {
@@ -103,7 +104,7 @@ export const LayoutEditor = () => {
 
     const fetchStatuses = async () => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/statuses.php?time=${new Date().getTime()}`);
+            const response = await fetch(`https://api.casedb.co/statuses.php?time=${new Date().getTime()}`);
             const data = await response.json();
             setStatuses(data.statuses || []);
         } catch (error) {
@@ -114,7 +115,7 @@ export const LayoutEditor = () => {
     const postStatuses = async () => {
         setIsSaving('statuses');
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/statuses.php`, {
+            const response = await fetch(`https://api.casedb.co/statuses.php`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(statusData),
@@ -145,7 +146,7 @@ export const LayoutEditor = () => {
         };
     
         try {
-            const response = await fetch("https://dalyblackdata.com/api/folder-templates.php", {
+            const response = await fetch("https://api.casedb.co/folder-templates.php", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(newFolder),
@@ -165,6 +166,29 @@ export const LayoutEditor = () => {
         setIsSaving(null);
     };
 
+    const createVital = async () => {
+        try {
+            const response = await fetch('https://api.casedb.co/sections.php?vital=true', {
+                method: 'POST',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: vitalData.vital_name,
+                    description: vitalData.vital_description,
+                    template_id: defaultTemplate.id,
+                    field_id: vitalData.vital_field ?? 0
+                })
+            });
+            const data = await response.json();
+            if (data.success) {
+                fetchTemplateLayout(defaultTemplate.id);
+                setVitalData({ name: '', description: '', field_id: '' });
+                setCreateNew(null);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
     useEffect(() => {
         fetchTemplates();
         fetchMarketingSources();
@@ -173,7 +197,7 @@ export const LayoutEditor = () => {
 
     const fetchTemplates = async () => {
         try {
-            const response = await fetch("https://dalyblackdata.com/api/layout.php");
+            const response = await fetch("https://api.casedb.co/layout.php");
             const data = await response.json();
 
             if (data.templates.length > 0) {
@@ -189,10 +213,11 @@ export const LayoutEditor = () => {
 
     const fetchTemplateLayout = async (templateId) => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/sections.php?template_id=${templateId}`);
+            const response = await fetch(`https://api.casedb.co/sections.php?template_id=${templateId}`);
             const data = await response.json();
             setSections(data.sections || []);
             setPhases(data.phases || []);
+            setVitals(data.vitals || []);
             fetchFolderStructure(templateId);
         } catch (error) {
             console.error("Error fetching sections:", error);
@@ -206,7 +231,7 @@ export const LayoutEditor = () => {
         templateId = templateId || 1;
 
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/custom_fields.php?${sectionId ? `section_id=${sectionId}&template_id=${templateId}&` : `template_id=${templateId}&`}time=${new Date().getTime()}`);
+            const response = await fetch(`https://api.casedb.co/custom_fields.php?${sectionId ? `section_id=${sectionId}&template_id=${templateId}&` : `template_id=${templateId}&`}time=${new Date().getTime()}`);
             const data = await response.json();
             setCurrentFields(data.custom_fields || []);
             setFieldTypes(data.fields);
@@ -244,7 +269,7 @@ export const LayoutEditor = () => {
 
         e.preventDefault();
         try {
-            const response = await fetch("https://dalyblackdata.com/api/layout.php", {
+            const response = await fetch("https://api.casedb.co/layout.php", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),
@@ -272,7 +297,7 @@ export const LayoutEditor = () => {
         setIsSaving('section');
         
         try {
-            const response = await fetch("https://dalyblackdata.com/api/sections.php", {
+            const response = await fetch("https://api.casedb.co/sections.php", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(newSection),
@@ -296,7 +321,7 @@ export const LayoutEditor = () => {
         setIsSaving('phase');
 
         try {
-            const response = await fetch("https://dalyblackdata.com/api/sections.php", {
+            const response = await fetch("https://api.casedb.co/sections.php", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(newPhase),
@@ -319,7 +344,7 @@ export const LayoutEditor = () => {
         console.log(phaseData);
 
         try {
-            const response = await fetch("https://dalyblackdata.com/api/sections.php", {
+            const response = await fetch("https://api.casedb.co/sections.php", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ ...phaseData, id: editPhase }),
@@ -337,7 +362,7 @@ export const LayoutEditor = () => {
 
     const deletePhase = async (phaseId) => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/sections.php?phase_id=${phaseId}`, {
+            const response = await fetch(`https://api.casedb.co/sections.php?phase_id=${phaseId}`, {
                 method: "DELETE",
             });
             const data = await response.json();
@@ -364,7 +389,7 @@ export const LayoutEditor = () => {
         };
 
         try {
-            const response = await fetch("https://dalyblackdata.com/api/sections.php", {
+            const response = await fetch("https://api.casedb.co/sections.php", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(newField),
@@ -442,7 +467,7 @@ export const LayoutEditor = () => {
         if (editingSection?.length > 1 || editingSection?.icon !== iconKey && createNew != 'section') {
             const updatedSection = { ...editingSection, icon: iconKey };
             try {
-                const response = await fetch("https://dalyblackdata.com/api/sections.php", {
+                const response = await fetch("https://api.casedb.co/sections.php", {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(updatedSection),
@@ -462,7 +487,7 @@ export const LayoutEditor = () => {
     const handleSectionUpdate = async () => {
         if (editingSection) {
             try {
-                const response = await fetch("https://dalyblackdata.com/api/sections.php", {
+                const response = await fetch("https://api.casedb.co/sections.php", {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(editingSection),
@@ -506,7 +531,7 @@ export const LayoutEditor = () => {
         const targetOrderId = updatedPhases.findIndex(phase => phase.id === movedPhase.id);
 
         try {
-            const response = await fetch("https://dalyblackdata.com/api/sections.php", {
+            const response = await fetch("https://api.casedb.co/sections.php", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ 
@@ -553,7 +578,7 @@ export const LayoutEditor = () => {
         const targetOrderId = updatedSections.findIndex(section => section.id === movedSection.id);
 
         try {
-            const response = await fetch("https://dalyblackdata.com/api/sections.php", {
+            const response = await fetch("https://api.casedb.co/sections.php", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ 
@@ -575,7 +600,7 @@ export const LayoutEditor = () => {
 
     const fetchMarketingSources = async () => {
         try {
-            const response = await fetch("https://dalyblackdata.com/api/marketing_sources.php");
+            const response = await fetch("https://api.casedb.co/marketing_sources.php");
             const data = await response.json();
             setMarketingSources(data.marketing_sources || []);
         } catch (error) {
@@ -589,7 +614,7 @@ export const LayoutEditor = () => {
         setIsSaving('marketing');
 
         try {
-            const response = await fetch("https://dalyblackdata.com/api/marketing_sources.php", {
+            const response = await fetch("https://api.casedb.co/marketing_sources.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -628,37 +653,64 @@ export const LayoutEditor = () => {
     const renderFieldInput = (field) => {
         switch (field.field_id) {
             case 1:
-                return (
-                    <Text type="text" placeholder={field.name} disable/>
-                );
+                return <Text type="text" placeholder={field.name} disable/>;
             case 2:
-                return (
-                    <Text type="textarea" placeholder={field.name} disable/>
-                );
+                return <Text type="textarea" placeholder={field.name} disable/>;
             case 3:
-                return (
-                    <NumberInput type="currency" />
-                );
+                return <NumberInput type="currency" />;
+            case 4:
+                return <NumberInput type="percent" />;
+            case 5:
+                return <NumberInput type="number" />;
             case 6:
-                return (
-                    <DateInput disable/>
-                );
+                return <DateInput disabled/>;
+            case 7:
+                return <TimeInput />;
             case 8:
+                return <Contact selectedContact={formData[field.id]}/>;
+            case 9:
                 return (
-                    <Contact selectedContact={formData[field.id]} />
-                );
-            case 10:
-                return (
-                    <Dropdown options={field.options || "[]"} />
-                );
-            case 12:
-                return (
-                    <Boolean
-                        options={field.options || []}
-                        value={"Unknown"}
-                        onChange={(selectedValue) => handleFieldChange(field.id, selectedValue)}
+                    <ContactList
+                        selectedContact={formData[field.id]}
+                        onChange={() => {}}
                     />
                 );
+            case 10:
+                return <Dropdown
+                            options={"[]"}
+                        />;
+            case 11:
+                return <MultiSelect options={"[]"}/>;
+            case 12:
+                return <Boolean options={["Yes", "No", "Unknown"]} onChange={() => {}}/>;
+            case 13:
+                return <Subheader title={field.name} />;
+            case 14:
+                return <Instructions instructions={field.name} />;
+            case 15:
+                return <FileUpload
+                    onChange={() => {}}
+                />
+            case 16:
+                return <MultiFile
+                    onChange={() => {}}
+                />
+            case 17:
+                return (
+                    <Calculation/>
+                );
+            case 18:
+                return <DocGen
+                            onChange={() => {}}
+                        />;
+            case 20:
+                return <Deadline
+                            onChange={() => {}}
+                        />;
+            case 22:
+                return <SearchSelect
+                            onChange={() => {}}
+                        />;
             default:
                 return null;
         }
@@ -908,14 +960,10 @@ export const LayoutEditor = () => {
                     ) : (selectedTemplateHeader === 2 ? (
                         <div className='vitals-container'>
                             <div className='vitals-list'>
-                                <Vital vital='Case Type' description={'The type of case being managed. Value assigned during lead creation.'} />
-                                <Vital vital='Intake Data' description={'The date the case was created. Value assigned during lead creation.'} />
-                                <Vital vital='Intake Time' description={'The time the case was created. Value assigned during lead creation.'} />
-                                <Vital vital='Intake User' description={'The user who created the case. Value assigned during lead creation.'} />
-                                <Vital vital='Marketing Source' description={'The source of the lead. Value assigned during lead creation.'} />
-                                <Vital vital='Referred By' description={'The person or company who referred the lead. Value assigned during lead creation.'} />
-                                <Vital vital='DB Origination' description={'The Daly & Black employee who referred the lead. Value assigned during lead creation.'} />
-                                
+                                <Vital vital='Case Type' description='The type of case being managed. Value assigned during lead creation.' />
+                                {vitals.map((vital, index) => (
+                                    <Vital vital={vital.name} description={vital.description} />
+                                ))}
                             </div>
                         </div>
                     ) : (selectedTemplateHeader === 3 ? (
@@ -1075,6 +1123,10 @@ export const LayoutEditor = () => {
                                 <input type="text" id='vital_name' onChange={(e) => setVitalData({ ...vitalData, vital_name: e.target.value })} value={vitalData.vital_name} name='vital_name' placeholder="Vital Name"/>
                             </div>
                             <div className='form-group'>
+                                <label htmlFor='vital_description'>Vital Description</label>
+                                <textarea id='vital_description' onChange={(e) => setVitalData({ ...vitalData, vital_description: e.target.value })} value={vitalData.vital_description} name='vital_description' placeholder="Vital Description"/>
+                            </div>
+                            <div className='form-group'>
                                 <label htmlFor='vital_field'>Vital Field</label>
                                 <select className='default-select' onChange={(e) => setVitalData({ ...vitalData, vital_field: e.target.value })} value={vitalData.vital_field} >
                                     <option value=''>Select Vital Field</option>
@@ -1083,6 +1135,7 @@ export const LayoutEditor = () => {
                                     ))}
                                 </select>
                             </div>
+                            <button className='action alt' onClick={createVital}>Create</button>
                         </div>
                     ) : (createNew === 'folder' ? (
                             <div className='new-template'>

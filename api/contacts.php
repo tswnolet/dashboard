@@ -1,4 +1,5 @@
 <?php
+require 'headers.php';
 require './db.php';
 
 session_start();
@@ -114,6 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $first_name     = $_POST['first_name'] ?? null;
     $middle_name    = $_POST['middle_name'] ?? null;
     $last_name      = $_POST['last_name'] ?? null;
+    $full_name      = $_POST['first_name'] . ' ' . $middle_name ? $middle_name . ' ' : '' . $last_name;
     $nickname       = $_POST['nickname'] ?? null;
     $prefix         = $_POST['prefix'] ?? null;
     $suffix         = $_POST['suffix'] ?? null;
@@ -126,12 +128,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $contact_type   = $is_company ? 'Company' : 'Client';
 
     $sql = "INSERT INTO contacts 
-        (first_name, middle_name, last_name, nickname, prefix, suffix, company_name, job_title, department, date_of_birth, date_of_death, is_company, profile_picture, contact_type) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        (full_name, first_name, middle_name, last_name, nickname, prefix, suffix, company_name, job_title, department, date_of_birth, date_of_death, is_company, profile_picture, contact_type) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     $stmt = $conn->prepare($sql);
     $stmt->bind_param(
-        "sssssssssssiss",
+        "ssssssssssssiss",
+        $full_name,
         $first_name,
         $middle_name,
         $last_name,

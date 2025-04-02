@@ -36,7 +36,7 @@ export const Contacts = () => {
 
     const fetchContacts = async () => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/contacts.php?time=${new Date().getTime()}`);
+            const response = await fetch(`https://api.casedb.co/contacts.php?time=${new Date().getTime()}`);
             const data = await response.json();
             setContacts(data.contacts);
         } catch (error) {
@@ -76,7 +76,7 @@ export const Contacts = () => {
                                 <tr key={contact.id} className="contact" onClick={() => handleClick(contact)}>
                                     <td className="contact-picture td">
                                         {contact.profile_picture ? (
-                                            <img className="contact-picture-listed" src={`https://dalyblackdata.com/api/${contact.profile_picture}`} alt="Profile" />
+                                            <img className="contact-picture-listed" src={`https://api.casedb.co/${contact.profile_picture}`} alt="Profile" />
                                         ) : (
                                             <div className="contact-initials">
                                                 <span>

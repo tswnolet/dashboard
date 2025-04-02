@@ -1,11 +1,11 @@
 <?php
+require 'headers.php';
 require 'vendor/autoload.php';
 use Aws\S3\S3Client;
 use Aws\Exception\AwsException;
 
 header('Content-Type: application/json');
 
-// Use Direct Credentials Instead of aws-config.php
 $s3 = new S3Client([
     'version' => 'latest',
     'region'  => 'us-east-1',

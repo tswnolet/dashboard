@@ -9,7 +9,7 @@ const Reports = () => {
 
     const fetchReports = async () => {
         try {
-            const response = await fetch('/api/reports.php');
+            const response = await fetch('/reports.php');
             const data = await response.json();
             setReports(data);
         } catch (error) {

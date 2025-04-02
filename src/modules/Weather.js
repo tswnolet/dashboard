@@ -51,7 +51,7 @@ export default function Weather({ theme }) {
         setLoading(true);
         if (all) setLoadingAll(true);
 
-        fetch(`https://dalyblackdata.com/events.php?offset=${offset}&all=${all}`)
+        fetch(`https://api.casedb.co/events.php?offset=${offset}&all=${all}`)
             .then((response) => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
@@ -99,7 +99,7 @@ export default function Weather({ theme }) {
     
         try {
             const schoolDataPromises = chunks.map(async (chunk) => {
-                const response = await fetch(`https://dalyblackdata.com/schools.php?ids=${chunk.join(",")}`);
+                const response = await fetch(`https://api.casedb.co/schools.php?ids=${chunk.join(",")}`);
                 return response.json();
             });
 

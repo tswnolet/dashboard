@@ -13,7 +13,7 @@ export const Case = ({ user_id }) => {
 
     const fetchDocuments = async () => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/documents.php?case_id=${caseData?.case?.case_id}&${new Date().getTime()}`);
+            const response = await fetch(`https://api.casedb.co/documents.php?case_id=${caseData?.case?.case_id}&${new Date().getTime()}`);
             const data = await response.json();
             if (data.success) {
                 setFolders(data.folders || {});
@@ -25,7 +25,7 @@ export const Case = ({ user_id }) => {
 
     const fetchCase = async () => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/cases.php?id=${id}`);
+            const response = await fetch(`https://api.casedb.co/cases.php?id=${id}`);
             const data = await response.json();
             setCaseData(data);
             fetchSections(data.case.template_id);
@@ -36,7 +36,7 @@ export const Case = ({ user_id }) => {
 
     const fetchSections = async (id) => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/sections.php?template_id=${id}`);
+            const response = await fetch(`https://api.casedb.co/sections.php?template_id=${id}`);
             const data = await response.json();
             setSections(data.sections);
         } catch (error) {

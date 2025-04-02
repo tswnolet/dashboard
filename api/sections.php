@@ -1,4 +1,5 @@
 <?php
+require 'headers.php';
 include 'db.php';
 session_start();
 
@@ -9,6 +10,48 @@ if ($conn->connect_error) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    if (isset($_GET['vitals'], $_GET['template_id'], $_GET['lead_id'])) {
+        $lead_id = intval($_GET['lead_id']);
+        $template_id = intval($_GET['template_id']);
+    
+        $sql = "
+            SELECT 
+                vitals.*, 
+                fu.value AS value,
+                cf.field_id AS custom_field_id
+            FROM vitals 
+            LEFT JOIN field_updates fu 
+                ON vitals.field_id = fu.field_id 
+                AND fu.lead_id = ?
+            LEFT JOIN custom_fields cf 
+                ON vitals.field_id = cf.id
+            WHERE vitals.template_id = ?
+        ";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ii", $lead_id, $template_id);    
+        $stmt->execute();
+        $result = $stmt->get_result();
+    
+        $vitals = [];
+        while ($row = $result->fetch_assoc()) {
+            $vitals[] = $row;
+        }
+    
+        echo json_encode(['success' => true, 'vitals' => $vitals]);
+        exit;
+    }
+    if (isset($_GET['vitals'], $_GET['template_id'])) {
+        $sql = "SELECT * FROM vitals";
+        $result = $conn->query($sql);
+
+        $vitals = [];
+        while ($row = $result->fetch_assoc()) {
+            $vitals[] = $row;
+        }
+
+        echo json_encode(['success' => true, 'vitals' => $vitals]);
+        exit;
+    }
     if (isset($_GET['template_id']) && !empty($_GET['template_id'])) {
         $template_id = intval($_GET['template_id']);
 
@@ -66,6 +109,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         } else {
             echo json_encode(['success' => false, 'message' => 'Error adding field', 'error' => $conn->error]);
         }
+    }
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['vital']) && $_GET['vital'] === 'true') {
+    $input = json_decode(file_get_contents('php://input'), true);
+
+    if (isset($input['name'], $input['description'], $input['template_id'], $input['field_id'])) {
+        $sql = "INSERT INTO vitals (name, description, template_id, field_id) VALUES (?, ?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ssii", $input['name'], $input['description'], $input['template_id'], $input['field_id']);
+        $stmt->execute();
+
+        if ($stmt->affected_rows > 0) {
+            echo json_encode(['success' => true, 'message' => 'Vital added successfully']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Error adding vital', 'error' => $conn->error]);
+        }
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Missing required fields for vital']);
     }
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);

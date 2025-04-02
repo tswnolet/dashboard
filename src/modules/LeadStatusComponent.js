@@ -9,7 +9,7 @@ const LeadStatusComponent = ({ startDate, endDate, refreshTrigger }) => {
 
     const fetchLeadStatuses = async () => {
         try {
-            let url = "https://dalyblackdata.com/api/leaddocket.php";
+            let url = "https://api.casedb.co/leaddocket.php";
             if (startDate && endDate) {
                 url += `?start_date=${startDate}&end_date=${endDate}`;
             }

@@ -36,7 +36,7 @@ export const FileUpload = ({ fetchFiles, currentPath }) => {
         if (!newFolderName.trim()) return;
 
         try {
-            const response = await fetch("https://dalyblackdata.com/api/create-folder.php", {
+            const response = await fetch("https://api.casedb.co/create-folder.php", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ folderName: `${currentPath}/${newFolderName}` }),
@@ -72,7 +72,7 @@ export const FileUpload = ({ fetchFiles, currentPath }) => {
         if (overwrite) formData.append("overwrite", "true");
 
         try {
-            const response = await fetch("https://dalyblackdata.com/api/upload-file.php", {
+            const response = await fetch("https://api.casedb.co/upload-file.php", {
                 method: "POST",
                 body: formData,
             });
@@ -197,7 +197,7 @@ export const FileList = () => {
     const fetchFiles = async (folder = "Exhibits") => {
         setFetchingFiles(true);
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/list-files.php?folder=${folder}`);
+            const response = await fetch(`https://api.casedb.co/list-files.php?folder=${folder}`);
             const data = await response.json();
             setDisplayedFiles(sortFiles([...data]));
         } catch (error) {
@@ -208,7 +208,7 @@ export const FileList = () => {
 
     const fetchAllFiles = async () => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/fetch-all-files.php`);
+            const response = await fetch(`https://api.casedb.co/fetch-all-files.php`);
             const data = await response.json();
             if (data.success) {
                 setAllFiles(sortFiles([...data.files]));
@@ -282,7 +282,7 @@ export const FileList = () => {
     
     const handleFolderDownload = async (folderName) => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/list-folder.php?folder=${folderName}`);
+            const response = await fetch(`https://api.casedb.co/list-folder.php?folder=${folderName}`);
             const fileList = await response.json();
 
             const zip = new JSZip();
@@ -315,7 +315,7 @@ export const FileList = () => {
                 ? { folderPath: file.path } 
                 : { fileKey: file.fileKey };
     
-            const response = await fetch("https://dalyblackdata.com/api/list-files.php", {
+            const response = await fetch("https://api.casedb.co/list-files.php", {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(requestBody),
@@ -335,7 +335,7 @@ export const FileList = () => {
         } catch (error) {
             console.error("Error deleting:", error);
         }
-    };      
+    };
 
     const handleFolderClick = (folderPath) => {
         setCurrentFolder(folderPath);

@@ -1,4 +1,5 @@
 <?php
+require 'headers.php';
 require './functions.php';
 
 function getUserPreferences($conn, $userId) {

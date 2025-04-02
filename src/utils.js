@@ -1,7 +1,7 @@
 import axios from "axios";
 import * as XLSX from "xlsx";
 
-const API_URL = "https://dalyblackdata.com/proxy.php";
+const API_URL = "https://casedb.co/proxy.php";
 
 // Function to handle file upload and parse the data
 export const handleFileUpload = (event, setFile, setLeads) => {

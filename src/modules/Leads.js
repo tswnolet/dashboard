@@ -25,7 +25,7 @@ export const Leads = ({ user }) => {
 
     const fetchLeads = async () => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/leads.php?time=${new Date().getTime()}`);
+            const response = await fetch(`https://api.casedb.co/leads.php?time=${new Date().getTime()}`);
             const data = await response.json();
             setLeads(data.leads);
         } catch (error) {

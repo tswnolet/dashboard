@@ -60,7 +60,7 @@ export const SearchBar = ({ placeholder = null, expanded, setExpanded, setSearch
         className="search-input"
         onChange={(e) => setSearchQuery(e.target.value)}
         style={{ display: expanded ? "block" : "none" }}
-        autofocus={autofocus}
+        autoFocus={autofocus}
       />
     </div>
   );

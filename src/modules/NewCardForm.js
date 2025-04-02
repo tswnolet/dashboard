@@ -19,7 +19,7 @@ const NewCardForm = ({ addCard }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/data.php', {
+      const response = await fetch('/data.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)

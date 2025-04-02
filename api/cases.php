@@ -1,4 +1,5 @@
 <?php
+require 'headers.php';
 require 'db.php';
 require 's3-helper.php';
 require 'folder-template-fetch.php';

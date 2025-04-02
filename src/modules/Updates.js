@@ -22,7 +22,7 @@ export const Updates = () => {
     useEffect(() => {
         const fetchUpdates = async () => {
             try {
-                const response = await fetch('https://dalyblackdata.com/api/updates.php');
+                const response = await fetch('https://api.casedb.co/updates.php');
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
@@ -67,7 +67,7 @@ export const Updates = () => {
     const setSeenUpdates = () => {
         const maxVersion = Math.max(...updates.versions.map(v => parseFloat(v)));
 
-        fetch('https://dalyblackdata.com/api/updates.php', {
+        fetch('https://api.casedb.co/updates.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

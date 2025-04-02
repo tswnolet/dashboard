@@ -83,7 +83,7 @@ export const CaseHeader = ({ caseData = {}, fetchCase }) => {
 
     const updateTags = async (updatedTags) => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/update-tags.php`, {
+            const response = await fetch(`https://api.casedb.co/update-tags.php`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ case_id: caseInfo.id, tags: updatedTags }),
@@ -99,7 +99,7 @@ export const CaseHeader = ({ caseData = {}, fetchCase }) => {
     };
 
     const contactDisplay = contact?.profile_picture
-        ? <img src={`https://dalyblackdata.com/api/${contact.profile_picture}`} alt="Profile" />
+        ? <img src={`https://api.casedb.co/${contact.profile_picture}`} alt="Profile" />
         : <h2>{contact.first_name?.trim().charAt(0) + contact?.last_name?.trim().charAt(0) || "DB"}</h2>;
 
     return (

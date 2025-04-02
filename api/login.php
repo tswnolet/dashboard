@@ -1,4 +1,5 @@
 <?php
+require 'headers.php';
 require 'db.php';
 
 $data = json_decode(file_get_contents('php://input'), true);
@@ -42,6 +43,14 @@ $stmt = $conn->prepare('UPDATE users SET token = ? WHERE id = ?');
 $stmt->bind_param('si', $token, $userId);
 
 if ($stmt->execute()) {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'domain' => '.casedb.co',
+        'secure' => true,
+        'httponly' => true,
+        'samesite' => 'None'
+    ]);
     session_start();
     $_SESSION['user_id'] = $userId;
     $_SESSION['name'] = $name;

@@ -61,7 +61,7 @@ export const CreateContact = ({ setCreateContact, fetchContacts }) => {
         }
     
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/contacts.php`, {
+            const response = await fetch(`https://api.casedb.co/contacts.php`, {
                 method: "POST",
                 body: formData
             });
@@ -156,7 +156,6 @@ export const CreateContact = ({ setCreateContact, fetchContacts }) => {
                                 </div>
                             </div>
                         )}
-                        <div className='divider'></div>
                         <div className="form-group cname">
                             <label htmlFor="company_name">Company Name</label>
                             <input type="text" id="company_name" value={contactInformation.company_name} onChange={(e) => setContactInformation({ ...contactInformation, company_name: e.target.value })} />

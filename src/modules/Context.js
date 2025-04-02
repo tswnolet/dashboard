@@ -16,13 +16,15 @@ const Context = ({ setAccessLevel, setUser, setLoggedIn, setShowAlert, showAlert
 
   const fetchData = (e) => {
     e.preventDefault();
-    fetch(`/api/${isLogin ? 'login' : 'signup'}.php`, {
+    fetch(`https://api.casedb.co/${isLogin ? 'login' : 'signup'}.php`, {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData)
     })
       .then((response) => response.json())
       .then((data) => {
+        console.log('API response:', data);
         if (data.success) {
           if (isLogin) {
             localStorage.setItem('token', data.token);
@@ -44,7 +46,7 @@ const Context = ({ setAccessLevel, setUser, setLoggedIn, setShowAlert, showAlert
         }
       })
       .catch((err) => {
-        console.error(err);
+        console.error('Error during fetch:', err); // Debugging log
         setError('An error occurred');
       });
   };

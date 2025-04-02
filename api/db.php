@@ -1,8 +1,8 @@
 <?php
-$host = 'localhost';
-$dbUsername = 'lehzrxmy_DB';
-$dbPassword = 'Dalyblack300!';
-$dbName = 'lehzrxmy_WPSGZ';
+$host = 'casedb.cluster-cq58cae80fw0.us-east-1.rds.amazonaws.com';
+$dbUsername = 'admin';
+$dbPassword = 'Scorpius1!';
+$dbName = 'casedb';
 
 $conn = new mysqli($host, $dbUsername, $dbPassword, $dbName);
 

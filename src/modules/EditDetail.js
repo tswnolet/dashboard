@@ -50,7 +50,7 @@ export const EditDetail = ({ setEditContact, contactData, fetchContacts }) => {
                 type: "home", line1: "", line2: "", city: "", state: "", postal_code: ""
             }]);            
 
-            setProfilePicture(contactData.profile_picture ? `https://dalyblackdata.com/api/${contactData.profile_picture}` : null);
+            setProfilePicture(contactData.profile_picture ? `https://api.casedb.co/${contactData.profile_picture}` : null);
         }
     }, [contactData]);
 
@@ -94,7 +94,7 @@ export const EditDetail = ({ setEditContact, contactData, fetchContacts }) => {
         }
     
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/update-contact.php`, {
+            const response = await fetch(`https://api.casedb.co/update-contact.php`, {
                 method: "POST",
                 body: formData
             });

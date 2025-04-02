@@ -19,20 +19,12 @@ export const CreateCase = ({ user, setCreateCase, fetchCases, caseTemplates }) =
     const [leadOrContact, setLeadOrContact] = useState("contact");
 
     useEffect(() => {
-        console.log("Case data:", caseData);
-    }, [caseData]);
-
-    useEffect(() => {
         setCaseData((prevData) => ({
             ...prevData,
             contact_id: Number(selectedContact?.contact_id || selectedContact?.id) || null,
             lead_id: selectedContact?.contact_id ? Number(selectedContact.id) : null
         }));
     }, [selectedContact]);
-
-    useEffect(() => {
-        
-    })
 
     const handleFieldChange = (field, value) => {
         setCaseData((prevData) => ({
@@ -49,7 +41,7 @@ export const CreateCase = ({ user, setCreateCase, fetchCases, caseTemplates }) =
 
     const handleCreateCase = async () => {
         try {
-            const response = await fetch("https://dalyblackdata.com/api/cases.php", {
+            const response = await fetch("https://api.casedb.co/cases.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -74,10 +66,6 @@ export const CreateCase = ({ user, setCreateCase, fetchCases, caseTemplates }) =
         setCreateLead(false);
         setCreateCase(true);
     };
-
-    useEffect(() => {
-        console.log(createLead);
-    }, [createLead]);
 
     return (
         <>

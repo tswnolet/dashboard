@@ -116,6 +116,7 @@ td.case-name {
     align-items: flex-start;
     flex-direction: column;
     width: 100%;
+    user-select: none;
 }
 
 .sidebar-vital > span:first-child {

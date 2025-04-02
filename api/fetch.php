@@ -1,4 +1,5 @@
 <?php
+require 'headers.php';
 require './db.php';
 require './user_functions.php';
 

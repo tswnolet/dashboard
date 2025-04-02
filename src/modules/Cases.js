@@ -53,7 +53,7 @@ export const Cases = ({ user }) => {
 
     const fetchCases = async () => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/cases.php?time=${new Date().getTime()}`);
+            const response = await fetch(`https://api.casedb.co/cases.php?time=${new Date().getTime()}`);
             const data = await response.json();
             setCases(data);
         } catch (error) {
@@ -88,7 +88,7 @@ export const Cases = ({ user }) => {
     
     const fetchCaseTemplates = async () => {
         try {
-            const response = await fetch("https://dalyblackdata.com/api/layout.php");
+            const response = await fetch("https://api.casedb.co/layout.php");
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -104,7 +104,7 @@ export const Cases = ({ user }) => {
 
     const fetchCaseTypes = async () => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/custom_fields.php?time=${new Date().getTime()}`);
+            const response = await fetch(`https://api.casedb.co/custom_fields.php?time=${new Date().getTime()}`);
             const data = await response.json();
             setCaseTypes(data.case_types);
         } catch (error) {
@@ -154,7 +154,7 @@ export const Cases = ({ user }) => {
                                 }}>
                                     <td className='case-name' title={`Case ID: ${c.id}`} onClick={() => navigate(`/case/${c.case_id}`)} ref={nameRef}>
                                         {c.contact_display.includes('uploads')
-                                            ? <img className='contact-initials' src={`https://dalyblackdata.com/api/${c.contact_display}`} alt="Profile" />
+                                            ? <img className='contact-initials' src={`https://api.casedb.co/${c.contact_display}`} alt="Profile" />
                                             : <span className='contact-initials'>{c.contact_display}</span>
                                         }
                                         {c.case_name}

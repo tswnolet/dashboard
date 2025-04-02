@@ -61,7 +61,13 @@ const App = () => {
     }
 
     try {
-      const response = await fetch('https://dalyblackdata.com/api/session.php', { credentials: 'include' });
+      const response = await fetch('https://api.casedb.co/session.php', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       const data = await response.json();
       if (data.isLoggedIn) {
         setLoggedIn(true);
@@ -87,7 +93,7 @@ const App = () => {
     if (process.env.NODE_ENV === 'development') {
         return;
     }
-    await fetch('https://dalyblackdata.com/api/session.php?close', { method: 'GET' });
+    await fetch('https://api.casedb.co/session.php?close', { method: 'GET' });
     setLoggedIn(false);
     window.location.href = '/login';
     setShowAlert(true);

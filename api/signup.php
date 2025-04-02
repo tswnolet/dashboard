@@ -1,4 +1,5 @@
 <?php
+require 'headers.php';
 require './db.php';
 require './mailer.php';
 
@@ -151,7 +152,7 @@ if ($requestMethod === 'POST') {
                         <p>Best regards,<br>Tyler</p>
                     </div>
                     <div class='footer'>
-                        <img src='https://dalyblackdata.com/api/logo.png' alt='Daly & Black' class='logo' />
+                        <img src='https://casedb.co/logo.png' alt='Daly & Black' class='logo' />
                     </div>
                 </div>
             </body>
@@ -172,7 +173,7 @@ if ($requestMethod === 'POST') {
                 <p>Username: <strong>$username</strong></p>
                 <p>Email: <strong>$email</strong></p>
                 <p>Please review and approve their access by clicking the link below:</p>
-                <p><a href='https://dalyblackdata.com/api/approve.php?token=$token'>Approve User</a></p>
+                <p><a href='https://casedb.co/approve.php?token=$token'>Approve User</a></p>
             </body>
             </html>
         ";

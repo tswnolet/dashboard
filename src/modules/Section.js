@@ -345,7 +345,7 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
 
     const fetchFields = async () => {
         try {
-            const res = await fetch(`https://dalyblackdata.com/api/custom_fields.php?section_id=${section_id}&template_id=${template_id}&lead_id=${lead_id}&${Date.now()}`);
+            const res = await fetch(`https://api.casedb.co/custom_fields.php?section_id=${section_id}&template_id=${template_id}&lead_id=${lead_id}&${Date.now()}`);
             const data = await res.json();
             
             setFields(data.custom_fields || []);
@@ -373,7 +373,7 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
     };    
 
     const updateFields = (data) => {
-        fetch('https://dalyblackdata.com/api/custom_fields.php', {
+        fetch('https://api.casedb.co/custom_fields.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -585,7 +585,7 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
                 formDataObj.append("section_name", sectionName);
                 formDataObj.append("file[]", formData[field.id]);
     
-                uploads.push(fetch("https://dalyblackdata.com/api/documents.php", {
+                uploads.push(fetch("https://api.casedb.co/documents.php", {
                     method: "POST",
                     body: formDataObj,
                 }));
@@ -598,7 +598,7 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
                     formDataObj.append("section_name", sectionName);
                     formDataObj.append("file[]", file);
     
-                    uploads.push(fetch("https://dalyblackdata.com/api/documents.php", {
+                    uploads.push(fetch("https://api.casedb.co/documents.php", {
                         method: "POST",
                         body: formDataObj,
                     }));
@@ -626,8 +626,6 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
             </div>
         );
     }
-
-    console.log(sectionName);
 
     return (
         <div className='case-section'>
@@ -677,8 +675,10 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
                             )}
                         </>
                     )}
+
                 </>
             )}
+            {(sectionName !== "Documents" && sectionName !== "Activity Feed") && output}
         </div>
       );      
 };

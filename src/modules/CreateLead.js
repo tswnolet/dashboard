@@ -51,7 +51,7 @@ export const CreateLead = ({ user, setCreateLead }) => {
         }
     
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/custom_fields.php`, {
+            const response = await fetch(`https://api.casedb.co/custom_fields.php`, {
                 method: 'POST',
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -71,7 +71,7 @@ export const CreateLead = ({ user, setCreateLead }) => {
 
     const fetchUsers = async () => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/user.php?users=true&time=${new Date().getTime()}`);
+            const response = await fetch(`https://api.casedb.co/user.php?users=true&time=${new Date().getTime()}`);
             const data = await response.json();
             setUsers(data.users);
         } catch (error) {
@@ -81,7 +81,7 @@ export const CreateLead = ({ user, setCreateLead }) => {
 
     const fetchMarketingSources = async () => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/marketing_sources.php?time=${new Date().getTime()}`);
+            const response = await fetch(`https://api.casedb.co/marketing_sources.php?time=${new Date().getTime()}`);
             const data = await response.json();
             setMarketingSources(data.marketing_sources);
         } catch (error) {
@@ -91,7 +91,7 @@ export const CreateLead = ({ user, setCreateLead }) => {
 
     const fetchStatuses = async () => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/statuses.php?time=${new Date().getTime()}`);
+            const response = await fetch(`https://api.casedb.co/statuses.php?time=${new Date().getTime()}`);
             const data = await response.json();
             setStatuses(data.statuses);
         } catch (error) {
@@ -136,7 +136,7 @@ export const CreateLead = ({ user, setCreateLead }) => {
         };
     
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/leads.php`, {
+            const response = await fetch(`https://api.casedb.co/leads.php`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(requestData),
@@ -183,7 +183,7 @@ export const CreateLead = ({ user, setCreateLead }) => {
 
     const fetchCaseTypes = async () => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/custom_fields.php?time=${new Date().getTime()}`);
+            const response = await fetch(`https://api.casedb.co/custom_fields.php?time=${new Date().getTime()}`);
             const data = await response.json();
             setCaseTypes(data.case_types);
         } catch (error) {
@@ -193,7 +193,7 @@ export const CreateLead = ({ user, setCreateLead }) => {
 
     const fetchCaseFields = async (caseTypeId) => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/case_fields.php?case_type_id=${caseTypeId}`);
+            const response = await fetch(`https://api.casedb.co/case_fields.php?case_type_id=${caseTypeId}`);
             const data = await response.json();
             if (data.success) {
                 setCaseFields(data.fields);

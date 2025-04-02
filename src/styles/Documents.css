@@ -39,6 +39,12 @@
     text-decoration: none;
 }
 
+table:not(.exhibits) td:not(.case-name) {
+    &:not(.contact-picture) {
+        width: 100%;
+    }
+}
+
 .folder-node.active {
     background-color: var(--border-color);
     color: var(--fill);

@@ -101,7 +101,7 @@ export const Dropdown = ({ placeholder = null, options = [], value = "", onChang
         if (marketing_list) {
             const fetchMarketingSources = async () => {
                 try {
-                    const response = await fetch(`https://dalyblackdata.com/api/marketing_sources.php?time=${new Date().getTime()}`);
+                    const response = await fetch(`https://api.casedb.co/marketing_sources.php?time=${new Date().getTime()}`);
                     const data = await response.json();
                     const sources = data.marketing_sources.map(source => source.source_name);
                     setParsedOptions(sources);
@@ -430,7 +430,7 @@ export const Calculation = ({ options, fieldUpdates = [], fields = [], lead_id, 
             try {
                 lastPosted.current = result;
 
-                await fetch('https://dalyblackdata.com/api/custom_fields.php', {
+                await fetch('https://api.casedb.co/custom_fields.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -472,7 +472,7 @@ export const Contact = ({ selectedContact = '', onCreateNewContact, setSelectedC
     const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
 
     useEffect(() => {
-        if (searchTerm.trim().length >= 2) {
+        if (searchTerm?.trim().length >= 2) {
             lead ? fetchLeads(searchTerm) : fetchContacts(searchTerm);
         } else {
             setSearchResults([]);
@@ -482,7 +482,7 @@ export const Contact = ({ selectedContact = '', onCreateNewContact, setSelectedC
 
     const fetchContacts = async (query) => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/contacts.php?search=${encodeURIComponent(query)}&time=${new Date().getTime()}`);
+            const response = await fetch(`https://api.casedb.co/contacts.php?search=${encodeURIComponent(query)}&time=${new Date().getTime()}`);
             const data = await response.json();
             if (data.success) {
                 setSearchResults(data.contacts.slice(0, 5));
@@ -501,7 +501,7 @@ export const Contact = ({ selectedContact = '', onCreateNewContact, setSelectedC
 
     const fetchLeads = async (query) => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/leads.php?search=${encodeURIComponent(query)}&time=${new Date().getTime()}`);
+            const response = await fetch(`https://api.casedb.co/leads.php?search=${encodeURIComponent(query)}&time=${new Date().getTime()}`);
             const data = await response.json();
             if (data.success) {
                 setSearchResults(data.leads.slice(0, 5));
@@ -543,12 +543,12 @@ export const Contact = ({ selectedContact = '', onCreateNewContact, setSelectedC
 
     const fetchContact = async (id) => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/contacts.php?id=${id}`);
+            const response = await fetch(`https://api.casedb.co/contacts.php?id=${id?.id ? id.id : id}`);
             const data = await response.json();
             if (data.contacts.id) {
                 setDisplayContact(data.contacts);
             } else {
-                const response = await fetch(`https://dalyblackdata.com/api/user.php?id=${id}`);
+                const response = await fetch(`https://api.casedb.co/user.php?id=${id?.id ? id.id : id}`);
                 const data = await response.json();
                 if (response.ok) {
                     setDisplayContact(data.contacts);
@@ -629,7 +629,7 @@ export const Contact = ({ selectedContact = '', onCreateNewContact, setSelectedC
             ) : (
                 <div className='contact-shortform'>
                     {displayContact?.profile_picture
-                        ? <img src={`https://dalyblackdata.com/api/${displayContact?.profile_picture}`} alt="Profile" className='contact-initials'/>
+                        ? <img src={`https://api.casedb.co/${displayContact?.profile_picture}`} alt="Profile" className='contact-initials'/>
                         : <span className='contact-initials'>{`${displayContact.full_name?.trim().charAt(0)}${displayContact.last_name?.trim().charAt(0)}`}</span>
                     }
                     <div className='contact-display'>
@@ -662,7 +662,7 @@ export const ContactList = ({ onChange, value = [] }) => {
                 const contactData = await Promise.all(
                     value.map(async (id) => {
                         try {
-                            const res = await fetch(`https://dalyblackdata.com/api/contacts.php?id=${id}`);
+                            const res = await fetch(`https://api.casedb.co/contacts.php?id=${id}`);
                             const data = await res.json();
                             return data.success
                                 ? { id: Date.now() + Math.random(), selectedContact: data.contacts }
@@ -739,7 +739,7 @@ export const DocGen = ({ value, onChange }) => {
     useEffect(() => {
         const fetchTemplates = async () => {
             try {
-                const response = await fetch(`https://dalyblackdata.com/api/templates.php?time=${new Date().getTime()}`);
+                const response = await fetch(`https://api.casedb.co/templates.php?time=${new Date().getTime()}`);
                 const data = await response.json();
                 if (data.success) {
                     setTemplates(data.templates);
@@ -768,8 +768,6 @@ export const Deadline = ({ value, title, onChange }) => {
         due: value?.due || '',
         done: value?.done || ''
     };
-
-    console.log(parsedValue);
 
     const handleDateChange = (key) => (newVal) => {
         onChange({ [key]: newVal });
@@ -834,7 +832,7 @@ export const DataTable = ({ fields, data, onRowClick }) => {
         });
     
         if (contactIds.size > 0) {
-            fetch(`https://dalyblackdata.com/api/contacts.php?ids=${Array.from(contactIds).join(',')}`)
+            fetch(`https://api.casedb.co/contacts.php?ids=${Array.from(contactIds).join(',')}`)
                 .then(res => res.json())
                 .then(result => {
                     setContactMap(result.contacts.reduce((map, contact) => {
@@ -967,7 +965,7 @@ export const AddActivity = ({ users, fetchFeed, case_id, onClick, addActivity, s
                 });
             }            
     
-            const response = await fetch("https://dalyblackdata.com/api/activity_feed.php", {
+            const response = await fetch("https://api.casedb.co/activity_feed.php", {
                 method: "POST",
                 body: formData,
             });

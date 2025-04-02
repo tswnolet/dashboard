@@ -2,12 +2,12 @@
 session_set_cookie_params([
   'lifetime' => 365 * 24 * 60 * 60, // 1 year
   'path' => '/',
-  'domain' => '.dalyblackdata.com', // Your domain
+  'domain' => '.casedb.co', // Your domain
   'secure' => true, // For HTTPS
   'httponly' => true,
   'samesite' => 'None', // Required for cross-origin
 ]);
-require './headers.php';
+require 'headers.php';
 
 // Unset all session variables
 $_SESSION = array();

@@ -1,40 +1,56 @@
 import { Activity, Dot, Loader2 } from "lucide-react";
 import React, { useState, useEffect, use } from "react";
 import { useNavigate } from "react-router";
-import { Contact } from "./FieldComponents";
+import {
+    Contact,
+    ContactList,
+    Text,
+    NumberInput,
+    DateInput,
+    TimeInput,
+    Dropdown,
+    MultiSelect,
+    Boolean,
+    Subheader,
+    Instructions,
+    FileUpload,
+    MultiFile,
+    Calculation,
+    DocGen,
+    Deadline,
+    SearchSelect
+} from "./FieldComponents";
 
-const EditableVital = ({ 
-    label, 
-    value, 
-    field, 
-    table, 
-    caseId, 
-    leadId, 
-    updateVital, 
-    formatDate, 
-    options = [], 
-    isContact = false 
+const EditableVital = ({
+    label,
+    value,
+    field,
+    table,
+    updateVital,
+    formatDate,
+    options = [],
+    isContact = false,
+    typeId,
+    allFields = [],
+    fieldUpdates = [],
+    lead_id = null,
+    sectionName = ''
 }) => {
     const [editing, setEditing] = useState(false);
     const [inputValue, setInputValue] = useState(value || "");
     const [loading, setLoading] = useState(false);
 
-    const isDateField = ["incident_date", "mediation_date", "updated_at", "create_date"].includes(field);
-    const isDropdown = options.length > 0;
+    console.log(value, inputValue);
 
     useEffect(() => {
-        if (isDateField && value) {
-            setInputValue(value ? new Date(value).toISOString().slice(0, 10) : ""); 
-        } else {
-            setInputValue(value || "");
-        }
+        setInputValue(value || "");
     }, [value]);
 
-    const handleSave = async (newValue) => {
-        if (isDateField) {
-            newValue = new Date(newValue).toISOString().slice(0, 10);
-        }
+    const handleFieldChange = async (fieldId, newVal) => {
+        await handleSave(newVal);
+    };
 
+    const handleSave = async (newValue) => {
         if (newValue !== value) {
             setLoading(true);
             await updateVital(field, newValue, table);
@@ -43,33 +59,53 @@ const EditableVital = ({
         setEditing(false);
     };
 
-    return (
-        <div className='sidebar-vital' onDoubleClick={() => setEditing(true)}>
-            <span className='subtext'>{label}:</span>
-            {editing ? (
-                isContact ? (
-                    <Contact 
-                        selectedContact={{ id: inputValue, full_name: value }}
-                        setSelectedContact={(contact) => handleSave(contact.id)}
-                        onCreateNewContact={() => console.log("Create new contact clicked")} 
-                    />
-                ) : isDropdown ? (
-                    <select
-                        className='default-select'
-                        value={inputValue}
-                        onChange={(e) => handleSave(e.target.value)}
-                        onBlur={() => setEditing(false)}
-                        autoFocus
-                    >
-                        {options.map((opt) => (
-                            <option key={opt.id} value={opt.id}>
-                                {opt.name}
-                            </option>
-                        ))}
-                    </select>
-                ) : (
+    const renderInputByType = () => {
+        switch (typeId) {
+            case 1:
+                return <Text type="text" placeholder={label} value={inputValue} onChange={(val) => handleFieldChange(field, val)} />;
+            case 2:
+                return <Text type="textarea" placeholder={label} value={inputValue} onChange={(val) => handleFieldChange(field, val)} />;
+            case 3:
+                return <NumberInput type="currency" value={inputValue} onChange={(val) => handleFieldChange(field, val)} />;
+            case 4:
+                return <NumberInput type="percent" value={inputValue} onChange={(val) => handleFieldChange(field, val)} />;
+            case 5:
+                return <NumberInput type="number" value={inputValue} onChange={(val) => handleFieldChange(field, val)} />;
+            case 6:
+                return <DateInput value={String(inputValue)} onChange={(val) => handleFieldChange(field, val)} />;
+            case 7:
+                return <TimeInput value={inputValue} onChange={(val) => handleFieldChange(field, val)} />;
+            case 8:
+                return <Contact selectedContact={inputValue} setSelectedContact={(contact) => handleFieldChange(field, contact?.id || null)} />;
+            case 9:
+                return <ContactList value={Array.isArray(inputValue) ? inputValue : []} onChange={(ids) => handleFieldChange(field, ids)} />;
+            case 10:
+                return <Dropdown options={options || "[]"} value={inputValue} onChange={(index) => handleFieldChange(field, index)} />;
+            case 11:
+                return <MultiSelect options={options || "[]"} value={inputValue} onChange={(val) => handleFieldChange(field, val)} />;
+            case 12:
+                return <Boolean options={options || []} value={inputValue != undefined ? Number(inputValue) : 2} onChange={(selectedValue) => handleFieldChange(field, selectedValue)} />;
+            case 13:
+                return <Subheader title={label} />;
+            case 14:
+                return <Instructions instructions={label} />;
+            case 15:
+                return <FileUpload value={inputValue} onChange={(val) => handleFieldChange(field, val)} lead_id={lead_id} section_name={sectionName} />;
+            case 16:
+                return <MultiFile value={inputValue} lead_id={lead_id} sectionName={sectionName} onChange={(val) => handleFieldChange(field, val)} />;
+            case 17:
+                return <Calculation options={options} fieldId={field} lead_id={lead_id} fields={allFields} fieldUpdates={fieldUpdates} onChange={handleSave} />;
+            case 18:
+                return <DocGen value={inputValue} onChange={(val) => handleFieldChange(field, val)} />;
+            case 20:
+                const parsedValue = typeof inputValue === 'string' ? JSON.parse(inputValue || '{}') : inputValue || {};
+                return <Deadline value={{ due: parsedValue.due || '', done: parsedValue.done || '' }} title={label} onChange={(updated) => handleFieldChange(field, { ...parsedValue, ...updated })} />;
+            case 22:
+                return <SearchSelect value={inputValue} onChange={(val) => handleFieldChange(field, val)} options={options} />;
+            default:
+                return (
                     <input
-                        type={isDateField ? "date" : "text"}
+                        type="text"
                         className='vital-input'
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
@@ -77,10 +113,24 @@ const EditableVital = ({
                         onKeyDown={(e) => e.key === "Enter" && handleSave(inputValue)}
                         autoFocus
                     />
-                )
+                );
+        }
+    };
+
+    return (
+        <div className='sidebar-vital' onDoubleClick={() => setEditing(true)}>
+            <span className='subtext'>{label}:</span>
+            {editing ? (
+                loading 
+                    ? <Loader2 className="spinner" /> 
+                    : (
+                        <div className='form-group'>
+                            {renderInputByType()}
+                        </div>
+                    )
             ) : (
                 <span className='subtext'>
-                    {loading ? <Loader2 className="spinner" /> : (isDateField ? formatDate(value)[0] : value)}
+                    {loading ? <Loader2 className="spinner" /> : (typeof value === 'string' && value.includes("T") ? formatDate(value)[0] : value)}
                 </span>
             )}
         </div>
@@ -91,8 +141,27 @@ export const CaseSidebar = ({ id, cases, fetchCases, caseTemplates, caseTypes, f
     const [caseData, setCaseData] = useState(cases.find((c) => c.case_id === id) ?? {});
     const [leadData, setLeadData] = useState(caseData.lead_data ?? {});
     const [leadUpdates, setLeadUpdates] = useState(leadData.lead_updates_data ?? []);
+    const [vitals, setVitals] = useState([]);
 
     const navigate = useNavigate();
+
+    const fetchVitals = async () => {
+        try {
+            const response = await fetch(`https://api.casedb.co/sections.php?vitals=true&template_id=${caseData.template_id}&lead_id=${leadData.lead_id}&${new Date().getTime()}`);
+            const data = await response.json();
+            if (data.success) {
+                setVitals(data.vitals || []);
+            }
+        } catch (error) {
+            console.error("Error fetching vitals:", error);
+        }
+    };
+
+    useEffect(() => {
+        if (caseData.template_id && caseData.case_id) {
+            fetchVitals();
+        }
+    }, [caseData.template_id, caseData.case_id]);
 
     const updateVital = async (field, newValue, table) => {
         const payload = {
@@ -104,7 +173,7 @@ export const CaseSidebar = ({ id, cases, fetchCases, caseTemplates, caseTypes, f
         };
 
         try {
-            const response = await fetch("https://dalyblackdata.com/api/update-vital.php", {
+            const response = await fetch("https://api.casedb.co/update-vital.php", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
@@ -136,7 +205,7 @@ export const CaseSidebar = ({ id, cases, fetchCases, caseTemplates, caseTypes, f
         <div className='case-sidebar'>
             <div className='case-sidebar-header' onClick={() => navigate(`/case/${caseData.case_id}`)}>
                 {caseData.contact_display && caseData.contact_display.includes('uploads')
-                    ? <img className='contact-initials large' src={`https://dalyblackdata.com/api/${caseData.contact_display}`} alt="Profile" />
+                    ? <img className='contact-initials large' src={`https://api.casedb.co/${caseData.contact_display}`} alt="Profile" />
                     : <span className='contact-initials large'>{caseData.contact_display}</span>
                 }
                 <div className="case-info">
@@ -161,56 +230,18 @@ export const CaseSidebar = ({ id, cases, fetchCases, caseTemplates, caseTypes, f
 
             <div className='case-sidebar-vitals'>
                 <div className='sidebar-vital-header'><Activity size={16}/>{" "}Vitals</div>
-                <EditableVital 
-                    label='Case Type' 
-                    value={caseTypes.find((type) => type.id === leadData.case_type_id)?.name}
-                    field="case_type_id"
-                    table="leads"
-                    caseId={caseData.case_id}
-                    leadId={leadData.lead_id}
-                    updateVital={updateVital}
-                    formatDate={formatDate}
-                    options={caseTypes} 
-                />
-                <EditableVital 
-                    label={`Type of ${caseTypes.find((type) => type.id === leadData.case_type_id)?.name} Case`}
-                    value={leadUpdates.find((data) => data.field_name === `Type of ${caseTypes.find((type) => type.id === leadData.case_type_id)?.name} Case`)?.value}
-                    field="type_of_case"
-                    table="lead_updates"
-                    caseId={caseData.case_id}
-                    leadId={leadData.lead_id}
-                    updateVital={updateVital}
-                    formatDate={formatDate}
-                />
-                <EditableVital 
-                    label='Incident Date' 
-                    value={leadData.incident_date}
-                    field="incident_date"
-                    table="leads"
-                    caseId={caseData.case_id}
-                    leadId={leadData.lead_id}
-                    updateVital={updateVital}
-                    formatDate={formatDate}
-                />
-                <EditableVital
-                    label='Primary Attorney'
-                    value={caseData?.team?.first_primary ?? ""}
-                    field="team.first_primary"
-                    table="cases"
-                    caseId={caseData.case_id}
-                    leadId={leadData.lead_id}
-                    updateVital={updateVital}
-                />
-                <EditableVital 
-                    label="Referred To" 
-                    value={leadData.referred_to_name}
-                    field="referred_to"
-                    table="leads"
-                    caseId={caseData.case_id}
-                    leadId={leadData.lead_id}
-                    updateVital={updateVital}
-                    isContact={true}
-                />
+                {vitals.map((vital) => (
+                    <EditableVital
+                        key={vital.id}
+                        label={vital.name}
+                        value={vital.value}
+                        typeId={vital.custom_field_id}
+                        field={vital.field_id}
+                        table="custom_fields"
+                        updateVital={updateVital}
+                        formatDate={formatDate}
+                    />
+                ))}
             </div>
         </div>
     );

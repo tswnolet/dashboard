@@ -90,7 +90,7 @@ export const CustomFields = () => {
 
     const fetchAllData = async () => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/custom_fields.php?time=${new Date().getTime()}`);
+            const response = await fetch(`https://api.casedb.co/custom_fields.php?time=${new Date().getTime()}`);
             const data = await response.json();
     
             if (data.success) {
@@ -116,7 +116,7 @@ export const CustomFields = () => {
 
     const createCaseType = async () => {
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/case_types.php`, {
+            const response = await fetch(`https://api.casedb.co/case_types.php`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(newField)
@@ -158,7 +158,7 @@ export const CustomFields = () => {
                 options: newField.options.length > 0 ? newField.options : null,
             };
     
-            const response = await fetch(`https://dalyblackdata.com/api/custom_fields.php`, {
+            const response = await fetch(`https://api.casedb.co/custom_fields.php`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)

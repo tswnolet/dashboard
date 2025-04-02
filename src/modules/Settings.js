@@ -36,7 +36,7 @@ const Settings = () => {
 
   const fetchAccountInfo = async () => {
     try {
-      const response = await fetch('/api/account.php');
+      const response = await fetch('/account.php');
       const data = await response.json();
       setAccountInfo({
         user: data.user,
@@ -81,7 +81,7 @@ const Settings = () => {
     }
 
     try {
-        const response = await fetch('/api/account.php', {
+        const response = await fetch('/account.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

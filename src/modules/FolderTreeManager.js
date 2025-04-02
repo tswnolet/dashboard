@@ -146,7 +146,7 @@ const FolderTreeManager = ({ folders }) => {
             folder.id === folderId ? { ...folder, name: newName } : folder
         );
         try {
-            const response = await fetch(`https://dalyblackdata.com/api/folder-templates.php`, {
+            const response = await fetch(`https://api.casedb.co/folder-templates.php`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ id: folderId, name: newName }),
