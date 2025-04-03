@@ -40,8 +40,6 @@ const EditableVital = ({
     const [inputValue, setInputValue] = useState(value || "");
     const [loading, setLoading] = useState(false);
 
-    console.log(value, inputValue);
-
     useEffect(() => {
         setInputValue(value || "");
     }, [value]);
@@ -72,7 +70,7 @@ const EditableVital = ({
             case 5:
                 return <NumberInput type="number" value={inputValue} onChange={(val) => handleFieldChange(field, val)} />;
             case 6:
-                return <DateInput value={String(inputValue)} onChange={(val) => handleFieldChange(field, val)} />;
+                return <DateInput value={String(inputValue)} onChange={(val) => setInputValue(val)} onBlur={() => handleSave(inputValue)} />;
             case 7:
                 return <TimeInput value={inputValue} onChange={(val) => handleFieldChange(field, val)} />;
             case 8:

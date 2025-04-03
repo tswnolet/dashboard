@@ -48,8 +48,9 @@ export const NumberInput = ({ type, value, onChange }) => {
     );
 };
 
-export const DateInput = ({ value = '', onChange, disable = false, checkbox = false }) => {
+export const DateInput = ({ value = '', onChange, onBlur = () => {}, disable = false, checkbox = false }) => {
     const [isChecked, setIsChecked] = useState(false);
+    const [localValue, setLocalValue] = useState(value || '');
 
     const today = () => {
         const d = new Date();
@@ -60,16 +61,28 @@ export const DateInput = ({ value = '', onChange, disable = false, checkbox = fa
         const newChecked = !isChecked;
         setIsChecked(newChecked);
         const newValue = newChecked ? today() : '';
+        setLocalValue(newValue);
         onChange(newValue);
     };
 
     const handleInputChange = (e) => {
+        setLocalValue(e.target.value);
         setIsChecked(false);
-        onChange(e.target.value);
+    };
+
+    const handleBlur = () => {
+        onBlur();
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            onBlur();
+        }
     };
 
     useEffect(() => {
         setIsChecked(value === today());
+        setLocalValue(value || '');
     }, [value]);
 
     return (
@@ -77,8 +90,10 @@ export const DateInput = ({ value = '', onChange, disable = false, checkbox = fa
             <input
                 type="date"
                 disabled={disable}
-                value={value}
+                value={localValue}
                 onChange={handleInputChange}
+                onBlur={handleBlur}
+                onKeyDown={handleKeyDown}
             />
             {checkbox && (
                 <div className="form-box alt" onClick={handleCheckboxClick}>
@@ -634,7 +649,17 @@ export const Contact = ({ selectedContact = '', onCreateNewContact, setSelectedC
                     }
                     <div className='contact-display'>
                         <span className='subtext'>{displayContact?.full_name}</span>
-                        <span className='subtext'>{displayContact?.phones[0]?.number}{displayContact?.phones[0]?.number && displayContact?.emails[0]?.email ? <SquareRounded style={{ height: "5px", width: "5px" }}/> : ''}{displayContact?.emails[0]?.email}</span>
+                        <div className='subtext contact-divider'>
+                            <span>
+                                {displayContact?.phones[0]?.number}
+                            </span>
+
+                            {displayContact?.phones[0]?.number && displayContact?.emails[0]?.email ? <SquareRounded style={{ height: "5px", width: "5px" }}/> : ''}
+
+                            <span>
+                                {displayContact?.emails[0]?.email}
+                            </span>
+                        </div>
                         <span className='subtext'>{displayContact?.job_title}</span>
                         <div
                             onClick={() => {

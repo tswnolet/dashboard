@@ -93,7 +93,7 @@ const App = () => {
     if (process.env.NODE_ENV === 'development') {
         return;
     }
-    await fetch('https://api.casedb.co/session.php?close', { method: 'GET' });
+    await fetch('https://api.casedb.co/session.php?close', { method: 'GET', credentials: 'include' });
     setLoggedIn(false);
     window.location.href = '/login';
     setShowAlert(true);

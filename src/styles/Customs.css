@@ -463,6 +463,15 @@
         width: 100%;
         gap: 7.5px;
     }
+
+    .contact-divider {
+        display: flex !important;
+        justify-content: flex-start !important;
+        align-items: center !important;
+        flex-shrink: 0;
+        flex-wrap: wrap !important;
+        gap: 2.5px !important;
+    }
 }
 
 .selected-row-details {

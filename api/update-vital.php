@@ -36,6 +36,13 @@ if ($table === "leads" && $field === "referred_to") {
     $updateQuery = "UPDATE lead_updates SET value = ?, created_at = NOW() WHERE lead_id = ? AND field_name = ?";
     $params = [$value, $lead_id, $field];
     $types = "sis";
+} elseif ($table === "custom_fields") {
+    $updateQuery = "UPDATE field_updates SET value = ? WHERE lead_id = ? AND field_id = ?";
+    $params = [$value, $lead_id, $field];
+    $types = "sii";
+} else {
+    echo json_encode(["success" => false, "message" => "Unsupported table type"]);
+    exit;
 }
 
 $stmt = $conn->prepare($updateQuery);
