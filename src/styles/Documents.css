@@ -62,6 +62,13 @@ table:not(.exhibits) td:not(.case-name) {
     }
 }
 
+.file-rename-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 2.5px;
+}
+
 .testing-upload {
     display: flex;
     justify-content: center;

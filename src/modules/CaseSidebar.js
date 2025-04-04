@@ -21,7 +21,7 @@ import {
     SearchSelect
 } from "./FieldComponents";
 
-const EditableVital = ({
+export const EditableVital = ({
     label,
     value,
     field,
@@ -29,12 +29,12 @@ const EditableVital = ({
     updateVital,
     formatDate,
     options = [],
-    isContact = false,
     typeId,
     allFields = [],
     fieldUpdates = [],
     lead_id = null,
-    sectionName = ''
+    sectionName = '',
+    contactName = null
 }) => {
     const [editing, setEditing] = useState(false);
     const [inputValue, setInputValue] = useState(value || "");
@@ -60,29 +60,107 @@ const EditableVital = ({
     const renderInputByType = () => {
         switch (typeId) {
             case 1:
-                return <Text type="text" placeholder={label} value={inputValue} onChange={(val) => handleFieldChange(field, val)} />;
+                return (
+                    <Text
+                        type="text"
+                        placeholder={label}
+                        value={inputValue}
+                        onChange={(val) => setInputValue(val)}
+                        onBlur={() => handleSave(inputValue)}
+                        onKeyDown={(e) => e.key === "Enter" && handleSave(inputValue)}
+                    />
+                );
             case 2:
-                return <Text type="textarea" placeholder={label} value={inputValue} onChange={(val) => handleFieldChange(field, val)} />;
+                return (
+                    <Text
+                        type="textarea"
+                        placeholder={label}
+                        value={inputValue}
+                        onChange={(val) => setInputValue(val)}
+                        onBlur={() => handleSave(inputValue)}
+                        onKeyDown={(e) => e.key === "Enter" && handleSave(inputValue)}
+                    />
+                );
             case 3:
-                return <NumberInput type="currency" value={inputValue} onChange={(val) => handleFieldChange(field, val)} />;
+                return (
+                    <NumberInput
+                        type="currency"
+                        value={inputValue}
+                        onChange={(val) => setInputValue(val)}
+                        onBlur={() => handleSave(inputValue)}
+                        onKeyDown={(e) => e.key === "Enter" && handleSave(inputValue)}
+                    />
+                );
             case 4:
-                return <NumberInput type="percent" value={inputValue} onChange={(val) => handleFieldChange(field, val)} />;
+                return (
+                    <NumberInput
+                        type="percent"
+                        value={inputValue}
+                        onChange={(val) => setInputValue(val)}
+                        onBlur={() => handleSave(inputValue)}
+                        onKeyDown={(e) => e.key === "Enter" && handleSave(inputValue)}
+                    />
+                );
             case 5:
-                return <NumberInput type="number" value={inputValue} onChange={(val) => handleFieldChange(field, val)} />;
+                return (
+                    <NumberInput
+                        type="number"
+                        value={inputValue}
+                        onChange={(val) => setInputValue(val)}
+                        onBlur={() => handleSave(inputValue)}
+                        onKeyDown={(e) => e.key === "Enter" && handleSave(inputValue)}
+                    />
+                );
             case 6:
-                return <DateInput value={String(inputValue)} onChange={(val) => setInputValue(val)} onBlur={() => handleSave(inputValue)} />;
+                return (
+                    <DateInput
+                        value={String(inputValue)}
+                        onChange={(val) => {
+                            setInputValue(val);
+                            handleSave(val);
+                        }}
+                        onBlur={() => handleSave(inputValue)}
+                    />
+                );
             case 7:
-                return <TimeInput value={inputValue} onChange={(val) => handleFieldChange(field, val)} />;
+                return (
+                    <TimeInput
+                        value={inputValue}
+                        onChange={(val) => setInputValue(val)}
+                        onBlur={() => handleSave(inputValue)}
+                    />
+                );
             case 8:
                 return <Contact selectedContact={inputValue} setSelectedContact={(contact) => handleFieldChange(field, contact?.id || null)} />;
             case 9:
                 return <ContactList value={Array.isArray(inputValue) ? inputValue : []} onChange={(ids) => handleFieldChange(field, ids)} />;
             case 10:
-                return <Dropdown options={options || "[]"} value={inputValue} onChange={(index) => handleFieldChange(field, index)} />;
+                return (
+                    <Dropdown
+                        options={options || "[]"} 
+                        value={inputValue} 
+                        onChange={(index) => setInputValue(index)}
+                        onBlur={() => handleSave(inputValue)}
+                    />
+                );
             case 11:
-                return <MultiSelect options={options || "[]"} value={inputValue} onChange={(val) => handleFieldChange(field, val)} />;
+                return (
+                    <MultiSelect
+                        options={options || "[]"} 
+                        value={inputValue} 
+                        onChange={(val) => setInputValue(val)}
+                        onBlur={() => handleSave(inputValue)}
+                    />
+                );
             case 12:
-                return <Boolean options={options || []} value={inputValue != undefined ? Number(inputValue) : 2} onChange={(selectedValue) => handleFieldChange(field, selectedValue)} />;
+                return (
+                    <Boolean
+                        options={options || []} 
+                        value={inputValue != undefined ? Number(inputValue) : 2} 
+                        onChange={(selectedValue) => setInputValue(selectedValue)}
+                        onBlur={() => handleSave(inputValue)}
+                    />
+                );
             case 13:
                 return <Subheader title={label} />;
             case 14:
@@ -99,7 +177,14 @@ const EditableVital = ({
                 const parsedValue = typeof inputValue === 'string' ? JSON.parse(inputValue || '{}') : inputValue || {};
                 return <Deadline value={{ due: parsedValue.due || '', done: parsedValue.done || '' }} title={label} onChange={(updated) => handleFieldChange(field, { ...parsedValue, ...updated })} />;
             case 22:
-                return <SearchSelect value={inputValue} onChange={(val) => handleFieldChange(field, val)} options={options} />;
+                return (
+                    <SearchSelect
+                        value={inputValue} 
+                        onChange={(val) => setInputValue(val)}
+                        onBlur={() => handleSave(inputValue)}
+                        options={options} 
+                    />
+                );
             default:
                 return (
                     <input
@@ -128,7 +213,7 @@ const EditableVital = ({
                     )
             ) : (
                 <span className='subtext'>
-                    {loading ? <Loader2 className="spinner" /> : (typeof value === 'string' && value.includes("T") ? formatDate(value)[0] : value)}
+                    {loading ? <Loader2 className="spinner" /> : (typeof value === 'string' && value.includes("T") ? formatDate(value)[0] : contactName ? contactName : options.length > 0 ? options[value] : value)}
                 </span>
             )}
         </div>
@@ -191,6 +276,7 @@ export const CaseSidebar = ({ id, cases, fetchCases, caseTemplates, caseTypes, f
                     );
                 }
                 fetchCases();
+                fetchVitals();
             } else {
                 console.error("Update failed:", result.message);
             }
@@ -228,6 +314,17 @@ export const CaseSidebar = ({ id, cases, fetchCases, caseTemplates, caseTypes, f
 
             <div className='case-sidebar-vitals'>
                 <div className='sidebar-vital-header'><Activity size={16}/>{" "}Vitals</div>
+                <EditableVital
+                    key="case-type-id"
+                    label="Case Type"
+                    value={leadData.case_type_id}
+                    typeId={10}
+                    field="case_type_id"
+                    table="leads"
+                    updateVital={updateVital}
+                    options={caseTypes.map(ct => ct.name)}
+                    formatDate={formatDate}
+                />
                 {vitals.map((vital) => (
                     <EditableVital
                         key={vital.id}
@@ -238,6 +335,14 @@ export const CaseSidebar = ({ id, cases, fetchCases, caseTemplates, caseTypes, f
                         table="custom_fields"
                         updateVital={updateVital}
                         formatDate={formatDate}
+                        options={(() => {
+                            try {
+                              return JSON.parse(vital?.options ?? '[]');
+                            } catch {
+                              return [];
+                            }
+                          })()}
+                        contactName={vital.contact_name}
                     />
                 ))}
             </div>

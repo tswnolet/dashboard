@@ -139,7 +139,7 @@ const Filter = ({ startDate, endDate, setStartDate, setEndDate, showDateInputs, 
                         <span className={`divider ${smallScreen ? 'horizontal' : 'vertical'}`}></span>
                         <div className='preset-buttons' style={{ height: "80%" }}>
                             <h4>Select Campaigns:</h4>
-                            {!smallScreen && <span className='subtext'>Hold Ctrl to select multiple</span>}
+                            {!smallScreen && <span className='subtext'>Hold Ctrl / Cmd to select multiple</span>}
                             <select multiple value={selectedCampaigns} onChange={handleCampaignChange} className="multi-select" style={{minHeight: "100%"}}>
                                 {campaignNames.map((campaign, index) => (
                                     <option key={index} value={campaign}>{campaign}</option>
@@ -149,7 +149,7 @@ const Filter = ({ startDate, endDate, setStartDate, setEndDate, showDateInputs, 
                         <span className={`divider ${smallScreen ? 'horizontal' : 'vertical'}`}></span>
                         <div className='preset-buttons' style={{ height: "80%" }}>
                             <h4>Select Data to Display:</h4>
-                            {!smallScreen && <span className='subtext'>Hold Ctrl to select multiple</span>}
+                            {!smallScreen && <span className='subtext'>Hold Ctrl / Cmd to select multiple</span>}
                             <select multiple value={selectedTitles} onChange={handleTitleChange} className="multi-select" style={{minHeight: "100%"}}>
                                 {titles.map((card, index) => (
                                     <option key={index} value={card}>{card}</option>

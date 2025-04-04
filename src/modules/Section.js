@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Boolean, Calculation, Contact, ContactList, DateInput, Deadline, Dropdown, FileUpload, Instructions, MultiFile, MultiSelect, NumberInput, Subheader, Text, TimeInput, TableOfContents, DataTable, SaveButton, SearchSelect, DocGen } from "./FieldComponents";
 import { Folder as FolderIcon, FolderOutlined } from "@mui/icons-material";
-import { File, FolderOpenIcon } from "lucide-react";
+import { File as FileIcon, FolderOpenIcon } from "lucide-react";
 import { ActivityFeed } from './ActivityFeed';
 import { DocumentSection } from './DocumentSection';
 import '../styles/Documents.css';
@@ -202,7 +202,7 @@ const Documents = ({ fetchDocuments, folders, caseName, case_id, user_id }) => {
     );
 };
 
-const Field = ({ field, value, handleFieldChange, conditional = false, fieldUpdates, fields, lead_id, refreshAfterCalc, sectionName }) => {
+const Field = ({ field, value, handleFieldChange, conditional = false, formData, fieldUpdates, fields, lead_id, refreshAfterCalc, sectionName }) => {
     if (!field) return null;
 
     const renderFieldInput = (field) => {
@@ -244,7 +244,7 @@ const Field = ({ field, value, handleFieldChange, conditional = false, fieldUpda
             case 13:
                 return <Subheader title={field.name} />;
             case 14:
-                return <Instructions instructions={field.name} />;
+                return <Instructions instructions={field.name}/>;
             case 15:
                 return <FileUpload
                     value={value}
@@ -266,10 +266,11 @@ const Field = ({ field, value, handleFieldChange, conditional = false, fieldUpda
                         fieldId={field.id}
                         lead_id={lead_id}
                         fields={fields}
+                        formData={formData}
                         fieldUpdates={fieldUpdates}
-                        onChange={refreshAfterCalc}
+                        onChange={(val) => refreshAfterCalc(field.id, val)}
                     />
-                );
+                );                
             case 18:
                 return <DocGen
                             value={value}
@@ -339,8 +340,8 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
         }));
     };
 
-    const refreshAfterCalc = () => {
-        fetchFields();
+    const refreshAfterCalc = (fieldId, value) => {
+        handleFieldChange(fieldId, value);
     };
 
     const fetchFields = async () => {
@@ -357,20 +358,36 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
     };
 
     const mergeFieldValues = (customFields, updates) => {
-        const groupedMap = {};
+        let flat = {};
+        const flatMap = {};
+        const grouped = [];
     
         updates.forEach(update => {
-            const { field_id, group_id, value } = update;
+            if (update.group_id === 0) {
+                flat = update;
     
-            if (group_id !== null) {
-                if (!groupedMap[group_id]) groupedMap[group_id] = { group_id };
-                groupedMap[group_id][field_id] = value;
+                Object.entries(update).forEach(([key, val]) => {
+                    if (key !== 'group_id') {
+                        const fieldDef = customFields.find(f => String(f.id) === String(key));
+                
+                        if (String(val) === String(key)) return;
+                
+                        if (fieldDef?.field_id === 17) {
+                            const num = parseFloat(val);
+                            flatMap[key] = isNaN(num) ? 0 : parseFloat(num.toFixed(2));
+                        } else {
+                            flatMap[key] = val;
+                        }
+                    }
+                });                
+            } else {
+                grouped.push(update);
             }
         });
     
-        setFieldUpdates(updates);
-        setGroupedData(Object.values(groupedMap));
-    };    
+        setFieldUpdates((prev) => JSON.stringify(prev) !== JSON.stringify(flatMap) ? flatMap : prev);
+        setGroupedData((prev) => JSON.stringify(prev) !== JSON.stringify(grouped) ? grouped : prev);        
+    };
 
     const updateFields = (data) => {
         fetch('https://api.casedb.co/custom_fields.php', {
@@ -423,12 +440,63 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
         setDataChanged(true);
     }, [formData]);
 
+    const resolveCalculationValue = (fieldId, visited = new Set()) => {
+        if (visited.has(fieldId)) {
+            console.warn(`Circular dependency detected for field ID: ${fieldId}`);
+            return 0; // Prevent infinite recursion
+        }
+    
+        visited.add(fieldId);
+    
+        const field = fields.find(f => f.id === fieldId);
+        if (!field || field.field_id !== 17) return getFieldValue(field);
+    
+        const options = typeof field.options === 'string' ? JSON.parse(field.options) : field.options;
+        const dependentFieldIds = JSON.parse(options?.field_ids || '[]');
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+        let expression = options?.rule || '';
+    
+        dependentFieldIds.forEach((id, idx) => {
+            let value = resolveCalculationValue(id, visited);
+            if (value === '' || value === null || value === undefined) {
+                // Insert default values for blank fields
+                const operatorBefore = expression[expression.indexOf(letters[idx]) - 1];
+                value = operatorBefore === '*' || operatorBefore === '/' ? 1 : 0;
+            }
+            expression = expression.replaceAll(letters[idx], value);
+        });
+    
+        try {
+            // Validate the expression before evaluating
+            if (!expression || /[^0-9+\-*/(). ]/.test(expression) || /[+\-*/]$/.test(expression)) {
+                throw new SyntaxError(`Invalid or incomplete expression: "${expression}"`);
+            }
+    
+            const result = new Function(`return ${expression}`)();
+            return typeof result === 'number' ? parseFloat(result.toFixed(2)) : 0;
+        } catch (e) {
+            console.error(`Error evaluating calculation for field ID: ${fieldId}`, e, { expression });
+            return 0;
+        }
+    };
+    
     const getFieldValue = (field) => {
         if (field.add_item === 1) {
             return formData[field.id];
         } else {
-            const update = fieldUpdates.find(update => update.field_id === field.id);
-            return formData[field.id] || formData[field.id] === 0 || formData[field.id] === '' ? formData[field.id] : update ? update.value : field.field_id === 12 ? 2 : '';
+            const val = formData[field.id];
+            if (val !== undefined && val !== null) return val;
+    
+            const stored = fieldUpdates?.[field.id];
+            if (stored !== undefined) return stored;
+    
+            if (field.field_id === 17) {
+                return resolveCalculationValue(field.id);
+            }
+    
+            if (field.field_id === 12) return 2;
+    
+            return '';
         }
     };
 
@@ -518,6 +586,7 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
                     value={getFieldValue(field)}
                     handleFieldChange={handleFieldChange}
                     conditional={false}
+                    formData={formData}
                     fieldUpdates={fieldUpdates}
                     fields={fields}
                     lead_id={lead_id}
@@ -533,6 +602,7 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
                     value={getFieldValue(child)}
                     handleFieldChange={handleFieldChange}
                     conditional={true}
+                    formData={formData}
                     fieldUpdates={fieldUpdates}
                     fields={fields}
                     lead_id={lead_id}
@@ -583,6 +653,7 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
                 const formDataObj = new FormData();
                 formDataObj.append("case_id", id);
                 formDataObj.append("section_name", sectionName);
+                formDataObj.append("user_id", user_id);
                 formDataObj.append("file[]", formData[field.id]);
     
                 uploads.push(fetch("https://api.casedb.co/documents.php", {
@@ -596,6 +667,7 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
                     const formDataObj = new FormData();
                     formDataObj.append("case_id", id);
                     formDataObj.append("section_name", sectionName);
+                    formDataObj.append("user_id", user_id);
                     formDataObj.append("file[]", file);
     
                     uploads.push(fetch("https://api.casedb.co/documents.php", {

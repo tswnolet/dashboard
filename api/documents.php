@@ -14,7 +14,7 @@ $s3 = new S3Client($config);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $caseId = $_POST['case_id'] ?? null;
-    $targetPath = $_POST['target_path'] ?? null;
+    $targetPath = $_POST['target_path'] ?? $_POST['section_name'] ?? null;
     $userId = $_POST['user_id'] ?? null;
 
     if (!$caseId || !$targetPath || !isset($_FILES['file']) || !$userId) {

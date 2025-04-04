@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ArrowRight, ChevronRight, Download, File, FolderOpenIcon, Trash, Upload, X } from "lucide-react";
+import { ArrowRight, ChevronRight, Download, File as FileSvg, FolderOpenIcon, Trash, Upload, X } from "lucide-react";
 import { SearchBar } from "./Nav";
 import { Dropdown, MultiFile } from "./FieldComponents";
+import Modal from "./Modal";
 
 export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, files, subfolders, caseName, onFolderClick, onBreadcrumbClick, setDocNav, docNav }) => {
     const hasSubfolders = Object.keys(subfolders).length > 0;
@@ -12,6 +13,8 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
     const [uploadWaiting, setUploadWaiting] = useState(false);
     const [activeFile, setActiveFile] = useState(null);
     const [more, setMore] = useState(null);
+    const [showRenameModal, setShowRenameModal] = useState(false);
+    const [filesToRename, setFilesToRename] = useState([]);
     const menuRef = useRef(null);
 
     const formatSize = (size) => {
@@ -49,17 +52,36 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
         return count;
     };
 
-    const handleFileSet = async (files) => {
+    const handleFileSet = (files) => {
         if (!files || files.length === 0) return;
     
-        setUploadWaiting(true);
+        const fileList = Array.from(files).map(file => {
+            const originalName = file.name;
+            const nameWithoutExt = originalName.substring(0, originalName.lastIndexOf('.')) || originalName;
+            const extension = originalName.split('.').pop();
+    
+            return { file, originalName, nameWithoutExt, extension, newName: nameWithoutExt };
+        });
+    
+        setFilesToRename(fileList);
+        setShowRenameModal(true);
+    };
 
-        for (let file of files) {
+    const uploadRenamedFiles = async () => {
+        setUploadWaiting(true);
+    
+        for (let item of filesToRename) {
+            const renamedFile = new File(
+                [item.file],
+                `${item.newName}.${item.extension}`,
+                { type: item.file.type }
+            );
+    
             const formData = new FormData();
             formData.append("case_id", case_id);
             formData.append("target_path", folderName);
             formData.append("user_id", user_id);
-            formData.append("file", file);
+            formData.append("file", renamedFile);
     
             try {
                 const response = await fetch("https://api.casedb.co/documents.php", {
@@ -68,16 +90,18 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
                 });
     
                 const result = await response.json();
-                if (result.success) {
-                    fetchDocuments();
-                    setUploadWaiting(false);
-                } else {
-                    console.warn(`Upload failed for ${file.name}: ${result.message}`);
+                if (!result.success) {
+                    console.warn(`Upload failed for ${item.originalName}: ${result.message}`);
                 }
             } catch (error) {
                 console.error("Upload error:", error);
             }
         }
+    
+        fetchDocuments();
+        setUploadWaiting(false);
+        setShowRenameModal(false);
+        setFilesToRename([]);
     };
 
     const handleDownload = async (file) => {
@@ -127,6 +151,42 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
                     uploadWaiting={uploadWaiting}
                 />
             </div>
+            {showRenameModal && (
+                <Modal
+                    title="Rename Files"
+                    instructions="Follow DB naming conventions."
+                    onClose={() => setShowRenameModal(false)}
+                    header={
+                        <div className='modal-header-actions'>
+                            <button onClick={uploadRenamedFiles} className="action">Upload</button>
+                            <button onClick={() => setShowRenameModal(false)} className="action alt">Cancel</button>
+                        </div>
+                    }
+                >
+                    <div className='modal-content-wrapper'>
+                        <div className='rename-files'>
+                            {filesToRename.map((item, idx) => (
+                                <div key={idx} className="form-group">
+                                    <label className="subtext">{item.originalName}</label>
+                                    <div className='file-rename-container'>
+                                        <input
+                                            type="text"
+                                            value={item.newName}
+                                            placeholder={item.originalName}
+                                            onChange={(e) => {
+                                                const updated = [...filesToRename];
+                                                updated[idx].newName = e.target.value;
+                                                setFilesToRename(updated);
+                                            }}
+                                        />
+                                        <span className="subtext" style={{ paddingBottom: "5px"}}>.{item.extension}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </Modal>
+            )}
             <div className="subtext document-breadcrumbs">
                 {folderParts.map((part, index) => {
                     const isLast = index === folderParts.length - 1;
@@ -185,7 +245,7 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
                             {filteredFiles.map((file, index) => (
                                 <tr key={`file-${index}`} onClick={() => setActiveFile(prev => prev !== index ? index : null)} className={`exhibit ${index === activeFile ? 'active-file' : ''}`}>
                                     <td className='file-name subtext'>
-                                        <File size={16} style={{ marginRight: 6 }} />
+                                        <FileSvg size={16} style={{ marginRight: 6 }} />
                                         <a href={file.url} target="_blank" rel="noopener noreferrer" title={file.name} className="subtext">{file.name.length > 35 ? `${String(file.name).split(".")[0].slice(0, 35)}(...).${String(file.name).split(".")[1]}` : file.name}</a>
                                     </td>
                                     <td className='file-date subtext'>{file.last_modified ? formatDate(file.last_modified) : "-"}</td>

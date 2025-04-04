@@ -447,6 +447,13 @@
     border: 1px solid var(--border-color);
 }
 
+.file-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2.5px;
+}
+
 .contact-display {
     display: flex;
     justify-content: flex-start;

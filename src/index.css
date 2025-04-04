@@ -232,7 +232,8 @@ input {
 }
 
 .file-upload.expanded {
-  width: 250px;
+  min-width: 250px;
+  max-width: 350px;
   background-color: var(--secondary-color);
   color: var(--text-color);
   border: 1px dashed var(--border-color);
@@ -460,6 +461,7 @@ table:not(.schools) > tbody > tr > td {
 
 .default-select {
   scrollbar-color: var(--hover-color) var(--card-color);
+  transition: background-color 0.3s, color 0.3s;
 }
 
 .default-select, .action, .section-properties input, .section-properties textarea {

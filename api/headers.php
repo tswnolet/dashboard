@@ -1,6 +1,6 @@
 <?php
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if ($origin === "https://casedb.co" || $origin === "http://localhost:3000/") {
+if ($origin === "https://casedb.co" || $origin === "http://localhost:3000") {
     header("Access-Control-Allow-Origin: $origin");
     header("Access-Control-Allow-Credentials: true");
 }

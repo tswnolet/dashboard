@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import '../styles/LayoutEditor.css';
 import { createPortal } from "react-dom";
 import { CreateContact } from "./CreateContact";
-import { AlarmClockPlus, Check, CheckCheck, CheckSquare, CloudUpload, Dot, DotSquare, Hash, Loader, Loader2, Paperclip, Phone, SendHorizonal, StickyNote, Upload, UserRoundPlus, X } from "lucide-react";
+import { AlarmClockPlus, Check, CheckCheck, CheckSquare, CloudUpload, Dot, DotSquare, Eraser, Hash, Loader, Loader2, Paperclip, Phone, SendHorizonal, StickyNote, Upload, UserRoundPlus, X } from "lucide-react";
 import { Calculate, MarginOutlined, Refresh, Source, Square, SquareRounded } from "@mui/icons-material";
 import { RiAiGenerate, RiAiGenerate2 } from "react-icons/ri";
 import { convertLength } from "@mui/material/styles/cssUtils";
@@ -25,30 +25,53 @@ const formatDate = (dateString) => {
     ];
 };
 
-export const Text = ({ type, placeholder, value, onChange, disable }) => {
+export const Text = ({ type, placeholder, value, onChange, disable, onBlur = () => {}, onKeyDown = () => {} }) => {
     return type === 'text' ? (
-        <input type='text' disabled={disable} placeholder={placeholder} value={value || ""} onChange={(e) => onChange(e.target.value)} />
+        <input
+            type='text'
+            disabled={disable}
+            placeholder={placeholder}
+            value={value || ""}
+            onChange={(e) => onChange(e.target.value)}
+            onBlur={onBlur}
+            onKeyDown={onKeyDown}
+        />
     ) : (
-        <textarea placeholder={placeholder} disabled={disable} value={value || ""} onChange={(e) => onChange(e.target.value)} />
+        <textarea
+            placeholder={placeholder}
+            disabled={disable}
+            value={value || ""}
+            onChange={(e) => onChange(e.target.value)}
+            onBlur={onBlur}
+            onKeyDown={onKeyDown}
+        />
     );
 };
 
-export const NumberInput = ({ type, value, onChange }) => {
+export const NumberInput = ({ type, value, onChange, onBlur = () => {}, onKeyDown = () => {} }) => {
     return (
         <div className='number-input'>
-            <input 
-                type='number' 
-                inputMode="numeric" 
-                placeholder='0.00' 
+            <input
+                type='number'
+                inputMode="numeric"
+                placeholder='0.00'
                 value={value || ""}
                 onChange={(e) => onChange(e.target.value)}
+                onBlur={onBlur}
+                onKeyDown={onKeyDown}
             />
             {type !== 'number' && <span className='number-symbol subtext'>{type === 'currency' ? "$" : '%'}</span>}
         </div>
     );
 };
 
-export const DateInput = ({ value = '', onChange, onBlur = () => {}, disable = false, checkbox = false }) => {
+export const DateInput = ({
+    value = '',
+    onChange,
+    onBlur = () => {},
+    disable = false,
+    checkbox = false
+}) => {
     const [isChecked, setIsChecked] = useState(false);
     const [localValue, setLocalValue] = useState(value || '');
 
@@ -57,12 +80,20 @@ export const DateInput = ({ value = '', onChange, onBlur = () => {}, disable = f
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     };
 
+    const commitValue = (finalValue) => {
+        setTimeout(() => {
+            onChange(finalValue);
+            onBlur();
+        }, 0);
+    };
+
     const handleCheckboxClick = () => {
         const newChecked = !isChecked;
         setIsChecked(newChecked);
         const newValue = newChecked ? today() : '';
         setLocalValue(newValue);
         onChange(newValue);
+        onBlur();
     };
 
     const handleInputChange = (e) => {
@@ -70,13 +101,13 @@ export const DateInput = ({ value = '', onChange, onBlur = () => {}, disable = f
         setIsChecked(false);
     };
 
-    const handleBlur = () => {
-        onBlur();
+    const handleBlur = (e) => {
+        commitValue(e.target.value);
     };
-
+    
     const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
-            onBlur();
+            commitValue(e.target.value);
         }
     };
 
@@ -109,7 +140,7 @@ export const TimeInput = ({ value, onChange }) => {
     return <input type='time' value={value || ""} onChange={(e) => onChange(e.target.value)} />;
 };
 
-export const Dropdown = ({ placeholder = null, options = [], value = "", onChange = () => {}, marketing_list = false }) => {
+export const Dropdown = ({ placeholder = null, options = [], value = "", onChange = () => {}, marketing_list = false, onBlur = () => {}, onKeyDown = () => {} }) => {
     const [parsedOptions, setParsedOptions] = useState([]);
 
     useEffect(() => {
@@ -142,7 +173,13 @@ export const Dropdown = ({ placeholder = null, options = [], value = "", onChang
     }, [marketing_list, options]);
 
     return (
-        <select className="default-select" value={value ?? ""} onChange={(e) => onChange(Number(e.target.value))}>
+        <select
+            className="default-select"
+            value={value ?? ""}
+            onChange={(e) => onChange(Number(e.target.value))}
+            onBlur={onBlur}
+            onKeyDown={onKeyDown}
+        >
             <option value="" disabled={placeholder}>{placeholder || 'Select...'}</option>
             {parsedOptions.map((option, index) => (
                 <option key={index} value={index}>{option}</option>
@@ -151,7 +188,7 @@ export const Dropdown = ({ placeholder = null, options = [], value = "", onChang
     );
 };
 
-export const MultiSelect = ({ options = [], value = [], onChange = () => {} }) => {
+export const MultiSelect = ({ options = [], value = [], onChange = () => {}, onBlur = () => {}, onKeyDown = () => {} }) => {
     let parsedOptions = [];
 
     try {
@@ -166,7 +203,7 @@ export const MultiSelect = ({ options = [], value = [], onChange = () => {} }) =
     }
 
     return (
-        <div className='multi-select-component'>
+        <div className='multi-select-component' onBlur={onBlur} onKeyDown={onKeyDown}>
             {parsedOptions.map((option, index) => (
                 <div
                     key={index}
@@ -268,7 +305,7 @@ export const SearchSelect = ({ value, onChange, options = [], placeholder = "Sel
     );
 };
 
-export const Boolean = ({ options = [], value, onChange }) => {
+export const Boolean = ({ options = [], value, onChange, onBlur = () => {}, onKeyDown = () => {} }) => {
     let parsedOptions = [];
 
     try {
@@ -281,7 +318,7 @@ export const Boolean = ({ options = [], value, onChange }) => {
     }
 
     return (
-        <div className='boolean'>
+        <div className='boolean' onBlur={onBlur} onKeyDown={onKeyDown}>
             {parsedOptions.map((option, index) => (
                 <div 
                     key={index} 
@@ -304,30 +341,85 @@ export const Instructions = ({ instructions }) => {
     return <p className='instructions'>{instructions}</p>;
 };
 
-export const FileUpload = ({ value, onChange, lead_id, section_name }) => {
+export const FileUpload = ({ value, onChange, upload = null, uploadWaiting = false }) => {
     const [file, setFile] = useState(null);
     const [uploading, setUploading] = useState(false);
-    const [uploadedName, setUploadedName] = useState(value || "");
+    const [startWait, setStartWait] = useState(false);
+    const fileInputRef = useRef(null);
 
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
-        setFile(selectedFile);
-        onChange?.(selectedFile);
+        if (selectedFile) {
+            setFile(selectedFile);
+            onChange?.(selectedFile);
+
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+        }
+    };
+
+    const handleClear = () => {
+        setFile(null);
+        onChange?.(null);
     };
 
     return (
-        <div className='file-upload'>
-            <input type='file' id={`file-upload`} onChange={handleFileChange} hidden/>
-            {uploading ? (
-                <label htmlFor={`file-upload`}>Uploading...</label>
-            ) : (
-                <label htmlFor={`file-upload`}>{file?.name || uploadedName || "Choose file..."}</label>
+        <div className={`file-upload${uploading ? ' expanded' : ''}`} onClick={() => setUploading(true)}>
+            <input
+                type='file'
+                id='file-upload'
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                hidden
+            />
+
+            <label
+                htmlFor='file-upload'
+                className='subtext'
+                onClick={(e) => {
+                    if (!uploading) e.preventDefault();
+                }}
+            >
+                {uploading ? 'Upload File...' : 'Upload'}
+            </label>
+
+            {file && (
+                <div className='file-actions'>
+                    {upload != null && (
+                        <>
+                            <button
+                                className='upload'
+                                disabled={startWait}
+                                onClick={() => {
+                                    upload?.();
+                                    setStartWait(true);
+                                }}
+                            >
+                                {!startWait ? <CloudUpload size={18} /> : startWait === 'done' ? <Check /> : <Loader2 className='spinner' />}
+                            </button>
+                            <button className='upload' disabled={startWait} onClick={handleClear}>
+                                <Eraser size={18} />
+                            </button>
+                        </>
+                    )}
+                </div>
+            )}
+
+            {file && (
+                <div className='file-list subtext'>
+                    <span>
+                        {file.name.length > 15
+                            ? `${file.name.slice(0, 15)}(...)`
+                            : file.name}
+                    </span>
+                </div>
             )}
         </div>
     );
 };
 
-export const MultiFile = ({ value, onChange, lead_id, sectionName, upload = null, uploadWaiting }) => {
+export const MultiFile = ({ value, onChange, upload = null, uploadWaiting }) => {
     const [files, setFiles] = useState([]);
     const [uploading, setUploading] = useState(false);
     const [startWait, setStartWait] = useState(false);
@@ -351,7 +443,7 @@ export const MultiFile = ({ value, onChange, lead_id, sectionName, upload = null
     }, [uploadWaiting]);
 
     return (
-        <div className={`file-upload${uploading ? ' expanded' : ''}`} onClick={() => setUploading(true)}>
+        <div className={`file-upload${uploading ? ' expanded' : ''}`} onClick={() => {setUploading(true); fileInputRef.current?.click();}}>
             <input
                 type='file'
                 id='multi-file'
@@ -364,19 +456,19 @@ export const MultiFile = ({ value, onChange, lead_id, sectionName, upload = null
                 <label
                     htmlFor='multi-file'
                     className='subtext'
-                    onClick={(e) => {
-                        if (!uploading) {
-                            e.preventDefault();
-                        }
-                    }}
                 >
                     {uploading ? 'Upload Files...' : 'Upload'}
                 </label>
             ) : (
                 upload != null && (
-                    <button className='upload' onClick={() => { upload(); setStartWait(true); }}>
-                        {!startWait ? <CloudUpload size={18} /> : startWait === 'done' ? <Check /> : <Loader2 className="spinner" />}
-                    </button>
+                    <div className='file-actions'>
+                        <button className='upload' disabled={startWait} onClick={() => { upload(); setStartWait(true); }}>
+                            {!startWait ? <CloudUpload size={18} /> : startWait === 'done' ? <Check /> : <Loader2 className="spinner" />}
+                        </button>
+                        <button className='upload' disabled={startWait} onClick={() => setFiles([])}>
+                            <Eraser size={18} />
+                        </button>
+                    </div>
                 )
             )}
             {files.length > 0 && (
@@ -395,9 +487,67 @@ export const MultiFile = ({ value, onChange, lead_id, sectionName, upload = null
     );
 };
 
-export const Calculation = ({ options, fieldUpdates = [], fields = [], lead_id, fieldId, onChange }) => {
+export const Calculation = ({
+    options,
+    fieldUpdates = {},
+    formData = {},
+    fields = [],
+    lead_id,
+    fieldId,
+    onChange
+}) => {
     const [result, setResult] = useState(0);
+    const [tooltipContent, setTooltipContent] = useState({ display: '', formula: '' });
+    const [showTooltip, setShowTooltip] = useState(false);
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const lastPosted = useRef(null);
+    const onChangeCount = useRef(0); // Counter to limit onChange calls
+
+    const handleMouseMove = useCallback((e) => {
+        const offsetX = 5;
+        const offsetY = 5;
+        const tooltipWidth = 250;
+        const pageWidth = window.innerWidth;
+
+        const positionToRight = e.pageX + tooltipWidth + offsetX < pageWidth;
+
+        setMousePosition({
+            x: positionToRight ? e.pageX + offsetX : e.pageX - (tooltipWidth / 2) - offsetX,
+            y: e.pageY + offsetY,
+        });
+    }, []);
+
+    const handleHover = () => {
+        if (!options || !fieldId) return;
+
+        const parsed = typeof options === 'string' ? JSON.parse(options) : options;
+        const rule = parsed?.rule || '';
+        const fieldIds = JSON.parse(parsed?.field_ids || '[]');
+
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+        let displayExpr = rule;
+        let formula = rule;
+
+        fieldIds.forEach((id, idx) => {
+            const letter = letters[idx];
+            const raw = formData[id] ?? fieldUpdates[id] ?? 0;
+            const fieldDef = fields.find(f => f.id === id);
+            const fieldTypeId = fieldDef?.field_id;
+            let val = isNaN(parseFloat(raw)) ? 0 : parseFloat(raw);
+            if (fieldTypeId === 4) val = val / 100;
+
+            displayExpr = displayExpr.replaceAll(letter, val);
+        });
+
+        setTooltipContent({ display: displayExpr, formula });
+        setShowTooltip(true);
+        document.addEventListener('mousemove', handleMouseMove);
+    };
+
+    const handleExit = () => {
+        setShowTooltip(false);
+        document.removeEventListener('mousemove', handleMouseMove);
+    };
 
     useEffect(() => {
         if (!options || !fieldId) return;
@@ -408,9 +558,7 @@ export const Calculation = ({ options, fieldUpdates = [], fields = [], lead_id, 
             const fieldIds = JSON.parse(parsed?.field_ids);
 
             const values = fieldIds.map(id => {
-                const update = fieldUpdates.find(f => f.field_id === id);
-                const raw = update?.value ?? 0;
-
+                const raw = formData[id] ?? fieldUpdates?.[id] ?? 0;
                 const fieldDef = fields.find(f => f.id === id);
                 const fieldTypeId = fieldDef?.field_id;
 
@@ -430,15 +578,18 @@ export const Calculation = ({ options, fieldUpdates = [], fields = [], lead_id, 
             const calculated = new Function(`return ${expression}`)();
             setResult(calculated ?? 0);
 
+            if (onChangeCount.current < 15) {
+                onChange?.(calculated ?? 0);
+                onChangeCount.current += 1;
+            }
         } catch (e) {
             console.error('Calculation error:', e);
             setResult(0);
         }
-    }, [options, fieldUpdates, fields, fieldId]);
+    }, [formData, fieldUpdates, fields, fieldId, options]);
 
     useEffect(() => {
         if (!options || !fieldId || isNaN(result)) return;
-
         if (lastPosted.current === result) return;
 
         const postValue = async () => {
@@ -447,14 +598,10 @@ export const Calculation = ({ options, fieldUpdates = [], fields = [], lead_id, 
 
                 await fetch('https://api.casedb.co/custom_fields.php', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         lead_id,
-                        field_values: {
-                            [fieldId]: result,
-                        },
+                        field_values: { [fieldId]: result }
                     }),
                 });
 
@@ -467,11 +614,52 @@ export const Calculation = ({ options, fieldUpdates = [], fields = [], lead_id, 
         postValue();
     }, [result]);
 
+    useEffect(() => {
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+        };
+    }, [handleMouseMove]);
+
     return (
-        <div className='number-input'>
-            <input type='text' disabled className='calculation' value={result}/>
-            <span className='number-symbol subtext'><Calculate size={18}/></span>
-        </div>
+        <>
+            <div className='number-input'>
+                <input type='text' disabled className='calculation' value={result}/>
+                <span
+                    className='number-symbol subtext'
+                    onMouseEnter={handleHover}
+                    onMouseLeave={handleExit}
+                >
+                    <Calculate size={18}/>
+                </span>
+            </div>
+
+            {showTooltip && (
+                <div
+                    className='tooltip-calculation'
+                    style={{
+                        position: 'absolute',
+                        left: `${mousePosition.x}px`,
+                        top: `${mousePosition.y}px`,
+                        background: 'rgba(0, 0, 0, 0.9)',
+                        color: 'white',
+                        padding: '8px 12px',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        pointerEvents: 'none',
+                        zIndex: 9999,
+                        width: 'max-content',
+                        maxWidth: '300px',
+                        lineHeight: '1.4',
+                        whiteSpace: 'normal',
+                    }}
+                >
+                    <strong>{tooltipContent.display}</strong>
+                    <div style={{ marginTop: 4, fontStyle: 'italic', opacity: 0.8 }}>
+                        {tooltipContent.formula}
+                    </div>
+                </div>
+            )}
+        </>
     );
 };
 
@@ -869,19 +1057,21 @@ export const DataTable = ({ fields, data, onRowClick }) => {
     }, [fields, data]);
 
     const displayValue = (field, rawValue) => {
-        if (field.field_id === 8) {
+        const isContactField = field.field_id === 8;
+
+        if (isContactField) {
             return contactMap?.[rawValue] || rawValue;
         }
-    
+            
         try {
             const opts = JSON.parse(field.options || "[]");
-            if (typeof rawValue === 'number' || !isNaN(rawValue)) {
+            if (opts && (typeof rawValue === 'number' || !isNaN(rawValue))) {
                 return opts[Number(rawValue)] ?? rawValue;
             }
         } catch {}
     
         return rawValue;
-    };    
+    };
 
     if (!data || data.length === 0) return <p className="subtext">No entries yet.</p>;
 
@@ -889,7 +1079,7 @@ export const DataTable = ({ fields, data, onRowClick }) => {
         <table className="data-table">
             <thead>
                 <tr>
-                    {fields.map(f => (
+                    {fields.filter(f => f.field_id !== 14 && f.field_id !== 13).map(f => (
                         <th key={f.id} title={f.name}>{`${f.name?.slice(0,32)}${f.name.length > 32 ? '...' : ''}`}</th>
                     ))}
                 </tr>
@@ -897,7 +1087,7 @@ export const DataTable = ({ fields, data, onRowClick }) => {
             <tbody>
                 {data.map((group, index) => (
                     <tr key={`group-${index}`} className='data-cell' onClick={() => onRowClick && onRowClick(group)}>
-                        {fields.map(f => {
+                        {fields.filter(f => f.field_id !== 14 && f.field_id !== 13).map(f => {
                             return (
                                 <td key={`group-${index}-field-${f.id}`}>
                                     {(() => {

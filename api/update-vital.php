@@ -37,9 +37,13 @@ if ($table === "leads" && $field === "referred_to") {
     $params = [$value, $lead_id, $field];
     $types = "sis";
 } elseif ($table === "custom_fields") {
-    $updateQuery = "UPDATE field_updates SET value = ? WHERE lead_id = ? AND field_id = ?";
-    $params = [$value, $lead_id, $field];
-    $types = "sii";
+    $updateQuery = "
+        INSERT INTO field_updates (lead_id, field_id, value) 
+        VALUES (?, ?, ?)
+        ON DUPLICATE KEY UPDATE value = VALUES(value)
+    ";
+    $params = [$lead_id, $field, $value];
+    $types = "iis";
 } else {
     echo json_encode(["success" => false, "message" => "Unsupported table type"]);
     exit;

@@ -1,6 +1,7 @@
 import { Badge, Mail, Pen, Pencil, Phone, SquareUser } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { EditDetail } from './EditDetail';
+import { EditableVital } from './CaseSidebar';
 
 const MetaItem = ({ icon, value, type = null, onClick }) => {
     if (!value) return null;
@@ -14,7 +15,7 @@ const MetaItem = ({ icon, value, type = null, onClick }) => {
     );
 };
 
-export const CaseHeader = ({ caseData = {}, fetchCase }) => {
+export const CaseHeader = ({ caseData = {}, fetchCase, vitals = [] }) => {
     const contact = caseData?.contact || {};
     const caseInfo = caseData?.case || {};
     const [tags, setTags] = useState([]);
@@ -98,6 +99,8 @@ export const CaseHeader = ({ caseData = {}, fetchCase }) => {
         }
     };
 
+    console.log(vitals)
+
     const contactDisplay = contact?.profile_picture
         ? <img src={`https://api.casedb.co/${contact.profile_picture}`} alt="Profile" />
         : <h2>{contact.first_name?.trim().charAt(0) + contact?.last_name?.trim().charAt(0) || "DB"}</h2>;
@@ -143,6 +146,28 @@ export const CaseHeader = ({ caseData = {}, fetchCase }) => {
                         <Pencil size={16} /> Add Tag
                     </span>
                 </div>
+            </div>
+            <div className='case-vitals'>
+                {vitals.map((vital) => (
+                    <EditableVital
+                        key={vital.id}
+                        label={vital.name}
+                        value={vital.value}
+                        typeId={vital.custom_field_id}
+                        field={vital.field_id}
+                        table="custom_fields"
+                        updateVital={(field, newValue, table) => {}}
+                        formatDate={(date) => {}}
+                        options={(() => {
+                            try {
+                                return JSON.parse(vital?.options ?? '[]');
+                            } catch {
+                                return [];
+                            }
+                        })()}
+                        contactName={vital.contact_name}
+                    />
+                ))}
             </div>
 
             {editContact && (

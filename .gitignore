@@ -28,6 +28,9 @@ list-files.php
 create-folder.php
 aws-config.php
 
+db.pem
+db.pub
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         echo json_encode([
             'success' => true,
             'custom_fields' => $customFields,
-            'field_updates' => $fieldUpdates,
+            'field_updates' => fetchGroupedFieldUpdates($conn, $lead_id, $section_id),
             'fields' => $fields,
             'section_id' => $section_id,
             'section_name' => $sectionName
@@ -59,42 +59,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($input['field_values']) && isset($input['lead_id'])) {
         $lead_id = $input['lead_id'];
         $fieldValues = $input['field_values'];
-        $group_id = isset($input['group_id']) ? (int)$input['group_id'] : getMaxGroupId($conn, $lead_id) + 1;
-
-        foreach ($fieldValues as $field_id => $value) {
-            $fieldMetaQuery = $conn->prepare("SELECT add_item FROM custom_fields WHERE id = ?");
-            $fieldMetaQuery->bind_param("i", $field_id);
-            $fieldMetaQuery->execute();
-            $fieldMetaResult = $fieldMetaQuery->get_result();
-            $fieldMeta = $fieldMetaResult->fetch_assoc();
-            $isAddItem = (int)($fieldMeta['add_item'] ?? 0) === 1;
-            $fieldMetaQuery->close();
-        
-            $usedGroupId = $isAddItem ? $group_id : 0;
-        
-            $stmt = $conn->prepare("SELECT id FROM field_updates WHERE field_id = ? AND lead_id = ? AND group_id = ?");
-            $stmt->bind_param('iii', $field_id, $lead_id, $usedGroupId);
-            $stmt->execute();
-            $stmt->store_result();
-        
-            if ($stmt->num_rows > 0) {
-                $stmt->close();
-                $updateStmt = $conn->prepare("UPDATE field_updates SET value = ? WHERE field_id = ? AND lead_id = ? AND group_id = ?");
-                $updateStmt->bind_param('siii', $value, $field_id, $lead_id, $usedGroupId);
-                $updateStmt->execute();
-                $updateStmt->close();
-            } else {
-                $stmt->close();
-                $insertStmt = $conn->prepare("INSERT INTO field_updates (field_id, lead_id, value, group_id) VALUES (?, ?, ?, ?)");
-                $insertStmt->bind_param('iisi', $field_id, $lead_id, $value, $usedGroupId);
-                $insertStmt->execute();
-                $insertStmt->close();
-            }
-        }        
     
-        echo json_encode(['success' => true, 'message' => 'Field values saved.', 'group_id' => $group_id]);
+        $addItemFields = [];
+        $addItemQuery = $conn->query("SELECT id FROM custom_fields WHERE add_item = 1");
+        while ($row = $addItemQuery->fetch_assoc()) {
+            $addItemFields[] = (int)$row['id'];
+        }
+    
+        $group_id = isset($input['group_id']) ? (int)$input['group_id'] : getMaxGroupId($conn, $lead_id) + 1;
+    
+        foreach ($fieldValues as $field_id => $value) {
+            if (is_array($value)) {
+                $allEmpty = array_reduce($value, function ($carry, $item) {
+                    return $carry && (empty($item) || $item === []);
+                }, true);
+    
+                if ($allEmpty) {
+                    continue;
+                }
+            }
+    
+            if (!is_string($value)) {
+                $value = json_encode($value);
+            }
+    
+            $isAddItem = in_array((int)$field_id, $addItemFields, true);
+    
+            $usedGroupId = $isAddItem ? $group_id : 0;
+    
+            $stmt = $conn->prepare("
+                INSERT INTO field_updates (field_id, lead_id, value, group_id)
+                VALUES (?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE value = VALUES(value)
+            ");
+            $stmt->bind_param('iisi', $field_id, $lead_id, $value, $usedGroupId);
+            $stmt->execute();
+            $stmt->close();
+        }
+    
+        echo json_encode(['success' => true, 'message' => 'Field values saved.', 'group_id' => $group_id, $usedGroupId, $isAddItem, $addItemFields]);
         exit;
-    }    
+    }
 
     $case_type_id = $input['case_type_id'] ?? 0;
     $field_id = $input['field_id'] ?? null;
@@ -187,6 +192,34 @@ function fetchFieldUpdates($conn, $lead_id, $section_id = null) {
     }
 
     return $updates;
+}
+
+function fetchGroupedFieldUpdates($conn, $lead_id, $section_id = null) {
+    $query = "
+        SELECT field_id, group_id, value
+        FROM field_updates
+        WHERE lead_id = ?
+    ";
+    if ($section_id !== null) {
+        $query .= " AND field_id IN (SELECT id FROM custom_fields WHERE section_id = ?)";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param('ii', $lead_id, $section_id);
+    } else {
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param('i', $lead_id);
+    }
+
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $grouped = [];
+    while ($row = $result->fetch_assoc()) {
+        $gid = $row['group_id'] ?? 0;
+        if (!isset($grouped[$gid])) $grouped[$gid] = ['group_id' => $gid];
+        $grouped[$gid][$row['field_id']] = $row['value'];
+    }
+
+    return array_values($grouped);
 }
 
 function fetchCaseTypes($conn) {

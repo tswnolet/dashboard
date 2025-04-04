@@ -18,7 +18,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             SELECT 
                 vitals.*, 
                 fu.value AS value,
-                cf.field_id AS custom_field_id
+                cf.field_id AS custom_field_id,
+                cf.options,
+                CASE 
+                    WHEN cf.field_id = 8 THEN (
+                        SELECT full_name 
+                        FROM contacts 
+                        WHERE contacts.id = fu.value 
+                        LIMIT 1
+                    )
+                    ELSE NULL
+                END AS contact_name
             FROM vitals 
             LEFT JOIN field_updates fu 
                 ON vitals.field_id = fu.field_id 
