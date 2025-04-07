@@ -37,8 +37,20 @@ import { useNavigate } from "react-router";
   
 
 const FeedItem = ({ type, setActiveFeed, activeFeed, notifications, mobile }) => {
+    let feedType = 'All';
+    switch (type) {
+        case 'Phone Calls':
+            feedType = 'calls';
+            break;
+        case 'Faxes':
+            feedType = 'faxes';
+            break;
+        default:
+            feedType = type;
+            break;
+    }
     return (
-        <div className={`feed-type${activeFeed === type ? ' active' : ''}`} onClick={() => setActiveFeed(type)}>
+        <div className={`feed-type${activeFeed === feedType ? ' active' : ''}`} onClick={() => setActiveFeed(feedType)}>
             <span className='feed-type-text'>
                 {iconMap[type]}{!mobile && type}
                 {!mobile && type === 'Reminders' && (notifications.reminder > 0 || notifications.priority > 0) &&
@@ -265,6 +277,10 @@ export const ActivityFeed = ({ case_id, user_id }) => {
         fetchFeed();
         fetchUsers();
     }, []);
+
+    useEffect(() => {
+        console.log(activeFeed);
+    }, [activeFeed])
 
     const filteredFeed = feed.filter(
         (type) =>

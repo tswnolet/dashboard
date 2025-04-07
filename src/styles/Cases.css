@@ -153,6 +153,7 @@ td.case-name {
     gap: 7.5px;
     background-color: var(--secondary-color);
     border-bottom: 1px solid var(--border-color);
+    overflow-x: hidden;
 }
 
 .case-header-title {
