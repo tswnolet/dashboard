@@ -1,4 +1,5 @@
 <?php
+require 'headers.php';
 $API_KEY = "f6fb37e9-58c9-418d-95a6-f867f8516850";
 $BASE_URL = "https://dalyblack.leaddocket.com/api";
 $MAX_ITEMS_PER_PAGE = 500;

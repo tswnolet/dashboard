@@ -127,10 +127,16 @@
     width: 100%;
     max-width: 250px;
     flex-wrap: wrap;
-    padding: 5px;
+    padding: 5px 10px;
     border: 1px solid var(--border-color);
     border-radius: 3px;
     cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.file:hover {
+    background-color: var(--border-color);
+    color: var(--text-color);
 }
 
 .activity-call-info {
@@ -315,6 +321,22 @@
     align-items: center;
     gap: 10px;
     height: 25px;
+}
+
+.task-complete {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 3px;
+    color: #4C8F4C;
+    transition: background-color 0.3s, color 0.3s;
+    cursor: pointer;
+    padding: 0 5px;
+}
+
+.task-complete:hover {
+    background-color: var(--border-color);
+    color: #d12424;
 }
 
 .activity-feed-item-pin {

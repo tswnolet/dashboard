@@ -453,12 +453,9 @@ export const MultiFile = ({ value, onChange, upload = null, uploadWaiting }) => 
                 hidden
             />
             {files.length === 0 ? (
-                <label
-                    htmlFor='multi-file'
-                    className='subtext'
-                >
+                <span className='subtext' style={{ color: !uploading ? "var(--secondary-color)" : 'var(--text-color)'}}>
                     {uploading ? 'Upload Files...' : 'Upload'}
-                </label>
+                </span>
             ) : (
                 upload != null && (
                     <div className='file-actions'>
@@ -1345,8 +1342,8 @@ export const Notification = ({ count, type }) => {
 
 export const File = ({ file, onClick }) => {
     return (
-        <div className='file subtext' onClick={onClick}>
-            {file?.name}
+        <div className='file subtext' onClick={onClick} title={file?.name}>
+            {file?.name?.length > 35 ? `${file?.name?.slice(0, 31)}(...).${file.name.slice(file.name.length - 4, file.name.length)}` : file.name}
         </div>
     );
 };

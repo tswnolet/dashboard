@@ -1,5 +1,5 @@
 <?php
-$host = 'casedb.cluster-cq58cae80fw0.us-east-1.rds.amazonaws.com';
+$host = 'db-casedb.cq58cae80fw0.us-east-1.rds.amazonaws.com';
 $dbUsername = 'admin';
 $dbPassword = 'Scorpius1!';
 $dbName = 'casedb';

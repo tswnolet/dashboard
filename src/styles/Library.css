@@ -12,10 +12,24 @@ input[type="file"] {
     align-items: center;
     flex-direction: column;
     gap: 10px;
+    background-color: var(--secondary-color);
+    padding: 15px;
+    max-width: 500px;
+    border-radius: 3px;
 
     h3 {
         margin: 0;
     }
+}
+
+.file-upload-library {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 450px;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .exhibits {
@@ -230,6 +244,12 @@ input[type="file"] {
 @keyframes spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
+}
+
+.file-upload-library .file-list {
+    background-color: var(--background-color);
+    padding: 5px;
+    border-radius: 3px;
 }
 
 .file-list {

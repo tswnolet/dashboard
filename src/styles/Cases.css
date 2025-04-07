@@ -97,7 +97,7 @@ td.case-name {
 .case-sidebar-vitals {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 5px;
     padding: 15px;
     width: 100%;
 }
@@ -125,9 +125,13 @@ td.case-name {
 
 .case-vitals {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     width: 100%;
+    gap: 10px;
+    margin-left: 65px;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .case-container {
@@ -141,7 +145,7 @@ td.case-name {
 
 .case-header {
     padding: 15px;
-    height: 151px;
+    min-height: 151px;
     flex-grow: 1;
     width: 100%;
     flex-shrink: 0;

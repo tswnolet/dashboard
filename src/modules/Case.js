@@ -11,6 +11,7 @@ export const Case = ({ user_id }) => {
     const [activeSection, setActiveSection] = useState(1);
     const [folders, setFolders] = useState({});
     const [vitals, setVitals] = useState([]);
+    const [caseTypes, setCaseTypes] = useState([]);
 
     const fetchVitals = async () => {
         try {
@@ -18,7 +19,6 @@ export const Case = ({ user_id }) => {
             const data = await response.json();
             if (data.success) {
                 setVitals(data.vitals || []);
-                console.log(data)
             }
         } catch (error) {
             console.error("Error fetching vitals:", error);
@@ -42,7 +42,6 @@ export const Case = ({ user_id }) => {
             const response = await fetch(`https://api.casedb.co/cases.php?id=${id}`);
             const data = await response.json();
             setCaseData(data);
-            fetchVitals();
             fetchSections(data.case.template_id);
         } catch (error) {
             console.error(error);
@@ -59,12 +58,24 @@ export const Case = ({ user_id }) => {
         }
     };
 
+    const fetchCaseTypes = async () => {
+        try {
+            const response = await fetch("https://api.casedb.co/case-types.php");
+            const data = await response.json();
+            setCaseTypes(data.case_types);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
     useEffect(() => {
         fetchCase();
     }, []);
 
     useEffect(() => {
         fetchDocuments();
+        fetchVitals();
+        fetchCaseTypes();
     }, [caseData]);
 
     useEffect(() => {
@@ -75,7 +86,7 @@ export const Case = ({ user_id }) => {
         <div className='case-container'>
             <CaseNav sections={sections} activeSection={activeSection} setActiveSection={setActiveSection} />
             <div className='case-body'>
-                <CaseHeader caseData={caseData} fetchCase={fetchCase} vitals={vitals}/>
+                <CaseHeader caseData={caseData} fetchCase={fetchCase} vitals={vitals} fetchVitals={fetchVitals} caseTypes={caseTypes}/>
                 <Section key={activeSection} user_id={user_id} lead_id={caseData?.lead?.id} id={id} caseName={caseData?.case?.case_name} fetchDocuments={fetchDocuments} folders={folders} caseType={caseData?.lead?.case_type_id} section_id={activeSection} template_id={caseData?.case?.template_id}/>
             </div>
         </div>

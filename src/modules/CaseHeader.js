@@ -15,7 +15,7 @@ const MetaItem = ({ icon, value, type = null, onClick }) => {
     );
 };
 
-export const CaseHeader = ({ caseData = {}, fetchCase, vitals = [] }) => {
+export const CaseHeader = ({ caseData = {}, fetchCase, vitals = [], fetchVitals, caseTypes }) => {
     const contact = caseData?.contact || {};
     const caseInfo = caseData?.case || {};
     const [tags, setTags] = useState([]);
@@ -99,7 +99,34 @@ export const CaseHeader = ({ caseData = {}, fetchCase, vitals = [] }) => {
         }
     };
 
-    console.log(vitals)
+    const updateVital = async (field, newValue, table) => {
+        const payload = {
+            case_id: caseData?.case?.case_id,
+            lead_id: caseData?.lead?.id,
+            field,
+            value: newValue,
+            table
+        };
+
+        try {
+            const response = await fetch("https://api.casedb.co/update-vital.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                fetchVitals();
+                if (table === 'leads' || table === 'cases')
+                    fetchCase();
+            } else {
+                console.error("Update failed:", result.message);
+            }
+        } catch (error) {
+            console.error("Error updating vital:", error);
+        }
+    };
 
     const contactDisplay = contact?.profile_picture
         ? <img src={`https://api.casedb.co/${contact.profile_picture}`} alt="Profile" />
@@ -148,6 +175,19 @@ export const CaseHeader = ({ caseData = {}, fetchCase, vitals = [] }) => {
                 </div>
             </div>
             <div className='case-vitals'>
+                <EditableVital
+                    label="Case Type"
+                    value={caseData?.lead?.case_type_id}
+                    typeId={10}
+                    field="case_type_id"
+                    table="leads"
+                    updateVital={updateVital}
+                    options={caseTypes.map(ct => ct.name)}
+                    transformValue={(name) => {
+                        const match = caseTypes.find(ct => ct.name === name);
+                        return match ? match.id : null;
+                    }}
+                />
                 {vitals.map((vital) => (
                     <EditableVital
                         key={vital.id}
@@ -156,7 +196,7 @@ export const CaseHeader = ({ caseData = {}, fetchCase, vitals = [] }) => {
                         typeId={vital.custom_field_id}
                         field={vital.field_id}
                         table="custom_fields"
-                        updateVital={(field, newValue, table) => {}}
+                        updateVital={updateVital}
                         formatDate={(date) => {}}
                         options={(() => {
                             try {

@@ -202,7 +202,7 @@ export const EditableVital = ({
 
     return (
         <div className='sidebar-vital' onDoubleClick={() => setEditing(true)}>
-            <span className='subtext'>{label}:</span>
+            <span className='subtext' title={label}>{label}:</span>
             {editing ? (
                 loading 
                     ? <Loader2 className="spinner" /> 

@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Boolean, Calculation, Contact, ContactList, DateInput, Deadline, Dropdown, FileUpload, Instructions, MultiFile, MultiSelect, NumberInput, Subheader, Text, TimeInput, TableOfContents, DataTable, SaveButton, SearchSelect, DocGen } from "./FieldComponents";
 import { Folder as FolderIcon, FolderOutlined } from "@mui/icons-material";
 import { File as FileIcon, FolderOpenIcon } from "lucide-react";
 import { ActivityFeed } from './ActivityFeed';
 import { DocumentSection } from './DocumentSection';
 import '../styles/Documents.css';
+import { useLocation } from 'react-router';
 
 const normalizeValueToIndex = (field, value) => {
     if (!field.options) return value;
@@ -78,6 +79,9 @@ const Documents = ({ fetchDocuments, folders, caseName, case_id, user_id }) => {
     const [currentFolder, setCurrentFolder] = useState(null);
     const folderEntries = Object.entries(folders);
     const [docNav, setDocNav] = useState(true);
+    const [folderInitialized, setFolderInitialized] = useState(false);
+    const location = useLocation();
+    const folderEffectRun = useRef(false);
 
     const buildFolderTree = () => {
         const root = {};
@@ -97,30 +101,67 @@ const Documents = ({ fetchDocuments, folders, caseName, case_id, user_id }) => {
         return root;
     };
 
+    console.log(currentFolder);
+
     useEffect(() => {
         fetchDocuments();
     }, []);
-        
+
     useEffect(() => {
-        if (folders && Object.keys(folders).length > 0) {
-            const nameFolder = Object.keys(folders).find((key) => key.includes("{{Name}}"));
-            if (nameFolder) {
+        if (!folders || Object.keys(folders).length === 0) return;
+    
+        const params = new URLSearchParams(location.search);
+        const folderParam = params.get("folder");
+    
+        const nameFolder = Object.keys(folders).find((key) => key.includes("{{Name}}"));
+        if (!nameFolder) return;
+    
+        if (folderParam && !folderEffectRun.current) {
+            const fullPath = `${nameFolder}/${folderParam}`;
+            const targetFiles = folders[fullPath];
+    
+            if (targetFiles) {
                 const subfolderTree = Object.fromEntries(
                     Object.entries(folders)
-                        .filter(([key]) => key.startsWith(`${nameFolder}/`))
+                        .filter(([key]) => key.startsWith(`${fullPath}/`))
                         .map(([key, value]) => {
-                            const sub = key.replace(`${nameFolder}/`, "").split("/")[0];
+                            const sub = key.replace(`${fullPath}/`, "").split("/")[0];
                             return [sub, value];
                         })
                 );
+    
                 setCurrentFolder({
-                    path: nameFolder,
-                    files: folders[nameFolder] || [],
+                    path: fullPath,
+                    files: targetFiles,
                     subfolders: subfolderTree,
                 });
+    
+                params.delete("folder");
+                const newUrl = `${window.location.pathname}`
+                window.history.replaceState({}, "", newUrl);
+    
+                folderEffectRun.current = true;
+                return;
             }
         }
-    }, [folders]);      
+    
+        if (!currentFolder && nameFolder) {
+            const subfolderTree = Object.fromEntries(
+                Object.entries(folders)
+                    .filter(([key]) => key.startsWith(`${nameFolder}/`))
+                    .map(([key, value]) => {
+                        const sub = key.replace(`${nameFolder}/`, "").split("/")[0];
+                        return [sub, value];
+                    })
+            );
+    
+            setCurrentFolder({
+                path: nameFolder,
+                files: folders[nameFolder] || [],
+                subfolders: subfolderTree,
+            });
+        }
+    }, [folders, location.search]);
 
     const renderTree = (tree, level = 0, parentPath = '') => {
         return Object.entries(tree).map(([folderName, data]) => {
@@ -443,7 +484,7 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
     const resolveCalculationValue = (fieldId, visited = new Set()) => {
         if (visited.has(fieldId)) {
             console.warn(`Circular dependency detected for field ID: ${fieldId}`);
-            return 0; // Prevent infinite recursion
+            return 0;
         }
     
         visited.add(fieldId);
@@ -459,7 +500,6 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
         dependentFieldIds.forEach((id, idx) => {
             let value = resolveCalculationValue(id, visited);
             if (value === '' || value === null || value === undefined) {
-                // Insert default values for blank fields
                 const operatorBefore = expression[expression.indexOf(letters[idx]) - 1];
                 value = operatorBefore === '*' || operatorBefore === '/' ? 1 : 0;
             }
@@ -467,7 +507,6 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
         });
     
         try {
-            // Validate the expression before evaluating
             if (!expression || /[^0-9+\-*/(). ]/.test(expression) || /[+\-*/]$/.test(expression)) {
                 throw new SyntaxError(`Invalid or incomplete expression: "${expression}"`);
             }

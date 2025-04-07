@@ -99,7 +99,7 @@ export const FileUpload = ({ fetchFiles, currentPath }) => {
     return (
         <div className="file-upload-container">
             <h3>Upload Case Documents</h3>
-            <div className="file-upload">
+            <div className="file-upload-library">
                 <div className="upload-actions">
                     <input type="file" id="fileInput" ref={fileInputRef} onChange={handleFileChange} multiple hidden />
                     <label htmlFor="fileInput" className="uploader action secondary">Choose File(s)</label>
@@ -442,7 +442,7 @@ export const FileList = () => {
             )}
             {!fetchingFiles ? (
                 <table className='exhibits'>
-                    <thead>
+                    <thead style={{ width: "100%" }}>
                         <tr>
                             <th className='file-name' onClick={() => requestSort('name')}>Name</th>
                             {!renderMobile && <th className='file-date' onClick={() => requestSort('lastModified')}>Last Modified</th>}
@@ -450,7 +450,7 @@ export const FileList = () => {
                             <th className='file-actions'>Actions</th>
                         </tr>
                     </thead>
-                    <tbody ref={exhibitRef}>
+                    <tbody ref={exhibitRef} style={{ width: "100%" }}>
                         {filteredFiles.map((file, index) => (
                             <tr key={index} className={`exhibit${activeFile === index ? ' active-file' : ''}`}
                                 onClick={() => setActiveFile(index)}

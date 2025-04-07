@@ -166,7 +166,7 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
                     <div className='modal-content-wrapper'>
                         <div className='rename-files'>
                             {filesToRename.map((item, idx) => (
-                                <div key={idx} className="form-group">
+                                <div key={`${idx}-${item}`} className="form-group">
                                     <label className="subtext">{item.originalName}</label>
                                     <div className='file-rename-container'>
                                         <input
@@ -208,7 +208,7 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
             <div className="document-content">
                 {(hasSubfolders || filteredFiles.length > 0) ? (
                     <table className="exhibits">
-                        <thead>
+                        <thead style={{ width: '100%' }}>
                             <tr>
                                 <th className='file-name'>Name</th>
                                 <th className='file-date'>Last Modified</th>
@@ -216,7 +216,7 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
                                 <th className='file-actions'>...</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody style={{ width: '100%' }}>
                             {hasSubfolders && Object.keys(subfolders).map((subfolderName, index) => (
                                 <tr key={`sub-${index}`} onClick={() => setActiveFile(prev => prev !== `${index}sub` ? `${index}sub` : null)} onDoubleClick={() => onFolderClick && onFolderClick(subfolderName)} className={`exhibit ${`${index}sub` === activeFile ? 'active-file' : ''}`}>
                                     <td className='file-name folder subtext'>

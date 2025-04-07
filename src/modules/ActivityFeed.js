@@ -15,11 +15,14 @@ import {
     Ellipsis,
     Pin,
     PinOff,
+    Check,
+    CheckCheck,
   } from "lucide-react";
 import { SearchBar } from "./Nav";
 import { AddActivity, File, Notification } from "./FieldComponents";
 import { PinOutlined } from "@mui/icons-material";
 import { file } from "jszip";
+import { useNavigate } from "react-router";
   
   export const iconMap = {
     All: <All size={18} />,
@@ -56,6 +59,34 @@ const Activity = ({ data, user_id, user, fetchFeed }) => {
     const deadline = data?.deadline?.due
         ? new Date(data.deadline.due).toLocaleDateString()
         : "Not set";
+    const navigate = useNavigate();
+
+    const completeTask = async (complete = true) => {
+        try {
+            const response = await fetch(`https://api.casedb.co/activity_feed.php`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: Number(data?.id),
+                    done: complete === true
+                }),
+            });
+    
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+    
+            const result = await response.json();
+
+            if (result.success) {
+                fetchFeed();
+            } else {
+                console.error('Failed to mark task as complete:', result.message);
+            }
+        } catch (err) {
+            console.error('Error completing task:', err);
+        }
+    };
 
     const pinNote = (pin, action) => {
         try {
@@ -121,11 +152,16 @@ const Activity = ({ data, user_id, user, fetchFeed }) => {
             </div>
             {Array.isArray(data.attachments) && <div className='files'>
                 {data.attachments.map((file, index) => (
-                    <File file={file} key={index} />
+                    <File file={file} key={index} onClick={() => navigate(`${window.location.pathname}?section=Documents&folder=${data.type !== "calls" ? 'Notes' : 'Call Log'}`)}/>
                 ))}
             </div>}
             <div className='activity-feed-item-menu' ref={optionRef}>
                 <div className='activity-menu-actions'>
+                    {data?.deadline?.done && 
+                        <div className='task-complete subtext' onClick={() => completeTask(false)}>
+                            complete<CheckCheck size={12} />
+                        </div>
+                    }
                     {data.pinned && (() => {
                         const pinData = typeof data.pinned === 'string' ? JSON.parse(data.pinned) : data.pinned;
                         const isPinnedForUser = Array.isArray(pinData?.users) && pinData.users.includes(Number(user_id));
@@ -171,6 +207,7 @@ const Activity = ({ data, user_id, user, fetchFeed }) => {
                         <div className="activity-feed-item-option" onClick={() => pinNote("project")}>Pin to Case Feed</div>
                         <div className="activity-feed-item-option">Copy Link</div>
                         <div className="activity-feed-item-option">Move to...</div>
+                        {data?.deadline?.assignees?.length > 0 && <div className="activity-feed-item-option" onClick={() => completeTask(data?.deadline?.done === null)}>{data?.deadline?.done ? 'Mark task incomplete' : 'Mark task complete'}</div>}
                     </div>
                 )}
             </div>
@@ -248,15 +285,19 @@ export const ActivityFeed = ({ case_id, user_id }) => {
 
     const pinnedIds = new Set(pinnedFeed.map(item => item.id));
 
+    const myTasks = filteredFeed.filter((item) => 
+        item.task === user_id
+    );
+
     const todayFeed = filteredFeed.filter(
         (item) =>
-            !pinnedIds.has(item.id) &&
+            !pinnedIds.has(item.id) && !myTasks.some(task => task.id === item.id) &&
             new Date(item.creation_date).toDateString() === today
     );
     
     const earlierFeed = filteredFeed.filter(
         (item) =>
-            !pinnedIds.has(item.id) &&
+            !pinnedIds.has(item.id) && !myTasks.some(task => task.id === item.id) &&
             new Date(item.creation_date).toDateString() !== today
     );
 
@@ -277,12 +318,14 @@ export const ActivityFeed = ({ case_id, user_id }) => {
                     notifications={{
                         reminder: feed.filter((data) => (
                             data.deadline?.due &&
+                            data.deadline?.done === null &&
                             Array.isArray(data.deadline.assignees) &&
                             data.deadline.assignees.map(Number).includes(Number(user_id)) &&
                             new Date(data.deadline.due) > new Date().setDate(new Date().getDate() + 7)
                         )).length,
                         priority: feed.filter((data) => (
                             data.deadline?.due &&
+                            data.deadline?.done === null &&
                             Array.isArray(data.deadline.assignees) &&
                             data.deadline.assignees.map(Number).includes(Number(user_id)) &&
                             new Date(data.deadline.due) <= new Date().setDate(new Date().getDate() + 7)
@@ -309,6 +352,24 @@ export const ActivityFeed = ({ case_id, user_id }) => {
                         {pinnedFeed.map((item, index) => (
                             <Activity
                                 key={`pinned-${index}`}
+                                data={item}
+                                user_id={user_id}
+                                user={users.find((user) => String(user.id) === String(item.task))?.name || "Unknown"}
+                                fetchFeed={fetchFeed}
+                            />
+                        ))}
+                    </>
+                )}
+                {myTasks.length > 0 && (
+                    <>
+                        <div className="activity-feed-header subtext">
+                            <span>My Assigned Tasks</span>
+                            <div className='divider horizontal'></div>
+                            <span>{myTasks.length} {myTasks.length > 1 ? "items" : "item"}</span>
+                        </div>
+                        {myTasks.map((item, index) => (
+                            <Activity
+                                key={`today-${index}`}
                                 data={item}
                                 user_id={user_id}
                                 user={users.find((user) => String(user.id) === String(item.task))?.name || "Unknown"}

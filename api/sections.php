@@ -19,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 vitals.*, 
                 fu.value AS value,
                 cf.field_id AS custom_field_id,
+                cf.section_id AS section_id,
                 cf.options,
                 CASE 
                     WHEN cf.field_id = 8 THEN (

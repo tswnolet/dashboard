@@ -167,6 +167,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $data = json_decode(file_get_contents('php://input'), true);
     $id = $data['id'] ?? null;
+
+    if (isset($data['done']) && $data['done'] === true && $id) {
+        $currentTimestamp = date('Y-m-d H:i:s');
+        $updateSql = "UPDATE deadlines SET done = ? WHERE task_id = ?";
+        $updateStmt = $conn->prepare($updateSql);
+        $updateStmt->bind_param("si", $currentTimestamp, $id);
+
+        if ($updateStmt->execute()) {
+            echo json_encode(['success' => true, 'message' => 'Done timestamp updated.', 'done' => $currentTimestamp]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Failed to update done timestamp.']);
+        }
+
+        $updateStmt->close();
+        exit;
+    } elseif (isset($data['done']) && $data['done'] == false && $id) {
+        $updateSql = "UPDATE deadlines SET done = NULL WHERE task_id = ?";
+        $updateStmt = $conn->prepare($updateSql);
+        $updateStmt->bind_param("i", $id);
+
+        if ($updateStmt->execute()) {
+            echo json_encode(['success' => true, 'message' => 'Task marked as incomplete.', 'done' => 'false']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Failed to mark task as incomplete.']);
+        }
+
+        $updateStmt->close();
+        exit;
+    }
+
     $pin = $data['pin'] ?? $_SESSION['user_id'] ?? null;
     $action = $data['action'] ?? 'toggle';
 
