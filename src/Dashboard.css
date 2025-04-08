@@ -345,7 +345,7 @@ button {
     font-size: 14px;
 }
 
-.subtext, input:disabled {
+.subtext:not(.alt), input:disabled {
     color: var(--subtext-color);
 }
 

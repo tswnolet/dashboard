@@ -55,6 +55,29 @@ if ($requestMethod === 'POST') {
         echo json_encode(["error" => "User not found"]);
     }
 } else if ($requestMethod === 'GET') {
+    if (isset($_GET['rates'])) {
+        $sql = '
+            SELECT 
+                users.user, 
+                users.name, 
+                users.id, 
+                rates.rate,
+                contacts.profile_picture
+            FROM users
+            LEFT JOIN rates ON rates.user_id = users.id
+            LEFT JOIN contacts ON contacts.id = users.contact_id
+        ';
+        $result = $conn->query($sql);
+
+        $users = [];
+        while ($row = $result->fetch_assoc()) {
+            $users[] = $row;
+        }
+
+        echo json_encode(['users' => $users]);
+        exit;
+    }
+
     if (isset($_GET['users'])) {
         $sql = "SELECT user, id, name, access_level FROM users WHERE access_level != 'no access'";
         $result = $conn->query($sql);

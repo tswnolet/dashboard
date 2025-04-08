@@ -32,6 +32,13 @@ input[type="file"] {
     gap: 10px;
 }
 
+.folder-creation-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
 .exhibits {
     display: flex;
     justify-content: flex-start;
@@ -188,14 +195,6 @@ input[type="file"] {
         justify-content: flex-start;
         text-wrap: nowrap;
         text-align: left;
-    }
-
-    .folder-creation {
-        width: 50%;
-
-        button {
-            width: 75%;
-        }
     }
 }
 

@@ -235,6 +235,16 @@ const MainOptions = ({
               Contacts
             </span>
           </div>
+          <div 
+            id='library' 
+            className={`menu-item ${isActive("/library") ? "active" : ""}`} 
+            style={{ justifyContent: expanded ? "flex-start" : "center" }} 
+            onClick={() => { if (!isActive("/library")) navigate("/library");}} 
+            title="Case Library"
+          >
+            <BookMarkedIcon size={25} />
+            <span style={{ display: expanded ? "block" : "none" }}>Case Library</span>
+          </div>
         </>
       )}
     </div>
@@ -316,16 +326,6 @@ const SubInfo = ({
             navigate={navigate}
             setLowerOption={setLowerOption}
           />
-          <div 
-            id='library' 
-            className={`menu-item ${isActive("/library") ? "active" : ""}`} 
-            style={{ justifyContent: expanded ? "flex-start" : "center" }} 
-            onClick={() => { if (!isActive("/library")) navigate("/library"); setLowerOption("library"); }} 
-            title="Case Library"
-          >
-            <BookMarkedIcon size={25} />
-            <span style={{ display: expanded ? "block" : "none" }}>Case Library</span>
-          </div>
         </>
       ) : (
         <div
@@ -464,8 +464,7 @@ const Nav = ({ accessLevel, theme, changeTheme, logout }) => {
   const isLowerOptionPage = useCallback(() => {
     return (
       location.pathname.startsWith("/client-portal") ||
-      location.pathname.startsWith("/firm-settings") || 
-      location.pathname.startsWith("/library")
+      location.pathname.startsWith("/firm-settings")
     );
   }, [location.pathname]);
 
@@ -475,8 +474,6 @@ const Nav = ({ accessLevel, theme, changeTheme, logout }) => {
         setLowerOption("client-portal");
       } else if (location.pathname.startsWith("/firm-settings")) {
         setLowerOption("firm-settings");
-      } else if (location.pathname.startsWith("/library")) {
-        setLowerOption("library");
       } else {
         setLowerOption(null);
       }
@@ -489,8 +486,6 @@ const Nav = ({ accessLevel, theme, changeTheme, logout }) => {
         setLowerOption("client-portal");
       else if (location.pathname.startsWith("/firm-settings"))
         setLowerOption("firm-settings");
-      else if (location.pathname.startsWith("/library"))
-        setLowerOption("library");
     }
   });
 

@@ -280,12 +280,14 @@ export const SearchSelect = ({ value, onChange, options = [], placeholder = "Sel
 
             {isOpen && !disabled && (
                 <div className="search-select-dropdown" ref={dropdownRef}>
-                    <input
-                        type="text"
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                        placeholder="Search..."
-                    />
+                    <div className="form-group nm">
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                            placeholder="Search..."
+                        />
+                    </div>
                     {filtered.length > 0 ? (
                         filtered.map(opt => (
                         <div

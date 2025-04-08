@@ -30,6 +30,7 @@ header {
         margin: 0;
         padding: 2px;
         cursor: pointer;
+        transition: color 0.3s;
     }
 
     h4:not(.active) {
@@ -40,6 +41,10 @@ header {
 #template-header .active {
     color: var(--fill);
     border-bottom: 3px solid var(--fill);
+}
+
+#template-header .inactive {
+    color: var(--subtext-color);
 }
 
 .new-template {

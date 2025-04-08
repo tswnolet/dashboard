@@ -45,6 +45,7 @@ export const FileUpload = ({ fetchFiles, currentPath }) => {
             const data = await response.json();
             if (data.success) {
                 setMessage(`Folder "${newFolderName}" created successfully!`);
+                setNewFolderName('');
                 fetchFiles();
             } else {
                 setMessage(`Error: ${data.error}`);
@@ -119,7 +120,7 @@ export const FileUpload = ({ fetchFiles, currentPath }) => {
                 <button className="action upload-button" onClick={() => handleUpload(false)} disabled={isUploading}>
                     {isUploading ? <Loader2 className="spinner" /> : "Upload"}
                 </button>
-
+                <div className='divider horizontal'></div>
                 {showFolderInput ? (
                     <div className="folder-creation form-group nm">
                         <input
@@ -128,8 +129,10 @@ export const FileUpload = ({ fetchFiles, currentPath }) => {
                             value={newFolderName}
                             onChange={(e) => setNewFolderName(e.target.value)}
                         />
-                        <button className="action" onClick={handleCreateFolder}>Create</button>
-                        <button className="action alt" onClick={() => setShowFolderInput(false)}>Cancel</button>
+                        <div className='folder-creation-actions'>
+                            <button className="action small" onClick={handleCreateFolder}>Create</button>
+                            <button className="action alt small" onClick={() => setShowFolderInput(false)}>Cancel</button>
+                        </div>
                     </div>
                 ) : (
                     <button className="action alt" onClick={() => setShowFolderInput(true)}>

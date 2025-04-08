@@ -1,0 +1,207 @@
+.rate-header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.rate-schedule-selection {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+
+    button svg {
+        transition: transform 0.3s;
+    }
+}
+
+.new-rate-schedule {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 15px;
+    background-color: var(--secondary-color);
+    border-radius: 3px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--button-box-shadow);
+
+    position: absolute;
+    top: 0;
+    left: calc(100% + 10px);
+    z-index: 1001;
+
+    h4 {
+        margin: 10px 0;
+        text-wrap: nowrap;
+    }
+}
+
+.rate-schedule .title {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: row;
+    flex: 0;
+    gap: 10px;
+    user-select: none;
+}
+
+.rate-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    color: var(--subtext-color);
+    position: relative;
+    transition: color 0.3s, background-color 0.3s, width 0.3s, height 0.3s;
+}
+
+.rate-action {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 24px;
+    width: 24px;
+    padding: 3px;
+    border-radius: 3px;
+}
+
+.rate-action svg {
+    min-width: 18px;
+    min-height: 18px;
+    height: 18px;
+    width: 18px;
+}
+
+.rate-action:hover {
+    color: var(--text-color);
+    background-color: var(--border-color);
+}
+
+.rate-action-options {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    padding: 10px;
+    border-radius: 3px;
+    box-shadow: var(--button-box-shadow);
+}
+
+.rate-action-option {
+    padding: 5px;
+    text-wrap: nowrap;
+    font-size: 14px;
+    border-radius: 3px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.rate-action-option:hover {
+    background-color: var(--hover-color);
+    color: var(--secondary-color);
+}
+
+.instructions.rate {
+    margin: 25px 0;
+}
+
+.rate-increment {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+
+    select {
+        color: var(--subtext-color);
+        width: 150px;
+    }
+}
+
+.time-table {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 250px;
+    width: 35%;
+}
+
+.rate-time {
+    width: 100%;
+}
+
+.rate-table {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-direction: column;
+    background-color: var(--secondary-color);
+    border-radius: 3px;
+    border: 1px solid var(--border-color);
+    width: 100%;
+    height: 250px;
+    overflow-y: auto;
+    position: relative;
+}
+
+.rate-table thead, .rate-table tbody {
+    display: flex;
+    justify-content: flex-start !important;
+    width: 100%;
+}
+
+.rate-table thead {
+    position: sticky;
+    top: 0;
+    background-color: var(--secondary-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.rate-table tbody tr {
+    &:not(:first-child) {
+        border-top: 1px solid var(--border-color);
+    }
+
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.rate-table tbody tr:hover {
+    background-color: var(--border-color);
+}
+
+.rate-table tr {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    th:first-child, th:nth-child(2), td:first-child, td:nth-child(2) {
+        width: 100%;
+        border-right: 1px solid var(--border-color);
+    }
+
+    th:nth-child(3), td:nth-child(3) {
+        width: 50%;
+    }
+
+    th {
+        text-wrap: nowrap;
+        padding: 5px;
+        font-size: 14px;
+    }
+
+    td {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 5px;
+        padding: 5px;
+        font-size: 12.8px;
+        color: var(--subtext-color);
+    }
+}

@@ -11,7 +11,7 @@
   --theme: light;
   --background-color: #eceff1;
   --secondary-color: #fff;
-  --card-color: #F7F8F9;
+  --card-color: #dfedf8;
   --text-color: #333;
   --subtext-color: rgb(99, 99, 99);
   --svg-fill: rgb(81, 81, 97);
@@ -461,6 +461,7 @@ table:not(.schools) > tbody > tr > td {
 }
 
 .default-select {
+  font-weight: 600;
   scrollbar-color: var(--hover-color) var(--card-color);
   transition: background-color 0.3s, color 0.3s;
 }

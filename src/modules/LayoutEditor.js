@@ -747,12 +747,12 @@ export const LayoutEditor = () => {
                         </select>
                     )  : (
                         <>
-                            <h4 onClick={() => setSelectedTemplateHeader(0)} className={selectedTemplateHeader === 0 ? 'active' : ''}>Sections</h4>
-                            <h4 onClick={() => setSelectedTemplateHeader(1)} className={selectedTemplateHeader === 1 ? 'active' : ''}>Phases</h4>
-                            <h4 onClick={() => setSelectedTemplateHeader(2)} className={selectedTemplateHeader === 2 ? 'active' : ''}>Vitals</h4>
-                            <h4 onClick={() => setSelectedTemplateHeader(3)} className={selectedTemplateHeader === 3 ? 'active' : ''}>Folder Structure</h4>
-                            <h4 onClick={() => setSelectedTemplateHeader(4)} className={selectedTemplateHeader === 4 ? 'active' : ''}>Marketing Sources</h4>
-                            <h4 onClick={() => setSelectedTemplateHeader(5)} className={selectedTemplateHeader === 5 ? 'active' : ''}>Lead Statuses</h4>
+                            <h4 onClick={() => setSelectedTemplateHeader(0)} className={`${selectedTemplateHeader !== 0 ? 'in' : ''}active`}>Sections</h4>
+                            <h4 onClick={() => setSelectedTemplateHeader(1)} className={`${selectedTemplateHeader !== 1 ? 'in' : ''}active`}>Phases</h4>
+                            <h4 onClick={() => setSelectedTemplateHeader(2)} className={`${selectedTemplateHeader !== 2 ? 'in' : ''}active`}>Vitals</h4>
+                            <h4 onClick={() => setSelectedTemplateHeader(3)} className={`${selectedTemplateHeader !== 3 ? 'in' : ''}active`}>Folder Structure</h4>
+                            <h4 onClick={() => setSelectedTemplateHeader(4)} className={`${selectedTemplateHeader !== 4 ? 'in' : ''}active`}>Marketing Sources</h4>
+                            <h4 onClick={() => setSelectedTemplateHeader(5)} className={`${selectedTemplateHeader !== 5 ? 'in' : ''}active`}>Lead Statuses</h4>
                         </>
                     )}
                 </div>

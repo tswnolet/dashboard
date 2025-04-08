@@ -39,7 +39,7 @@
     text-decoration: none;
 }
 
-table:not(.exhibits) td:not(.case-name) {
+.case td:not(.case-name), .lead td, .contact td {
     &:not(.contact-picture) {
         width: 100%;
     }

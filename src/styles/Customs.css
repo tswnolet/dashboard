@@ -95,18 +95,18 @@
 
 .form-group.alt {
     flex-direction: row;
+    justify-content: space-between;
     align-items: center;
     margin: 0;
-    max-width: 50%;
+    overflow: hidden;
 
     label {
         min-width: 35%;
-        max-width: 35%;
         flex-shrink: 0;
     }
 }
 
-.form-group.alt input, .form-group.alt select {
+.form-group.alt input, .form-group.alt select:not(.small) {
     flex-grow: 1;
     min-width: 0;
 }
