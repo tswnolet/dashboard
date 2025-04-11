@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import '../styles/BillingSetup.css';
 import { EllipsisVertical, X } from 'lucide-react';
-import { SearchSelect } from './FieldComponents';
+import { DataTable, MiniNav, NumberInput, SearchSelect, Subheader } from './FieldComponents';
 import Modal from './Modal';
+import { BillingInvoices } from './BillingInvoices';
 
 export const BillingSetup = () => {
     const [rateSchedule, setRateSchedule] = useState(0);
@@ -18,14 +19,19 @@ export const BillingSetup = () => {
     const [selectedMember, setSelectedMember] = useState(null);
     const [editRate, setEditRate] = useState(null);
     const [teamMemberData, setTeamMemberData] = useState({});
+    const [tkClassifications, setTkClassifications] = useState([]);
     const optionRef = useRef(null);
-
+    
     const fetchBillingRates = async () => {
         const response = await fetch('https://api.casedb.co/billing.php');
         const data = await response.json();
 
-        if (data.success) setRateSchedules(data.billing_rates);
-    }
+        if (data.success) {
+            setRateSchedules(data.billing_rates);
+            setTkClassifications(data.classifications);
+            setTimeIncrement(data.billing_rates[rateSchedule].time_increment);
+        }
+    };
 
     const createBillingRate = async () => {    
         const response = await fetch('https://api.casedb.co/billing.php', {
@@ -51,7 +57,7 @@ export const BillingSetup = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await fetch(`https://api.casedb.co/user.php?rates=true&time=${new Date().getTime()}`);
+            const response = await fetch(`https://api.casedb.co/user.php?billing_rate=${rateSchedule + 1}&time=${new Date().getTime()}`);
             const data = await response.json();
             if (response.ok) {
                 setUsers(data.users);
@@ -69,18 +75,57 @@ export const BillingSetup = () => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    ...teamMemberData
+                    user_id: Number(editRate.id),
+                    billing_rates_id: rateSchedule + 1,
+                    classification_id: Number(teamMemberData.classification ?? 1),
+                    rate: Number(teamMemberData.rate ?? editRate.rate),
+                    timekeeper_id: teamMemberData.timekeeper_id ?? editRate.timekeeper_id
                 })
             });
             const data = await response.json();
+            fetchUsers();
+            setEditRate(null);
+            setTeamMemberData({});
+            
         } catch (err) {
             console.error(err);
         }
     }
 
+    const fetchIncrement = async () => {
+        try {
+            const response = await fetch('https://api.casedb.co/billing.php');
+            const data = await response.json();
+            if (data.success) {
+                setTimeIncrement(data.billing_rates[rateSchedule].time_increment ?? 0);
+            }
+        } catch (error) {
+            console.error("Error fetching increment:", error);
+        }
+    }
+
+    const updateIncrement = async (val) => {
+        try {
+            const response = await fetch('https://api.casedb.co/billing.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    billing_rates_id: rateSchedule + 1,
+                    time_increment: Number(val)
+                })
+            });
+            if (response.ok) {
+                setTimeIncrement(Number(val) ?? 0);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     useEffect(() => {
         fetchBillingRates();
-        fetchUsers();
     }, []);
 
     useEffect(() => {
@@ -101,6 +146,11 @@ export const BillingSetup = () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, [editRateSchedule]);
+
+    useEffect(() => {
+        fetchUsers();
+        fetchIncrement();
+    }, [rateSchedule]);
 
     return (
         <div className='page-container'>
@@ -135,7 +185,7 @@ export const BillingSetup = () => {
                             <select 
                                 className='default-select' 
                                 value={rateSchedule} 
-                                onChange={(e) => setRateSchedule(e.target.value)}
+                                onChange={(e) => setRateSchedule(Number(e.target.value))}
                             >
                                 {rateSchedules.map((rate, index) => (
                                     <option key={index} value={index}>{rate.name}</option>
@@ -202,7 +252,13 @@ export const BillingSetup = () => {
                         </div>
                         <div className='rate-increment'>
                             <label className='subtext alt'>Minimum Time Increment</label>
-                            <select className='default-select small' value={timeIncrement} onChange={(e) => setTimeIncrement(e.target.value)}>
+                            <select className='default-select small' value={timeIncrement} 
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    setTimeIncrement(val);
+                                    updateIncrement(val);
+                                }}
+                            >
                                 <option value={0}>None</option>
                                 <option value={1}>0.1 Hour</option>
                                 <option value={2}>0.25 Hour</option>
@@ -213,7 +269,12 @@ export const BillingSetup = () => {
                         </div>
                         <div className='time-table'>
                             <div className='rate-time'>
-                                <SearchSelect options={users.map(user => user.name)} value={selectedMember} onChange={(val) => setSelectedMember(val)}/>
+                                <SearchSelect
+                                    options={Object.fromEntries(users.map(user => [user.id, user.name]))}
+                                    value={selectedMember}
+                                    onChange={(val) => setSelectedMember(val)}
+                                    placeholder='Search for a team member...'
+                                />
                             </div>
                             <table className='rate-table'>
                                 <thead>
@@ -224,18 +285,24 @@ export const BillingSetup = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {users.map(user => (
-                                        <tr key={user.id} onClick={() => setEditRate(user.id)}>
+                                    {users.filter(user => selectedMember ? Number(user.id) === Number(selectedMember) : user).map(user => (
+                                        <tr key={user.id} onClick={() => setEditRate(user)}>
                                             <td>
-                                                <span className='contact-initials'>
-                                                    {user.profile_picture 
-                                                        ? <img src={`https://api.casedb.co/${user.profile_picture}`}/> 
-                                                        : 'TH'
-                                                        }
-                                                </span>
+                                            <span className='contact-initials'>
+                                                {user.profile_picture ? (
+                                                    <img src={`https://api.casedb.co/${user.profile_picture}`} />
+                                                ) : (
+                                                    (() => {
+                                                        const parts = user.name?.trim().split(' ');
+                                                        const first = parts?.[0]?.[0] || '';
+                                                        const last = parts?.[parts.length - 1]?.[0] || '';
+                                                        return (first + last).toUpperCase();
+                                                    })()
+                                                )}
+                                            </span>
                                                 {user.name}
                                             </td>
-                                            <td>{user.user}</td>
+                                            <td>{user.timekeeper_id}</td>
                                             <td>{user.rate}</td>
                                         </tr>
                                     ))}
@@ -248,18 +315,53 @@ export const BillingSetup = () => {
                                     header={(
                                         <div className='modal-header-actions'>
                                             <button className='action alt' onClick={() => setEditRate(null)}>Cancel</button>
-                                            <button className='action' onClick={() => {}}>Save</button>
+                                            <button className='action' onClick={() => updateRate()}>Save</button>
                                         </div>
                                     )}
                                 >
                                      <div className='modal-content-wrapper'>
-                                        
+                                        <div className='user-name'>
+                                        <span className='contact-initials'>
+                                                    {editRate.profile_picture 
+                                                    ? (
+                                                        <img src={`https://api.casedb.co/${editRate.profile_picture}`}/> 
+                                                    ) : (
+                                                        (() => {
+                                                            const parts = editRate.name?.trim().split(' ');
+                                                            const first = parts?.[0]?.[0] || '';
+                                                            const last = parts?.[parts.length - 1]?.[0] || '';
+                                                            return (first + last).toUpperCase();
+                                                        })()
+                                                    )}
+                                                </span>
+                                            {editRate.name}
+                                        </div>
+                                        <div className='billing-rate-setup'>
+                                            <div className='form-group'>
+                                                <label className='subtext'>Timekeeper ID</label>
+                                                <input type='text' placeholder='Timekeeper ID' value={teamMemberData?.timekeeper_id?.length > 0 ? teamMemberData.timekeeper_id : editRate.timekeeper_id} onChange={(e) => setTeamMemberData({ ...teamMemberData, timekeeper_id: e.target.value})}/>
+                                            </div>
+                                            <div className='form-group'>
+                                                <label className='subtext'>Rate</label>
+                                                <NumberInput type='currency' value={teamMemberData?.rate?.length > 0 ? teamMemberData.rate : editRate.rate} onChange={(val) => setTeamMemberData({ ...teamMemberData, rate: val})} />
+                                            </div>
+                                        </div>
+                                        <div className='form-group'>
+                                            <label className='subtext'>Timekeeper Classification</label>
+                                            <select className='default-select' value={teamMemberData?.classification?.length > 0 ? teamMemberData.classification : editRate.classification_id} onChange={(e) => setTeamMemberData({ ...teamMemberData, classification: e.target.value})}>
+                                                {tkClassifications.filter(classification => Number(classification.rate_id) === (rateSchedule + 1) || Number(classification.rate_id) === Number(rateSchedules[rateSchedule]?.settings)).map((classification) => (
+                                                    <option key={classification.id} value={classification.id}>{classification.classification}</option>
+                                                ))}
+                                            </select>
+                                        </div>
                                      </div>
                                 </Modal>
                             }
                         </div>
                     </div>
                 </div>
+            ) : billingNav === 1 ? (
+                <BillingInvoices />
             ) : (
                 <></>
             )}

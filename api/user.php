@@ -55,19 +55,29 @@ if ($requestMethod === 'POST') {
         echo json_encode(["error" => "User not found"]);
     }
 } else if ($requestMethod === 'GET') {
-    if (isset($_GET['rates'])) {
-        $sql = '
+    if (isset($_GET['billing_rate'])) {
+        $rate_id = $_GET['billing_rate'] ?? '';
+
+        $sql = "
             SELECT 
                 users.user, 
                 users.name, 
                 users.id, 
-                rates.rate,
+                billing_rate.rate,
+                billing_rate.timekeeper_id,
+                billing_rate.classification_id,
                 contacts.profile_picture
             FROM users
-            LEFT JOIN rates ON rates.user_id = users.id
-            LEFT JOIN contacts ON contacts.id = users.contact_id
-        ';
-        $result = $conn->query($sql);
+            LEFT JOIN billing_rate 
+                ON billing_rate.user_id = users.id 
+                AND billing_rate.billing_rates_id = ?
+            LEFT JOIN contacts 
+                ON contacts.id = users.contact_id
+        ";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $rate_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
         $users = [];
         while ($row = $result->fetch_assoc()) {

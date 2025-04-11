@@ -163,12 +163,12 @@
 }
 
 .rate-table tbody tr {
+    cursor: pointer;
+    transition: background-color 0.3s;
+
     &:not(:first-child) {
         border-top: 1px solid var(--border-color);
     }
-
-    cursor: pointer;
-    transition: background-color 0.3s;
 }
 
 .rate-table tbody tr:hover {
@@ -204,4 +204,120 @@
         font-size: 12.8px;
         color: var(--subtext-color);
     }
+}
+
+.user-name {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 5px;
+}
+
+.billing-rate-setup {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+
+    .form-group {
+        max-width: calc(50% - 5px);
+    }
+}
+
+.invoices {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.invoices-container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    height: 100%;
+    width: 100%;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.invoice-template-table {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    border: 1px solid var(--border-color);
+    background-color: var(--secondary-color);
+    border-radius: 3px;
+}
+
+.invoice-template-table thead, .invoice-template-table tbody {
+    display: flex;
+    justify-content: flex-start !important;
+    width: 100%;
+}
+
+.invoice-template-table thead {
+    position: sticky;
+    top: 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.invoice-template-table tbody tr:hover {
+    background-color: var(--border-color);
+}
+
+.invoice-template-table tr {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    transition: background-color 0.3s;
+
+    &:not(:last-child) {
+        border-bottom: 1px solid var(--border-color);
+    }
+}
+
+.invoice-template-table th, .invoice-template-table td {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px;
+
+    &:not(:last-child) {
+        justify-content: flex-start;
+    }
+
+    &:last-child {
+        justify-content: center;
+    }
+}
+
+.invoice-template-table td {
+    font-size: 12.8px;
+    color: var(--subtext-color);
+    height: 100%;
+}
+
+.invoice-template-table th:not(:last-child), .invoice-template-table td:not(:last-child) {
+    width: 100%;
+    border-right: 1px solid var(--border-color);
+}
+
+.invoice-template-table th:last-child, .invoice-template-table td:last-child {
+    width: 25%;
+}
+
+.invoice-template-table tbody tr {
+    &:not(:first-child) {
+        border-top: 1px solid var(--border-color);
+    }
+
+    cursor: pointer;
+    transition: background-color 0.3s;
 }

@@ -225,6 +225,20 @@ export const SearchSelect = ({ value, onChange, options = [], placeholder = "Sel
 
     useEffect(() => {
         if (!isOpen) return;
+    
+        const handleKeyDown = (e) => {
+            if ((e.key === 'Backspace' || e.key === 'Delete') && !search) {
+                onChange(null);
+                setSearch('');
+            }
+        };
+    
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, search]);    
+
+    useEffect(() => {
+        if (!isOpen) return;
 
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -274,8 +288,9 @@ export const SearchSelect = ({ value, onChange, options = [], placeholder = "Sel
             <div
                 className="search-select-input"
                 onClick={() => !disabled && setIsOpen(!isOpen)}
+                title='Press Backspace or Delete to clear the selection'
             >
-                {selectedLabel || placeholder}
+                {`${selectedLabel || placeholder}`}
             </div>
 
             {isOpen && !disabled && (
@@ -334,8 +349,27 @@ export const Boolean = ({ options = [], value, onChange, onBlur = () => {}, onKe
     );
 };
 
+export const Toggle = ({ value, onChange, label = null }) => {
+    return (
+        <div className='toggle-container'>
+            <div className={`toggle${value ? ' active' : ''}`} onClick={() => onChange(!value)}>
+                <div className={`toggle-circle ${value ? 'set' : ''}`} />
+            </div>
+            <span className='subtext'>{label}</span>
+        </div>
+    );
+};
 
-export const Subheader = ({ title }) => {
+export const Subheader = ({ title, action = null }) => {
+    if (action) {
+        return (
+            <div className='subheader' id={title}>
+                <h2>{title}</h2>
+                {action}
+            </div>
+        );
+    }
+
     return <h2 className='subheader' id={title}>{title}</h2>;
 };
 
@@ -500,7 +534,7 @@ export const Calculation = ({
     const [showTooltip, setShowTooltip] = useState(false);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const lastPosted = useRef(null);
-    const onChangeCount = useRef(0); // Counter to limit onChange calls
+    const onChangeCount = useRef(0);
 
     const handleMouseMove = useCallback((e) => {
         const offsetX = 5;
@@ -1349,3 +1383,21 @@ export const File = ({ file, onClick }) => {
         </div>
     );
 };
+
+export const MiniNav = ({ options = [], selectedOption, setSelectedOption }) => {
+    return (
+        <>
+            <div className='mini-nav'>
+                {options.map((option, index) => (
+                    <div 
+                        key={index} 
+                        className={`option${selectedOption === index ? ' active' : ''}`} 
+                        onClick={() => setSelectedOption(index)}
+                    >
+                        {option}
+                    </div>
+                ))}
+            </div>
+        </>
+    );
+}

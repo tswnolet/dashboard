@@ -17,7 +17,7 @@
   --svg-fill: rgb(81, 81, 97);
   --border-color: #ddd;
   --line-color: rgba(0,0,0,0.1);
-  --button-box-shadow: 0 0 10px 10px rgba(255, 136, 57, 0.025);
+  --button-box-shadow: 0 0 10px 10px rgba(255, 192, 57, 0.05);
   --large-box-shadow: 0 0 50px 25px rgba(0, 0, 0, 0.1);
   --hover-color: #8b8b8b;
   --context-color: white;
@@ -25,8 +25,10 @@
   --slider-offset: 0.3em;
   --dark: 0;
   --graph-color: #624b8f;
-  --fill: rgb(40, 57, 85);
+  --fill: #283955;
+  --blue: #283955;
   --fill-2: #f4bc41;
+  --gold: #f4bc41;
   --fill-3: #442208;
   --fill-4: #262533;
   --priority-color: #f44141;
@@ -365,6 +367,10 @@ table:not(.schools) > tbody > tr > td {
   }
 }
 
+thead {
+  font-size: 14px;
+}
+
 .page-container > div:not(.file-upload):not(.data-action-container) {
   width: 100%;
 }
@@ -461,18 +467,26 @@ table:not(.schools) > tbody > tr > td {
 }
 
 .default-select {
+  border-radius: 3px;
   font-weight: 600;
   scrollbar-color: var(--hover-color) var(--card-color);
   transition: background-color 0.3s, color 0.3s;
 }
 
-.default-select, .action, .section-properties input, .section-properties textarea {
+.default-select, .action, .form-group input, .section-properties textarea {
   outline: none;
-  border-radius: 3px;
 
   &:not(.small) {
     max-width: 500px;
   }
+
+  &.small {
+    max-width: 250px !important;
+  }
+}
+
+input:focus, .default-select:focus, textarea:focus {
+  box-shadow: var(--button-box-shadow);
 }
 
 .small {
@@ -504,6 +518,7 @@ table:not(.schools) > tbody > tr > td {
   justify-content: center;
   gap: 8px;
   color: var(--secondary-color);
+  border-radius: 3px;
   border: none;
   font-weight: 800;
   cursor: pointer;
@@ -527,8 +542,13 @@ table:not(.schools) > tbody > tr > td {
   color: var(--text-color);
   background-color: transparent;
   border: 1px solid var(--border-color);
-  border-radius: 3px;
   width: 100%;
+}
+
+.action.tertiary {
+  color: var(--fill);
+  background-color: transparent;
+  border: 1px solid var(--border-color);
 }
 
 .action:hover {
