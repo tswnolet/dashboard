@@ -12,8 +12,8 @@ import {
   RiLogoutCircleLine,
   RiBillLine,
 } from "react-icons/ri";
-import { Book, BookMarkedIcon, Cloud, Contact2, FileEditIcon, Hash, Menu, Search } from "lucide-react";
-import { ArrowBack, MoreHorizOutlined, ChangeCircleOutlined, CloudDoneOutlined, CloudOutlined, Create, CreateOutlined, Add, AddOutlined, AddCircleOutline, DocumentScannerOutlined } from "@mui/icons-material";
+import { Book, BookMarkedIcon, CircleDollarSign, Cloud, Contact2, FileEditIcon, Hash, Menu, Search } from "lucide-react";
+import { ArrowBack, MoreHorizOutlined, ChangeCircleOutlined, CloudDoneOutlined, CloudOutlined, Create, CreateOutlined, Add, AddOutlined, AddCircleOutline, DocumentScannerOutlined, Money } from "@mui/icons-material";
 import Logo from "../resources/logo.png";
 import "../styles/Nav.css";
 import { Theme } from "./Theme";
@@ -34,7 +34,7 @@ function useOutsideClick(ref, callback) {
 }
 
 /* SearchBar Component */
-export const SearchBar = ({ placeholder = null, expanded, setExpanded, setSearchQuery, autofocus = false }) => {
+export const SearchBar = ({ placeholder = null, expanded, setExpanded = () => {}, setSearchQuery, autofocus = false }) => {
   const containerRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -87,7 +87,7 @@ const Dropdown = ({
       ? "main-active"
       : "";
   
-  const isActive = (route) => location.pathname.startsWith(route);
+  const isActive = (route) => location.pathname === route;
   
   return (
     <>
@@ -118,7 +118,9 @@ const Dropdown = ({
       </div>
       {isOpen && (
         <div className='submenu'>
-          {submenuItems.map((item, index) => (
+          {submenuItems.map((item, index) => {
+            console.log(isActive(item.route), item.route, location.pathname);
+            return (
             <div
               key={index}
               className={`submenu-item${isActive(item.route) ? " active" : ""}${expanded ? " expanded" : ""}`}
@@ -133,7 +135,7 @@ const Dropdown = ({
               {item.Icon && <item.Icon size={20} />}
               {expanded && <span>{item.label}</span>}
             </div>
-          ))}
+          )})}
         </div>
       )}
     </>
@@ -302,8 +304,13 @@ const SubInfo = ({
               },
               {
                 label: "Billing",
-                Icon: RiBillLine,
+                Icon: CircleDollarSign,
                 route: "/firm-settings/billing",
+              },
+              {
+                label: "Billing Setup",
+                Icon: RiBillLine,
+                route: "/firm-settings/billing-setup",
               },
               {
                 label: "Contacts Setup",

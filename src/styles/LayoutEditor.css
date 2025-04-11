@@ -83,7 +83,9 @@ header {
     &:not(.deadline-group) {
         &:not(.task-assign) {
             &:not(.call-log) {
-                width: 100%;
+                &:not(.small) {
+                    width: 100%;
+                }
             }
         }
     }

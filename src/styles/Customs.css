@@ -235,7 +235,7 @@
 
 .toggle-container {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     gap: 5px;
 }
@@ -260,6 +260,41 @@
     left: 22px;
     background-color: var(--gold);
     box-shadow: 0 0 15px 15px rgba(244, 188, 65, 0.15);
+}
+
+.checkbox-group {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    user-select: none;
+}
+
+.hint-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.info-box {
+    cursor: pointer;
+}
+
+.hint {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--secondary-color);
+    background-color: var(--text-color);
+    border-radius: 3px;
+    padding: 5px 10px;
+    font-size: 12.8px;
+    text-align: center;
+    position: absolute;
+    top: calc(100% + 5px);
+    min-width: 200px;
+    z-index: 1002;
 }
 
 .multi-select-component {
@@ -338,7 +373,41 @@
     scroll-margin-top: 100px;
     margin: 0;
     padding-top: 10px;
+}
+
+.subheader:not(.small) {
     width: 100%;
+}
+
+.subheader.small {
+    width: 50%;
+}
+
+.subheader-solo {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    scroll-margin-top: 100px;
+    margin: 0;
+    padding-top: 10px;
+}
+
+.subtext-title {
+    color: var(--subtext-title);
+    margin: 10px 0 0 0;
+    font-size: 14px;
+}
+
+.subtext-data {
+    color: var(--subtext-title);
+    font-size: 14px;
+}
+
+.data-display {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-direction: column;
 }
 
 .number-input {
@@ -607,6 +676,19 @@
     width: 19px;
     height: 19px;
     border: 2px solid var(--secondary-color);
+}
+
+.bank-account {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 3px;
+    border: 1px solid var(--border-color);
+    padding: 10px;
+
+    a {
+        color: var(--text-color);
+    }
 }
 
 @media (min-width: 769px) {

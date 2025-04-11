@@ -1,3 +1,7 @@
+.billing {
+    margin-bottom: 50px;
+}
+
 .rate-header {
     display: flex;
     justify-content: flex-start;
@@ -226,6 +230,14 @@
     }
 }
 
+.invoice-template-container, .payment-template-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-direction: column;
+    width: 100%;
+}
+
 .invoices {
     display: flex;
     justify-content: flex-start;
@@ -243,34 +255,41 @@
     gap: 10px;
 }
 
-.invoice-template-table {
+.billing-template-table, .billing-table {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    width: 100%;
     border: 1px solid var(--border-color);
     background-color: var(--secondary-color);
     border-radius: 3px;
 }
 
-.invoice-template-table thead, .invoice-template-table tbody {
+.table-full {
+    width: 100%;
+}
+
+.table-half {
+    width: 50%;
+}
+
+.billing-table thead, .billing-table tbody, .billing-template-table thead, .billing-template-table tbody {
     display: flex;
     justify-content: flex-start !important;
     width: 100%;
 }
 
-.invoice-template-table thead {
+.billing-table thead, .billing-template-table thead {
     position: sticky;
     top: 0;
     border-bottom: 1px solid var(--border-color);
 }
 
-.invoice-template-table tbody tr:hover {
+.billing-table tbody tr:hover, .billing-template-table tbody tr:hover {
     background-color: var(--border-color);
 }
 
-.invoice-template-table tr {
+.billing-table tr, .billing-template-table tr {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -283,41 +302,100 @@
     }
 }
 
-.invoice-template-table th, .invoice-template-table td {
+.billing-table th, .billing-table td, .billing-template-table th, .billing-template-table td {
     display: flex;
     align-items: center;
     gap: 5px;
     padding: 5px;
-
-    &:not(:last-child) {
-        justify-content: flex-start;
-    }
-
-    &:last-child {
-        justify-content: center;
-    }
 }
 
-.invoice-template-table td {
+.billing-template-table th:not(:last-child), .billing-template-table td:not(:last-child) {
+    justify-content: flex-start;
+}
+
+.billing-table th, .billing-table td, .billing-template-table th:last-child, .billing-template-table td:last-child {
+    justify-content: center;
+}
+
+.billing-table td, .billing-template-table td {
     font-size: 12.8px;
     color: var(--subtext-color);
     height: 100%;
 }
 
-.invoice-template-table th:not(:last-child), .invoice-template-table td:not(:last-child) {
+.billing-table th:not(:last-child), .billing-table td:not(:last-child), .billing-template-table th:not(:last-child), .billing-template-table td:not(:last-child) {
     width: 100%;
     border-right: 1px solid var(--border-color);
 }
 
-.invoice-template-table th:last-child, .invoice-template-table td:last-child {
+.billing-table th, .billing-table td {
+    width: 100%;
+    justify-content: center;
+}
+
+.billing-template-table th:last-child, .billing-template-table td:last-child {
     width: 25%;
 }
 
-.invoice-template-table tbody tr {
+.billing-table tr, .billing-template-table tbody tr {
     &:not(:first-child) {
         border-top: 1px solid var(--border-color);
     }
 
     cursor: pointer;
     transition: background-color 0.3s;
+}
+
+.payment-settings-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 10px;
+    flex-direction: column;
+    width: 25%;
+    max-width: 350px;
+}
+
+.billing.payments, .billing.unbilled, .billing.invoices {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.checkbox-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.checkbox-container .checkbox-group:not(:first-child) {
+    margin-left: 32px;
+}
+
+.unbilled-search, .invoices-search {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.unbilled-search-header, .invoices-search-header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.billing-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
 }

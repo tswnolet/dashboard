@@ -1,96 +1,64 @@
 import { useState, useEffect } from 'react';
-import { Instructions, MiniNav, Subheader, Toggle } from './FieldComponents';
-import { Download, Plus } from 'lucide-react';
+import { SearchBar } from './Nav';
+import { DataDisplay, Dropdown, Toggle } from './FieldComponents';
+import { Plus } from 'lucide-react';
 
 export const BillingInvoices = () => {
-    const [miniNavSelected, setMiniNavSelected] = useState(0);
-    const [roles, setRoles] = useState([]);
-    const [iGSettings, setIGSettings] = useState({
-        invoiceGenerationEnabled: false,
-        invoiceApprovalEnabled: false,
-        invoiceApprovalRequired: false,
-    });
-
-    const fetchRoles = async () => {
-        try {
-            const response = await fetch('https://api.casedb.co/roles.php');
-            const data = await response.json();
-            setRoles(data.roles);
-        } catch (error) {
-            console.error('Error fetching roles:', error);
-        }
-    }
-
-    useEffect(() => {
-        fetchRoles();
-    }, []);
+    const [searchCase, setSearchCase] = useState('');
+    const [searchTag, setSearchTag] = useState('');
+    const [status, setStatus] = useState(0);
+    const [showArchived, setShowArchived] = useState(false);
+    const [createInvoice, setCreateInvoice] = useState(false);
+    const [invoices, setInvoices] = useState([]);
 
     return (
         <div className='billing invoices'>
-            <MiniNav
-                options={['Invoice Template', 'LEDES Settings', 'Invoice Generation Settings', 'Invoice Approval']}
-                selectedOption={miniNavSelected}
-                setSelectedOption={setMiniNavSelected}
-            />
-            <div className='invoices-container'>
-                {miniNavSelected === 0 ? (
-                    <>
-                        <div className='form-group'>
-                            <label className='subtext'>Default Template *</label>
-                            <select className='default-select small' value={0}>
-                                <option value={0}>Default</option>
-                                <option value={1}>Custom</option>
-                            </select>
-                        </div>
-                        <Subheader title='Templates' action={<button className='action tertiary'><Plus />New Template</button>} />
-                        <table className='invoice-template-table'>
-                            <thead>
-                                <tr>
-                                    <th>Template Name</th>
-                                    <th>Description</th>
-                                    <th>Download</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Filevine Base Template</td>
-                                    <td>A simple template provided by Filevine</td>
-                                    <td><Download size={16} /></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <Instructions instructions='Unless another template is selected at the case level, the default template will be used.' />
-                    </>
-                ) : miniNavSelected === 1 ? (
-                    <>
-                        <div className='form-group'>
-                            <label className='subtext'>Law Firm ID</label>
-                            <input type='text' className='small' placeholder='Law Firm ID' />
-                        </div>
-                    </>
-                ) : miniNavSelected === 2 ? (
-                    <>
-                        <Subheader title='Invoice Generation Settings' />
-                        <Toggle value={iGSettings.invoiceGenerationEnabled} onChange={(val) => setIGSettings({ ...iGSettings, invoiceGenerationEnabled: val })} label='Save all invoice PDFs to selected project' />
-                        <Instructions instructions='When enabled, all generated invoice PDFs will be saved in the docs section of the selected case, rather than their own case.' />
-                    </>
-                ) : miniNavSelected === 3 && (
-                    <>
-                        <Subheader title='Invoice Approval' />
-                        <Instructions instructions='Invoice approval is an optional first approver on an invoice approval route that has flexible responsibilities.' />
-                        <Instructions instructions='Select an existing role to designate as the Invoice Approver.' />
-                        <div className='form-group'>
-                            <label className='subtext'>Invoice Approver</label>
-                            <select className='default-select small' value={0}>
-                                <option value={0}>Select a role</option>
-                                {roles.map((role, index) => (
-                                    <option key={index} value={role.id}>{role.role}</option>
-                                ))}
-                            </select>
-                        </div>
-                    </>
-                )}
+            <div className='invoices-search'>
+                <div className='unbilled-search-header'>
+                    <SearchBar placeholder='Search by Case Name' value={searchCase} onChange={(e) => setSearchCase(e.target.value)} expanded={true} />
+                    <Dropdown
+                        options={['All', 'Editing', 'Final', 'Void', 'Paid', 'Partially Paid', 'Overdue', 'Pending Approval', 'Approved']}
+                        placeholder='Invoice Status...'
+                        value={status}
+                        onChange={(index) => setStatus(index)} />
+                    <SearchBar placeholder='Search by Tag' value={searchTag} onChange={(e) => setSearchTag(e.target.value)} expanded={true} />
+                    <Toggle
+                        label='Show Archived'
+                        value={showArchived}
+                        onChange={() => setShowArchived(prev => !prev)}
+                    />
+                </div>
+                <button className='action tertiary' onClick={() => setCreateInvoice(true)}><Plus size={18} />Create Invoice</button>
+            </div>
+            <div className='billing-container'>
+                <DataDisplay title='Total Outstanding' value={invoices?.reduce((acc, c) => c?.unbilled, 0)} type='currency' />
+                <table className='billing-table table-full'>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Case Name</th>
+                            <th>Case Type</th>
+                            <th>Tags</th>
+                            <th>Invoice #</th>
+                            <th>Description</th>
+                            <th>Total Outstanding</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {invoices.filter((i) => i.phase != 'archived' || showArchived).map((i, index) => (
+                            <tr key={index}>
+                                <td>{i?.case}</td>
+                                <td>{i?.tags[0]}</td>
+                                <td>{i?.case_type}</td>
+                                <td>{i?.time}</td>
+                                <td>{i?.expenses}</td>
+                                <td>{i?.flat_fees}</td>
+                                <td>{i?.expenses + i?.flat_fees}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
         </div>
     );
-}
+};

@@ -21,6 +21,7 @@ import { Cases } from './modules/Cases';
 import { FileUpload, FileList } from './modules/ExhibitViewer';
 import { Case } from './modules/Case';
 import { BillingSetup } from './modules/BillingSetup';
+import { Billing } from './modules/Billing';
 
 const App = () => {
   const [loading, setLoading] = useState(true);
@@ -171,7 +172,8 @@ const AppRoutes = ({ accessLevel, setAccessLevel, setUser, user, loggedIn, setLo
           {accessLevel === 'global admin' ? ( 
             <>
               <Route path="/dashboard" element={<Dashboard setLoggedIn={setLoggedIn} />} />
-              <Route path='/firm-settings/billing' element={<BillingSetup />} />
+              <Route path='/firm-settings/billing' element={<Billing />} />
+              <Route path='/firm-settings/billing-setup' element={<BillingSetup />} />
             </>
           ) : (
             <Route path='/dashboard' element={<Cases user={user} />} />

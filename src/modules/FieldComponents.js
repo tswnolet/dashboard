@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import '../styles/LayoutEditor.css';
 import { createPortal } from "react-dom";
 import { CreateContact } from "./CreateContact";
-import { AlarmClockPlus, Check, CheckCheck, CheckSquare, CloudUpload, Dot, DotSquare, Eraser, Hash, Loader, Loader2, Paperclip, Phone, SendHorizonal, StickyNote, Upload, UserRoundPlus, X } from "lucide-react";
+import { AlarmClockPlus, Check, CheckCheck, CheckSquare, CloudUpload, Dot, DotSquare, Eraser, Hash, Info, Loader, Loader2, Paperclip, Phone, SendHorizonal, StickyNote, Upload, UserRoundPlus, X } from "lucide-react";
 import { Calculate, MarginOutlined, Refresh, Source, Square, SquareRounded } from "@mui/icons-material";
 import { RiAiGenerate, RiAiGenerate2 } from "react-icons/ri";
 import { convertLength } from "@mui/material/styles/cssUtils";
@@ -360,21 +360,85 @@ export const Toggle = ({ value, onChange, label = null }) => {
     );
 };
 
-export const Subheader = ({ title, action = null }) => {
+export const Checkbox = ({ value, onChange, label = null, hint = null }) => {
+    const [hintVisible, setHintVisible] = useState(false);
+    const hintRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (hintRef.current && !hintRef.current.contains(event.target)) {
+                setHintVisible(false);
+            }
+        };
+
+        if (hintVisible) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [hintVisible]);
+
+    return (
+        <div className='checkbox-group'>
+            <div 
+                className='checkbox'
+                onClick={onChange}
+            >
+                {value ? '✓' : ''}
+            </div>
+            {label && <label className='subtext'>{label}</label>}
+            <input type='checkbox' hidden />
+            <div className='hint-container' ref={hintRef}>
+                {hint && <Info className='info-box' size={18} onClick={() => setHintVisible(prev => !prev)}/>}
+                {hintVisible && (
+                    <div className='hint'>
+                        {hint}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export const Subheader = ({ title, small = false, action = null }) => {
     if (action) {
         return (
-            <div className='subheader' id={title}>
+            <div className={`subheader ${small ? 'small' : ''}`} id={title}>
                 <h2>{title}</h2>
                 {action}
             </div>
         );
     }
 
-    return <h2 className='subheader' id={title}>{title}</h2>;
+    return <h2 className='subheader-solo' id={title}>{title}</h2>;
 };
 
-export const Instructions = ({ instructions }) => {
-    return <p className='instructions'>{instructions}</p>;
+export const SubtextTitle = ({ title }) => {
+    return <p className='subtext-title'>{title}</p>;
+}
+
+export const DataDisplay = ({title, value, type }) => {
+    const formatValue = (val) => {
+        if (type === 'currency') {
+            return `$${parseFloat(val).toFixed(2)}`;
+        } else if (type === 'percentage') {
+            return `${parseFloat(val).toFixed(2)}%`;
+        }
+        return val;
+    };
+
+    return (
+        <div className='data-display'>
+            <span className='subtext'>{title}</span>
+            <span className='subtext-data'>{formatValue(value)}</span>
+        </div>
+    );
+};
+
+export const Instructions = ({ instructions, limited = false }) => {
+    return <p className='instructions' style={{maxWidth: limited ? '50%' : ''}}>{instructions}</p>;
 };
 
 export const FileUpload = ({ value, onChange, upload = null, uploadWaiting = false }) => {
@@ -1401,3 +1465,21 @@ export const MiniNav = ({ options = [], selectedOption, setSelectedOption }) => 
         </>
     );
 }
+
+export const BankAccountLink = ({ value, onChange }) => {
+    return (
+        <div className='bank-account'>
+        <Instructions
+            instructions={
+                <>
+                    No accounts available.
+                    <br />
+                    <br />
+                    Request feature completion by contacting:{' '}
+                    <a href="mailto:tnolet@dalyblack.com">tnolet@dalyblack.com</a>
+                </>
+            }
+        />
+        </div>
+    )
+};

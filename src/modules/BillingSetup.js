@@ -3,7 +3,8 @@ import '../styles/BillingSetup.css';
 import { EllipsisVertical, X } from 'lucide-react';
 import { DataTable, MiniNav, NumberInput, SearchSelect, Subheader } from './FieldComponents';
 import Modal from './Modal';
-import { BillingInvoices } from './BillingInvoices';
+import { BillingSetupInvoices } from './BillingSetupInvoices';
+import { BillingPayments } from './BillingSetupPayments';
 
 export const BillingSetup = () => {
     const [rateSchedule, setRateSchedule] = useState(0);
@@ -361,7 +362,9 @@ export const BillingSetup = () => {
                     </div>
                 </div>
             ) : billingNav === 1 ? (
-                <BillingInvoices />
+                <BillingSetupInvoices />
+            ) : billingNav === 2 ? (
+                <BillingPayments />
             ) : (
                 <></>
             )}

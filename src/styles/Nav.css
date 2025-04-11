@@ -262,10 +262,11 @@ nav.scrolled {
   display: flex;
   align-items: center;
   background: transparent;
-  height: 40px;
+  height: 36px;
   border-radius: 3px;
   transition: width 0.3s ease-in-out, background 0.3s ease-in-out;
-  width: 40px;
+  width: 36px;
+  max-width: 300px;
   overflow: hidden;
   cursor: pointer;
   position: relative;
@@ -275,7 +276,6 @@ nav.scrolled {
   width: 100%;
   max-width: 300px;
   background: var(--card-color);
-  box-shadow: var(--button-box-shadow);
   border: 1px solid var(--border-color);
 }
 

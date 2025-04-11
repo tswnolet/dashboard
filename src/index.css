@@ -14,6 +14,7 @@
   --card-color: #dfedf8;
   --text-color: #333;
   --subtext-color: rgb(99, 99, 99);
+  --subtext-title: #383838;
   --svg-fill: rgb(81, 81, 97);
   --border-color: #ddd;
   --line-color: rgba(0,0,0,0.1);
@@ -42,6 +43,7 @@
   --card-color: #2c343b;
   --text-color: #F7F8F9;
   --subtext-color: #C7D1DB;
+  --subtext-title: #F7F8F9;
   --svg-fill: #cccccc;
   --border-color: #333;
   --line-color: rgba(255,255,255,0.1);
@@ -485,12 +487,13 @@ thead {
   }
 }
 
-input:focus, .default-select:focus, textarea:focus {
+input:not(.search-input):focus, .default-select:focus, textarea:focus {
   box-shadow: var(--button-box-shadow);
 }
 
 .small {
   margin: 0 !important;
+  width: 50%;
 }
 
 .default-select, .action, .section-properties input {
@@ -516,6 +519,7 @@ input:focus, .default-select:focus, textarea:focus {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   gap: 8px;
   color: var(--secondary-color);
   border-radius: 3px;

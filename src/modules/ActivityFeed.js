@@ -198,7 +198,7 @@ const Activity = ({ data, user_id, user, fetchFeed }) => {
                                 {isPinnedForCase && (
                                     <div
                                         className='activity-pin case-pin'
-                                        title='Pinned to Project Feed'
+                                        title='Pinned to Case Feed'
                                         onMouseOver={() => setHoveringPin("project")}
                                         onMouseLeave={() => setHoveringPin(null)}
                                     >
