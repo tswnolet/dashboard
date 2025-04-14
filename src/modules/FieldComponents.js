@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import '../styles/LayoutEditor.css';
 import { createPortal } from "react-dom";
 import { CreateContact } from "./CreateContact";
-import { AlarmClockPlus, Check, CheckCheck, CheckSquare, CloudUpload, Dot, DotSquare, Eraser, Hash, Info, Loader, Loader2, Paperclip, Phone, SendHorizonal, StickyNote, Upload, UserRoundPlus, X } from "lucide-react";
+import { AlarmClockPlus, Calendar, Check, CheckCheck, CheckSquare, CloudUpload, Dot, DotSquare, Eraser, Hash, Info, Loader, Loader2, Paperclip, Phone, SendHorizonal, StickyNote, Upload, UserRoundPlus, X } from "lucide-react";
 import { Calculate, MarginOutlined, Refresh, Source, Square, SquareRounded } from "@mui/icons-material";
 import { RiAiGenerate, RiAiGenerate2 } from "react-icons/ri";
 import { convertLength } from "@mui/material/styles/cssUtils";
@@ -223,34 +223,11 @@ export const SearchSelect = ({ value, onChange, options = [], placeholder = "Sel
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
 
-    useEffect(() => {
-        if (!isOpen) return;
-    
-        const handleKeyDown = (e) => {
-            if ((e.key === 'Backspace' || e.key === 'Delete') && !search) {
-                onChange(null);
-                setSearch('');
-            }
-        };
-    
-        document.addEventListener('keydown', handleKeyDown);
-        return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, search]);    
+    const validOptions = Array.isArray(options) || typeof options === 'object';
 
-    useEffect(() => {
-        if (!isOpen) return;
+    const parsedOptions = useMemo(() => {
+        if (!validOptions) return [];
 
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                setIsOpen(false);
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [isOpen]);
-
-    const parsedOptions = (() => {
         try {
             const opts = typeof options === 'string' ? JSON.parse(options) : options;
 
@@ -265,7 +242,9 @@ export const SearchSelect = ({ value, onChange, options = [], placeholder = "Sel
             console.error('Invalid options format for SearchSelect:', err);
             return [];
         }
-    })();
+    }, [options]);
+
+    const selectedLabel = parsedOptions.find(o => o.value === value?.toString())?.label || '';
 
     useEffect(() => {
         const searchLower = search.toLowerCase();
@@ -273,7 +252,31 @@ export const SearchSelect = ({ value, onChange, options = [], placeholder = "Sel
             opt.label.toLowerCase().includes(searchLower)
         );
         setFiltered(filteredOptions);
-    }, [search, options]);
+    }, [search, parsedOptions]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+
+        const handleKeyDown = (e) => {
+            if ((e.key === 'Delete') && !search) {
+                onChange(null);
+                setSearch('');
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [isOpen, search]);
 
     const handleSelect = (val) => {
         onChange(val);
@@ -281,40 +284,47 @@ export const SearchSelect = ({ value, onChange, options = [], placeholder = "Sel
         setSearch('');
     };
 
-    const selectedLabel = parsedOptions.find(o => o.value === value?.toString())?.label || '';
+    const handleFocus = () => {
+        if (!disabled && validOptions) setIsOpen(true);
+    };
 
     return (
-        <div className={`search-select ${disabled ? 'disabled' : ''}`} style={{ position: 'relative' }}>
-            <div
+        <div
+            className={`search-select always ${disabled ? 'disabled' : ''}`}
+            style={{ position: 'relative' }}
+            ref={dropdownRef}
+        >
+            <input
+                type="text"
                 className="search-select-input"
-                onClick={() => !disabled && setIsOpen(!isOpen)}
-                title='Press Backspace or Delete to clear the selection'
-            >
-                {`${selectedLabel || placeholder}`}
-            </div>
+                value={search || selectedLabel}
+                onChange={e => setSearch(e.target.value)}
+                placeholder={placeholder}
+                onFocus={handleFocus}
+                disabled={disabled}
+                title='Press delete while focused to clear'
+            />
 
-            {isOpen && !disabled && (
-                <div className="search-select-dropdown" ref={dropdownRef}>
-                    <div className="form-group nm">
-                        <input
-                            type="text"
-                            value={search}
-                            onChange={e => setSearch(e.target.value)}
-                            placeholder="Search..."
-                        />
-                    </div>
+            {isOpen && !disabled && validOptions && (
+                <div className="search-select-dropdown">
                     {filtered.length > 0 ? (
                         filtered.map(opt => (
-                        <div
-                            key={opt.value}
-                            onClick={() => handleSelect(opt.value)}
-                            style={{ padding: '8px', cursor: 'pointer', borderBottom: '1px solid var(--border-color)' }}
-                        >
-                            {opt.label}
-                        </div>
+                            <div
+                                key={opt.value}
+                                onClick={() => handleSelect(opt.value)}
+                                style={{
+                                    padding: '8px',
+                                    cursor: 'pointer',
+                                    borderBottom: '1px solid var(--border-color)',
+                                }}
+                            >
+                                {opt.label}
+                            </div>
                         ))
                     ) : (
-                        <div style={{ padding: '8px', color: 'var(--text-color)' }}>No results found</div>
+                        <div style={{ padding: '8px', color: 'var(--text-color)' }}>
+                            No results found
+                        </div>
                     )}
                 </div>
             )}
@@ -1095,6 +1105,29 @@ export const Deadline = ({ value, title, onChange }) => {
                     <label>Done</label>
                     <DateInput value={parsedValue.done} onChange={handleDateChange("done")} checkbox />
                 </div>
+            </div>
+        </div>
+    );
+};
+
+export const DateRange = ({ title }) => {
+    const [preset, setPreset] = useState('');
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
+
+    const handleReset = () => {
+        setPreset('');
+        setStartDate(null);
+        setEndDate(null);
+    }
+
+    return (
+        <div className='date-range'>
+            <label className='subtext'>{title}</label>
+            <div className='date-range-inputs'>
+                <div className='data-presets form-box alt'><Calendar size={18} /></div>
+                <input type='date' value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                <input type='date' value={endDate} onChange={(e) => setEndDate(e.target.value)} />
             </div>
         </div>
     );

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BillingUnbilled } from './BillingUnbilled';
 import { BillingInvoices } from './BillingInvoices';
+import { BillingPayments } from './BillingPayments';
 
 export const Billing = () => {
     const [billingNav, setBillingNav] = useState(0);
@@ -39,7 +40,7 @@ export const Billing = () => {
             </div>
             {billingNav === 0 && <BillingUnbilled />}
             {billingNav === 1 && <BillingInvoices />}
-            {/*billingNav === 2 && <BillingPayments />*/}
+            {billingNav === 2 && <BillingPayments />}
         </div>
     )
 }

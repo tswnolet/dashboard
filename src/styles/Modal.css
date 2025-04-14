@@ -18,8 +18,15 @@
     width: 80%;
     position: relative;
     max-height: 90%;
-    overflow-y: auto;
     scrollbar-color: var(--hover-color) var(--card-color);
+}
+
+.modal-content:not(.single-view) {
+    overflow-y: scroll;
+}
+
+.modal-content.single-view {
+    overflow-y: visible;
 }
 
 .modal-content:not(.wide) {

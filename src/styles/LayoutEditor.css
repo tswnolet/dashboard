@@ -127,7 +127,7 @@ header {
     align-items: center;
 }
 
-.deadline input, .form-group input[type='text'], 
+.deadline input, .form-group input[type='text'], .date-range input,
 .form-group textarea, 
 .form-group select {
     width: 100%;
@@ -138,7 +138,7 @@ header {
     font-size: 14px;
 }
 
-.form-group input[type='text'], .deadline input {
+.form-group input[type='text'], .date-range input, .deadline input {
     height: 36px;
     padding: 0 10px;
     max-width: 100%;
@@ -325,7 +325,7 @@ header {
     color: var(--text-color);
 }
 
-.section-label input, .form-group input, 
+.section-label input, .form-group input, .date-range input,
 .section-label textarea {
     flex: 1;
     padding: 8px;

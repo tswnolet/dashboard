@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { SearchBar } from './Nav';
-import { DataDisplay, Dropdown, Toggle } from './FieldComponents';
+import { DataDisplay, Dropdown, SearchSelect, Toggle } from './FieldComponents';
 import { Plus } from 'lucide-react';
+import Modal from './Modal';
 
 export const BillingInvoices = () => {
     const [searchCase, setSearchCase] = useState('');
@@ -15,13 +16,14 @@ export const BillingInvoices = () => {
         <div className='billing invoices'>
             <div className='invoices-search'>
                 <div className='unbilled-search-header'>
-                    <SearchBar placeholder='Search by Case Name' value={searchCase} onChange={(e) => setSearchCase(e.target.value)} expanded={true} />
+                    <SearchBar placeholder='Case Name...' title='Search by Case Name' setSearchQuery={(val) => setSearchCase(val)} expanded={true} />
                     <Dropdown
                         options={['All', 'Editing', 'Final', 'Void', 'Paid', 'Partially Paid', 'Overdue', 'Pending Approval', 'Approved']}
                         placeholder='Invoice Status...'
                         value={status}
-                        onChange={(index) => setStatus(index)} />
-                    <SearchBar placeholder='Search by Tag' value={searchTag} onChange={(e) => setSearchTag(e.target.value)} expanded={true} />
+                        onChange={(index) => setStatus(index)}
+                    />
+                    <SearchBar placeholder='Tag...' title='Search by Tag' setSearchQuery={(val) => setSearchTag(val)} expanded={true} />
                     <Toggle
                         label='Show Archived'
                         value={showArchived}
@@ -31,7 +33,7 @@ export const BillingInvoices = () => {
                 <button className='action tertiary' onClick={() => setCreateInvoice(true)}><Plus size={18} />Create Invoice</button>
             </div>
             <div className='billing-container'>
-                <DataDisplay title='Total Outstanding' value={invoices?.reduce((acc, c) => c?.unbilled, 0)} type='currency' />
+                <DataDisplay title='Total Outstanding' value={invoices?.reduce((acc, i) => i?.payment === null, 0)} type='currency' />
                 <table className='billing-table table-full'>
                     <thead>
                         <tr>
@@ -59,6 +61,24 @@ export const BillingInvoices = () => {
                     </tbody>
                 </table>
             </div>
+            {createInvoice && (
+                <Modal
+                    onClose={() => setCreateInvoice(null)}
+                    title="Create Invoice"
+                    single
+                    footer={(
+                        <div className='modal-footer-actions'>
+                            <button className='action alt' onClick={() => setCreateInvoice(null)}>Cancel</button>
+                            <button className='action' onClick={() => {}}>Save</button>
+                        </div>
+                    )}
+                >
+                    <div className='form-group small'>
+                        <label className='subtext'>Select Case</label>
+                        <SearchSelect />
+                    </div>
+                </Modal>
+            )}
         </div>
     );
 };

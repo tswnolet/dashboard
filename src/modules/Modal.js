@@ -1,10 +1,10 @@
 import React from 'react';
 import '../styles/Modal.css';
 
-const Modal = ({ children, onClose, title, instructions = null, wide = false, header, footer }) => {
+const Modal = ({ children, onClose, title, instructions = null, single = false, wide = false, header, footer }) => {
     return (
         <div className="modal-overlay" onClick={onClose}>
-            <div className={`modal-content${wide ? ' wide' : ''}`} onClick={(e) => e.stopPropagation()}>
+            <div className={`modal-content${wide ? ' wide' : ''}${single ? ' single-view' : ''}`} onClick={(e) => e.stopPropagation()}>
                 {title && 
                     <div className='modal-title'>
                         <div className='title-container'>

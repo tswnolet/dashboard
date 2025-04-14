@@ -6,7 +6,7 @@ import Modal from './Modal';
 
 export const BillingUnbilled = () => {
     const [searchCase, setSearchCase] = useState('');
-    const [setSearchName, setSetSearchName] = useState('');
+    const [searchName, setSearchName] = useState('');
     const [searchTag, setSearchTag] = useState('');
     const [showArchived, setShowArchived] = useState(false);
     const [createInvoice, setCreateInvoice] = useState(false);
@@ -17,9 +17,9 @@ export const BillingUnbilled = () => {
             <div className='billing unbilled'>
                 <div className='unbilled-search'>
                     <div className='unbilled-search-header'>
-                        <SearchBar placeholder='Search by Case Name' value={searchCase} onChange={(e) => setSearchCase(e.target.value)} expanded={true} />
-                        <SearchBar placeholder='Search by Client Name' value={setSearchName} onChange={(e) => setSetSearchName(e.target.value)} expanded={true} />
-                        <SearchBar placeholder='Search by Tag' value={searchTag} onChange={(e) => setSearchTag(e.target.value)} expanded={true} />
+                        <SearchBar placeholder='Case Name...' title='Search by Case Name' setSearchQuery={(val) => setSearchCase(val)} expanded={true} />
+                        <SearchBar placeholder='Name or @username...' title='Search by Name or @username' setSearchQuery={(val) => setSearchName(val)}  expanded={true} />
+                        <SearchBar placeholder='Tag...' title='Search by Tag' setSearchQuery={(val) => setSearchTag(val)} expanded={true} />
                         <Toggle
                             label='Show Archived'
                             value={showArchived}
@@ -33,7 +33,7 @@ export const BillingUnbilled = () => {
                     <table className='billing-table table-full'>
                         <thead>
                             <tr>
-                                <th>Case</th>
+                                <th>Case Name</th>
                                 <th>Tags</th>
                                 <th>Case Type</th>
                                 <th>Time</th>
@@ -62,6 +62,7 @@ export const BillingUnbilled = () => {
                 <Modal
                     onClose={() => setCreateInvoice(null)}
                     title="Create Invoice"
+                    single
                     footer={(
                         <div className='modal-footer-actions'>
                             <button className='action alt' onClick={() => setCreateInvoice(null)}>Cancel</button>

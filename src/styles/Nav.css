@@ -258,6 +258,15 @@ nav.scrolled {
   gap: 10px;
 }
 
+.searchbar {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-direction: column;
+  width: 100%;
+  max-width: 300px;
+}
+
 .search-container {
   display: flex;
   align-items: center;
@@ -266,7 +275,7 @@ nav.scrolled {
   border-radius: 3px;
   transition: width 0.3s ease-in-out, background 0.3s ease-in-out;
   width: 36px;
-  max-width: 300px;
+  max-width: 100%;
   overflow: hidden;
   cursor: pointer;
   position: relative;
@@ -275,7 +284,7 @@ nav.scrolled {
 .search-container.expanded {
   width: 100%;
   max-width: 300px;
-  background: var(--card-color);
+  background: var(--border-color);
   border: 1px solid var(--border-color);
 }
 

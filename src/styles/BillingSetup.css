@@ -263,6 +263,7 @@
     border: 1px solid var(--border-color);
     background-color: var(--secondary-color);
     border-radius: 3px;
+    transition: all 0.3s;
 }
 
 .table-full {
@@ -376,18 +377,18 @@
     margin-left: 32px;
 }
 
-.unbilled-search, .invoices-search {
+.unbilled-search, .invoices-search, .payments-search {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-end;
     width: 100%;
 }
 
-.unbilled-search-header, .invoices-search-header {
+.unbilled-search-header, .invoices-search-header, .payments-search-header {
     display: flex;
     justify-content: flex-start;
-    align-items: center;
-    gap: 10px;
+    align-items: flex-end;
+    gap: 15px;
     width: 100%;
 }
 

@@ -34,7 +34,7 @@ function useOutsideClick(ref, callback) {
 }
 
 /* SearchBar Component */
-export const SearchBar = ({ placeholder = null, expanded, setExpanded = () => {}, setSearchQuery, autofocus = false }) => {
+export const SearchBar = ({ placeholder = null, title = null, expanded, setExpanded = () => {}, setSearchQuery, autofocus = false }) => {
   const containerRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -43,6 +43,32 @@ export const SearchBar = ({ placeholder = null, expanded, setExpanded = () => {}
       inputRef.current?.focus();
     }
   }, [expanded]);
+
+  if (title) {
+    return (
+      <div className='searchbar'>
+        {title && <label className="search-title subtext">{title}</label>}    
+        <div
+          ref={containerRef}
+          className={`search-container ${expanded ? "expanded" : ""}`}
+          style={!expanded ? { justifyContent: "center" } : { padding: "0 10px" }}
+          onClick={() => setExpanded(true)}
+        >
+          <Search className="search-icon" size={expanded ? "20" : "25"} />
+          <input
+            ref={inputRef}
+            type="text"
+            name='search-bar'
+            placeholder={placeholder || "Search"}
+            className="search-input"
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ display: expanded ? "block" : "none" }}
+            autoComplete='off'
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -60,7 +86,7 @@ export const SearchBar = ({ placeholder = null, expanded, setExpanded = () => {}
         className="search-input"
         onChange={(e) => setSearchQuery(e.target.value)}
         style={{ display: expanded ? "block" : "none" }}
-        autoFocus={autofocus}
+        autoComplete='off'
       />
     </div>
   );

@@ -4,7 +4,7 @@ import { EllipsisVertical, X } from 'lucide-react';
 import { DataTable, MiniNav, NumberInput, SearchSelect, Subheader } from './FieldComponents';
 import Modal from './Modal';
 import { BillingSetupInvoices } from './BillingSetupInvoices';
-import { BillingPayments } from './BillingSetupPayments';
+import { BillingSetupPayments as BillingPayments } from './BillingSetupPayments';
 
 export const BillingSetup = () => {
     const [rateSchedule, setRateSchedule] = useState(0);

@@ -494,6 +494,7 @@ input:not(.search-input):focus, .default-select:focus, textarea:focus {
 .small {
   margin: 0 !important;
   width: 50%;
+  overflow:visible;
 }
 
 .default-select, .action, .section-properties input {

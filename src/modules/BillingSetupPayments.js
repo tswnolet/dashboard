@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { BankAccountLink, Checkbox, Instructions, Subheader, SubtextTitle } from './FieldComponents';
 import { Plus } from 'lucide-react';
 
-export const BillingPayments = () => {
+export const BillingSetupPayments = () => {
     const [paymentChecks, setPaymentChecks] = useState({});
     return (
         <div className='billing payments'>
