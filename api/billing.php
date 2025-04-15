@@ -3,6 +3,20 @@ require 'headers.php';
 require 'db.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    if (isset($_GET['settings'])) {
+        $case_id = $_GET['settings'];
+    
+        $sql = 'SELECT * FROM billing_settings WHERE case_id = ?';
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('i', $case_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $settings = $result->fetch_assoc();
+    
+        echo json_encode(['success' => true, 'settings' => $settings]);
+        exit;
+    }
+
     $sql = 'SELECT * FROM billing_rates';
     $result = $conn->query($sql);
     
@@ -32,6 +46,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
+
+    if (isset($_GET['settings'])) {
+        $case_id = intval($_GET['settings']);
+
+        $billing_rates_id = $input['billing_rates_id'] ?? null;
+        $invoice_terms = $input['invoice_terms'] ?? null;
+        $client_matter_id = $input['client_matter_id'] ?? null;
+        $invoice_template = $input['invoice_template'] ?? null;
+        $deposit_destination = $input['deposit_destination'] ?? null;
+        $funds_account = $input['funds_account'] ?? null;
+
+        $checkStmt = $conn->prepare("SELECT id FROM billing_settings WHERE case_id = ?");
+        $checkStmt->bind_param("i", $case_id);
+        $checkStmt->execute();
+        $result = $checkStmt->get_result();
+
+        if ($result->num_rows > 0) {
+            $stmt = $conn->prepare("
+                UPDATE billing_settings 
+                SET billing_rates_id = ?, invoice_terms = ?, client_matter_id = ?, invoice_template = ?, deposit_destination = ?, funds_account = ?
+                WHERE case_id = ?
+            ");
+            $stmt->bind_param(
+                "iisiiii",
+                $billing_rates_id,
+                $invoice_terms,
+                $client_matter_id,
+                $invoice_template,
+                $deposit_destination,
+                $funds_account,
+                $case_id
+            );
+        } else {
+            $stmt = $conn->prepare("
+                INSERT INTO billing_settings (
+                    case_id, billing_rates_id, invoice_terms, client_matter_id, invoice_template, deposit_destination, funds_account
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            ");
+            $stmt->bind_param(
+                "iiisiii",
+                $case_id,
+                $billing_rates_id,
+                $invoice_terms,
+                $client_matter_id,
+                $invoice_template,
+                $deposit_destination,
+                $funds_account
+            );
+        }
+
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true, 'billing_rates_id' => $billing_rates_id]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Failed to save billing settings']);
+        }
+
+        exit;
+    }
 
     if (isset($input['time_increment'], $input['billing_rates_id'])) {
         $time_increment = $input['time_increment'];

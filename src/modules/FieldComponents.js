@@ -8,7 +8,7 @@ import { RiAiGenerate, RiAiGenerate2 } from "react-icons/ri";
 import { convertLength } from "@mui/material/styles/cssUtils";
 import Loading from "./Loading";
 
-const formatDate = (dateString) => {
+export const formatDate = (dateString) => {
     if (!dateString) return ["", "", ""];
 
     const months = [
@@ -21,8 +21,23 @@ const formatDate = (dateString) => {
     return [
         `${months[dateObject.getUTCMonth()]} ${dateObject.getUTCDate()}, ${dateObject.getUTCFullYear()}`,
         dateObject.toISOString(),
-        dateObject.toUTCString().split(" ")[4]
+        dateObject.toUTCString().split(" ")[4], `${dateObject.getUTCMonth() + 1}/${dateObject.getUTCDate()}/${dateObject.getUTCFullYear()}`
     ];
+};
+
+export const formatValue = (val, type) => {
+    if (type === 'currency') {
+        const num = parseFloat(val);
+        if (isNaN(num)) return '$0.00';
+        return num.toLocaleString('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 2,
+        });
+    } else if (type === 'percentage') {
+        return `${parseFloat(val).toFixed(2)}%`;
+    }
+    return val;
 };
 
 export const Text = ({ type, placeholder, value, onChange, disable, onBlur = () => {}, onKeyDown = () => {} }) => {
@@ -430,19 +445,10 @@ export const SubtextTitle = ({ title }) => {
 }
 
 export const DataDisplay = ({title, value, type }) => {
-    const formatValue = (val) => {
-        if (type === 'currency') {
-            return `$${parseFloat(val).toFixed(2)}`;
-        } else if (type === 'percentage') {
-            return `${parseFloat(val).toFixed(2)}%`;
-        }
-        return val;
-    };
-
     return (
         <div className='data-display'>
             <span className='subtext'>{title}</span>
-            <span className='subtext-data'>{formatValue(value)}</span>
+            <span className='subtext-data'>{formatValue(value, type)}</span>
         </div>
     );
 };

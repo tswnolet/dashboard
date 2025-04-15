@@ -1,0 +1,45 @@
+.billing-summary, .billing-settings {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.billing-settings {
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 50px;
+}
+
+.billing-summary-details {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-direction: column;
+    width: 50%;
+}
+
+.billing-summary-totals {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.billing-invoice-totals {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 50%;
+}
+
+.billing-invoices {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    padding-right: 15px;
+}

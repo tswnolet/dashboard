@@ -6,12 +6,25 @@ import { BillingPayments } from './BillingPayments';
 export const Billing = () => {
     const [billingNav, setBillingNav] = useState(0);
     const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+    const [cases, setCases] = useState([]);
+
+    const fetchCases = async () => {
+        try {
+            const response = await fetch('https://api.casedb.co/cases.php');
+            const data = await response.json();
+            setCases(data);
+        } catch (error) {
+            console.error('Error fetching cases:', error);
+        }
+    }
 
     const handleResize = () => {
         setScreenWidth(window.innerWidth);
     }
 
     useEffect(() => {
+        fetchCases();
+
         window.addEventListener('resize', handleResize);
         return () => {
             window.removeEventListener('resize', handleResize);
@@ -38,9 +51,9 @@ export const Billing = () => {
                     </>
                 )}
             </div>
-            {billingNav === 0 && <BillingUnbilled />}
-            {billingNav === 1 && <BillingInvoices />}
-            {billingNav === 2 && <BillingPayments />}
+            {billingNav === 0 && <BillingUnbilled cases={cases}/>}
+            {billingNav === 1 && <BillingInvoices cases={cases} />}
+            {billingNav === 2 && <BillingPayments cases={cases} />}
         </div>
     )
 }

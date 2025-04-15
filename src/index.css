@@ -531,6 +531,12 @@ input:not(.search-input):focus, .default-select:focus, textarea:focus {
   transition: background 0.3s ease-in-out, transform 0.2s;
 }
 
+.action:disabled {
+  background-color: var(--border-color) !important;
+  color: var(--text-color);
+  cursor: not-allowed;
+}
+
 .action:not(.nav-toggle-button) {
   max-width: 200px;
 }

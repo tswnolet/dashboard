@@ -6,6 +6,7 @@ import { ActivityFeed } from './ActivityFeed';
 import { DocumentSection } from './DocumentSection';
 import '../styles/Documents.css';
 import { useLocation } from 'react-router';
+import { TimeBilling } from './TimeBilling';
 
 const normalizeValueToIndex = (field, value) => {
     if (!field.options) return value;
@@ -725,14 +726,16 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
         setAddItemMode(selectedRow);
     }, [selectedRow]);
 
-    const staticSections = ['Documents', 'Activity Feed'];
+    const staticSections = ['Documents', 'Activity Feed', 'Time & Billing'];
     if (staticSections.includes(sectionName)) {
         return (
             <div className={`case-section full horizontal`}>
                 {sectionName === 'Documents' ? (
                     <Documents fetchDocuments={fetchDocuments} folders={folders} caseName={caseName} case_id={id} user_id={user_id}/>
-                ) : (
+                ) : sectionName === "Activity Feed" ? (
                     <ActivityFeed case_id={id} user_id={user_id} />
+                ) : (
+                    <TimeBilling case_id={id} />
                 )}
             </div>
         );

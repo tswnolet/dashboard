@@ -38,6 +38,10 @@ header {
     }
 }
 
+#template-header.alt-header {
+    margin-top: 20px;
+}
+
 #template-header .active {
     color: var(--fill);
     border-bottom: 3px solid var(--fill);

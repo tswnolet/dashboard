@@ -278,10 +278,6 @@ export const ActivityFeed = ({ case_id, user_id }) => {
         fetchUsers();
     }, []);
 
-    useEffect(() => {
-        console.log(activeFeed);
-    }, [activeFeed])
-
     const filteredFeed = feed.filter(
         (type) =>
             (type.type === String(activeFeed).toLowerCase() ||

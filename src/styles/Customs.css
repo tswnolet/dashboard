@@ -98,7 +98,7 @@
     justify-content: space-between;
     align-items: center;
     margin: 0;
-    overflow: hidden;
+    overflow: visible;
 
     label {
         min-width: 35%;
@@ -570,11 +570,37 @@
     background-color: var(--secondary-color);
     height: 150px;
     font-size: 14px;
+    overflow: auto;
 
     input {
         border: none !important;
         border-bottom: 1px solid var(--border-color) !important;
     }
+}
+
+.expand-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    background-color: var(--subtext-color);
+    color: var(--secondary-color);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.action-header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.expand-icon:hover {
+    background-color: var(--text-color);
 }
 
 .toc-header {

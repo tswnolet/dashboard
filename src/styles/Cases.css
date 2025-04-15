@@ -430,7 +430,9 @@ span.remove-tag:hover {
 @media (min-width: 1024px) {
     .case-section .form-group:not(.deadline-group) {
         &:not(.activity) {
-            max-width: calc(33.333% - 13.33px);
+            &:not(.mid) {
+                max-width: calc(33.333% - 13.33px);
+            }
         }
     }
 }
