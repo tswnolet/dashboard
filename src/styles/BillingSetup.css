@@ -416,8 +416,15 @@
     align-items: center;
     width: 100%;
     border: 1px solid transparent;
+    border-radius: 3px;
     user-select: none;
+    cursor: pointer;
     transition: padding 0.3s, border 0.3s, background-color 0.3s;
+}
+
+.payment-item:not(.expanded):hover {
+    background-color: var(--border-color);
+    padding: 5px 10px;
 }
 
 .payment-item.expanded {

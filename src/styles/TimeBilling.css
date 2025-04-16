@@ -43,3 +43,43 @@
     width: 100%;
     padding-right: 15px;
 }
+
+.team-member {
+    max-width: 50%;
+}
+
+.entry-container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.entry-container .form-group {
+    max-width: calc(33.33% - (20px / 3));
+}
+
+.entry-container .form-group input {
+    width: 100%;
+}
+
+.entry-lower-container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 15px;
+}
+
+.billing-entries {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+}
+
+.entry-type-item {
+    text-transform: capitalize;
+}

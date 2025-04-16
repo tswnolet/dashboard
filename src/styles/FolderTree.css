@@ -16,7 +16,7 @@
     position: sticky;
     top: 0;
     flex-shrink: 0;
-    width: 350px;
+    width: 300px;
     height: 100%;
     margin: 0;
     padding: 15px 0 0 15px;
@@ -36,7 +36,10 @@
 .folder-tree {
     list-style: none;
     position: relative;
-    
+}
+
+.level-1 {
+    margin-bottom: 50px;
 }
 
 .folder-tree:not(.main) {
@@ -124,7 +127,7 @@
 
 .folder-tree span, .document-nav .folder-node {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 5px;
     position: relative;
 }

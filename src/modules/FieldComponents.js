@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import '../styles/LayoutEditor.css';
 import { createPortal } from "react-dom";
 import { CreateContact } from "./CreateContact";
-import { AlarmClockPlus, Calendar, Check, CheckCheck, CheckSquare, CloudUpload, Dot, DotSquare, Eraser, Hash, Info, Loader, Loader2, Paperclip, Phone, SendHorizonal, StickyNote, Upload, UserRoundPlus, X } from "lucide-react";
+import { AlarmClockPlus, Calendar, Check, CheckCheck, CheckSquare, CloudUpload, Dot, DotSquare, Eraser, Hash, Info, Loader, Loader2, Paperclip, Phone, SendHorizonal, SquareCheckBig, StickyNote, Upload, UserRoundPlus, X } from "lucide-react";
 import { Calculate, MarginOutlined, Refresh, Source, Square, SquareRounded } from "@mui/icons-material";
 import { RiAiGenerate, RiAiGenerate2 } from "react-icons/ri";
 import { convertLength } from "@mui/material/styles/cssUtils";
@@ -385,7 +385,7 @@ export const Toggle = ({ value, onChange, label = null }) => {
     );
 };
 
-export const Checkbox = ({ value, onChange, label = null, hint = null }) => {
+export const Checkbox = ({ value, onChange, mini = null, label = null, hint = null, space = null }) => {
     const [hintVisible, setHintVisible] = useState(false);
     const hintRef = useRef(null);
 
@@ -406,23 +406,23 @@ export const Checkbox = ({ value, onChange, label = null, hint = null }) => {
     }, [hintVisible]);
 
     return (
-        <div className='checkbox-group'>
+        <div className={`checkbox-group ${space ? ' space' : ''}`}>
             <div 
-                className='checkbox'
+                className={`checkbox${mini ? '-mini' : ''} ${value ? ' checked' : ''}`}
                 onClick={onChange}
             >
-                {value ? '✓' : ''}
+                {value ? <SquareCheckBig size={18} /> : ''}
             </div>
             {label && <label className='subtext'>{label}</label>}
             <input type='checkbox' hidden />
-            <div className='hint-container' ref={hintRef}>
-                {hint && <Info className='info-box' size={18} onClick={() => setHintVisible(prev => !prev)}/>}
+            {hint && <div className='hint-container' ref={hintRef}>
+                <Info className='info-box' size={18} onClick={() => setHintVisible(prev => !prev)}/>
                 {hintVisible && (
                     <div className='hint'>
                         {hint}
                     </div>
                 )}
-            </div>
+            </div>}
         </div>
     );
 };
@@ -776,8 +776,8 @@ export const Calculation = ({
     );
 };
 
-export const Contact = ({ selectedContact = '', onCreateNewContact, setSelectedContact, onCreateNewLead, lead = false }) => {
-    const [searchTerm, setSearchTerm] = useState(selectedContact?.full_name || selectedContact?.contact_name || "");
+export const Contact = ({ selectedContact = '', onCreateNewContact, setSelectedContact, onCreateNewLead, lead = false, users = null }) => {
+    const [searchTerm, setSearchTerm] = useState(selectedContact?.full_name || selectedContact?.contact_name || selectedContact?.name || "");
     const [searchResults, setSearchResults] = useState([]);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [displayContact, setDisplayContact] = useState(null);
@@ -788,13 +788,19 @@ export const Contact = ({ selectedContact = '', onCreateNewContact, setSelectedC
     const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
 
     useEffect(() => {
-        if (searchTerm?.trim().length >= 2) {
+        if (users && searchTerm.trim().length >= 2) {
+            const searchLower = searchTerm.toLowerCase();
+            const filtered = users.filter(u => u.name.toLowerCase().includes(searchLower));
+            setSearchResults(filtered.slice(0, 5));
+            setIsDropdownOpen(true);
+            positionDropdown();
+        } else if (!users && searchTerm.trim().length >= 2) {
             lead ? fetchLeads(searchTerm) : fetchContacts(searchTerm);
         } else {
             setSearchResults([]);
             setIsDropdownOpen(false);
         }
-    }, [searchTerm, lead]);
+    }, [searchTerm, lead, users]);
 
     const fetchContacts = async (query) => {
         try {
@@ -835,7 +841,7 @@ export const Contact = ({ selectedContact = '', onCreateNewContact, setSelectedC
     };
 
     const handleSelectItem = (item) => {
-        setSearchTerm(item.full_name || item.contact_name);
+        setSearchTerm(item.full_name || item.contact_name || item.name || "");
         setSearchResults([]);
         setIsDropdownOpen(false);
         setSelectedContact(item);
@@ -853,8 +859,10 @@ export const Contact = ({ selectedContact = '', onCreateNewContact, setSelectedC
     };
 
     useEffect(() => {
-        if (selectedContact)
+        if (selectedContact && !users)
             fetchContact(selectedContact);
+        else if (selectedContact && users)
+            setDisplayContact(selectedContact);
     }, [selectedContact]);
 
     const fetchContact = async (id) => {
@@ -871,7 +879,7 @@ export const Contact = ({ selectedContact = '', onCreateNewContact, setSelectedC
                 }
             }
         } catch (error) {
-
+            console.error("Error fetching contact:", error);
         }
     };
 
@@ -902,20 +910,20 @@ export const Contact = ({ selectedContact = '', onCreateNewContact, setSelectedC
                     <input
                         ref={inputRef}
                         type='text'
-                        placeholder={lead ? "Search for lead..." : "Search or create contact..."}
+                        placeholder={users ? "Name or @username" : lead ? "Search for lead..." : "Search or create contact..."}
                         value={searchTerm}
                         onFocus={() => searchResults.length > 0 && setIsDropdownOpen(true)}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         name='contact-input'
                         autoComplete="off"
                     />
-                    <div
+                    {!users && <div
                         className='form-box alt'
                         title="Create new contact"
                         onClick={() => !lead ? onCreateNewContact() : onCreateNewLead()}
                     >
                         <UserRoundPlus size={20} />
-                    </div>
+                    </div>}
                     {isDropdownOpen && searchResults.length > 0 && createPortal(
                         <ul
                             ref={dropdownRef}
@@ -932,9 +940,11 @@ export const Contact = ({ selectedContact = '', onCreateNewContact, setSelectedC
                                     key={item.id}
                                     onClick={() => handleSelectItem(item)}
                                 >
-                                    {lead 
-                                        ? `${item.contact_name} (Status: ${item.status_name})`
-                                        : `${item.full_name} (${item.emails?.[0]?.email || "No email"})`
+                                    {users 
+                                        ? `${item.name}`
+                                        : lead 
+                                            ? `${item.contact_name} (Status: ${item.status_name})`
+                                            : `${item.full_name} (${item.emails?.[0]?.email || "No email"})`
                                     }
                                 </li>
                             ))}
@@ -944,35 +954,62 @@ export const Contact = ({ selectedContact = '', onCreateNewContact, setSelectedC
                 </div>
             ) : (
                 <div className='contact-shortform'>
-                    {displayContact?.profile_picture
-                        ? <img src={`https://api.casedb.co/${displayContact?.profile_picture}`} alt="Profile" className='contact-initials'/>
-                        : <span className='contact-initials'>{`${displayContact.full_name?.trim().charAt(0)}${displayContact.last_name?.trim().charAt(0)}`}</span>
-                    }
-                    <div className='contact-display'>
-                        <span className='subtext'>{displayContact?.full_name}</span>
-                        <div className='subtext contact-divider'>
-                            <span>
-                                {displayContact?.phones[0]?.number}
+                    {users ? (
+                        <>
+                            <span className='contact-initials'>
+                                {selectedContact?.profile_picture 
+                                    ? <img src={`https://api.casedb.co/${selectedContact.profile_picture}`} /> 
+                                    : `${selectedContact?.name?.trim().charAt(0)}${selectedContact?.name?.trim().split(" ")[2] 
+                                        ? selectedContact?.name?.trim().split(" ")[2]?.charAt(0) 
+                                        : selectedContact?.name?.trim().split(" ")[1]?.charAt(0)}`}
                             </span>
-
-                            {displayContact?.phones[0]?.number && displayContact?.emails[0]?.email ? <SquareRounded style={{ height: "5px", width: "5px" }}/> : ''}
-
-                            <span>
-                                {displayContact?.emails[0]?.email}
-                            </span>
-                        </div>
-                        <span className='subtext'>{displayContact?.job_title}</span>
-                        <div
-                            onClick={() => {
-                                setSelectedContact('');
-                                setSearchTerm('');
-                                setDisplayContact(null);
-                            }}
-                            className='exit'
-                        >
-                            <X size={20} />
-                        </div>
-                    </div>
+                            <div className='contact-display-shortform'>
+                                <span className='subtext'>{selectedContact?.name}</span>
+                                <span className='subtext'>{`@${selectedContact?.user}` || selectedContact?.id}</span>
+                                <div
+                                    onClick={() => {
+                                        setSelectedContact('');
+                                        setSearchTerm('');
+                                        setDisplayContact(null);
+                                    }}
+                                    className='exit'
+                                >
+                                    <X size={20} />
+                                </div>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            {displayContact?.profile_picture ? (
+                                <img src={`https://api.casedb.co/${displayContact?.profile_picture}`} alt="Profile" className='contact-initials'/>
+                            ) : (
+                                <span className='contact-initials'>
+                                    {`${displayContact?.full_name?.trim().charAt(0)}${displayContact?.last_name?.trim().charAt(0)}`}
+                                </span>
+                            )}
+                            <div className='contact-display'>
+                                <span className='subtext'>{displayContact?.full_name}</span>
+                                <div className='subtext contact-divider'>
+                                    <span>{displayContact?.phones?.[0]?.number}</span>
+                                    {displayContact?.phones?.[0]?.number && displayContact?.emails?.[0]?.email && (
+                                        <SquareRounded style={{ height: "5px", width: "5px" }}/>
+                                    )}
+                                    <span>{displayContact?.emails?.[0]?.email}</span>
+                                </div>
+                                <span className='subtext'>{displayContact?.job_title}</span>
+                                <div
+                                    onClick={() => {
+                                        setSelectedContact('');
+                                        setSearchTerm('');
+                                        setDisplayContact(null);
+                                    }}
+                                    className='exit'
+                                >
+                                    <X size={20} />
+                                </div>
+                            </div>
+                        </>
+                    )}
                 </div>
             )}
         </>
@@ -1280,7 +1317,7 @@ export const AddActivity = ({ users, fetchFeed, case_id, onClick, addActivity, s
     const userMap = users.reduce((acc, user) => {
         acc[user.id] = user.name;
         return acc;
-      }, {});
+    }, {});
       
     const handleInputChange = (key) => (value) => {
         setActivityData((prev) => ({ ...prev, [key]: value, type: activeActivityType === 0 ? "notes" : activeActivityType === 1 ? "tasks" : "calls" }));

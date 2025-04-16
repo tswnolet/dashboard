@@ -1,8 +1,37 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ArrowRight, ChevronRight, Download, File as FileSvg, FolderOpenIcon, Trash, Upload, X } from "lucide-react";
+import { ArrowRight, ChevronRight, Download, File as FileSvg, FolderOpenIcon, FolderPlus, Pencil, Trash, Upload, X } from "lucide-react";
 import { SearchBar } from "./Nav";
-import { Dropdown, MultiFile } from "./FieldComponents";
+import { Checkbox, Dropdown, MultiFile } from "./FieldComponents";
 import Modal from "./Modal";
+import { Folder } from "@mynaui/icons-react";
+
+const CreateFolder = ({ folderName, setFolderName, onClick=(() => {}) }) => {
+    return (
+        <Modal
+            title="Create Folder"
+            instructions="Enter a name for the new folder."
+            onClose={onClick}
+            footer={
+                <div className='modal-footer-actions'>
+                    <button onClick={onClick} className="action">Create</button>
+                    <button onClick={onClick} className="action alt">Cancel</button>
+                </div>
+            }
+        >
+            <div className='modal-content-wrapper'>
+                <div className='form-group mid'>
+                    <label className="subtext">Folder Name</label>
+                    <input
+                        type="text"
+                        value={folderName}
+                        onChange={(e) => setFolderName(e.target.value)}
+                        placeholder="Enter folder name"
+                    />
+                </div>
+            </div>
+        </Modal>
+    );
+};
 
 export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, files, subfolders, caseName, onFolderClick, onBreadcrumbClick, setDocNav, docNav }) => {
     const hasSubfolders = Object.keys(subfolders).length > 0;
@@ -15,6 +44,9 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
     const [more, setMore] = useState(null);
     const [showRenameModal, setShowRenameModal] = useState(false);
     const [filesToRename, setFilesToRename] = useState([]);
+    const [selectedKeys, setSelectedKeys] = useState([]);
+    const [createFolder, setCreateFolder] = useState(false);
+    const [newFolderName, setNewFolderName] = useState("");
     const menuRef = useRef(null);
 
     const formatSize = (size) => {
@@ -104,6 +136,26 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
         setFilesToRename([]);
     };
 
+    const createFolderOnS3 = async ({ caseId, folderName, currentPath }) => {
+        const fullPath = `cases/${caseId}/{{Name}}/${currentPath ? currentPath + '/' : ''}${folderName}/`;
+    
+        try {
+            const response = await fetch('https://api.casedb.co/documents.php', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    case_id: caseId,
+                    path: fullPath
+                })
+            });
+            const result = await response.json();
+            return result;
+        } catch (error) {
+            console.error('Error creating folder:', error);
+            return { success: false, message: error.message };
+        }
+    };
+
     const handleDownload = async (file) => {
         try {
             const response = await fetch(file.url);
@@ -119,6 +171,37 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
         } catch (error) {
             console.error("Download error:", error);
         }
+    };
+
+    const handleBulkDelete = async () => {
+        if (selectedKeys.length === 0) return;
+    
+        if (window.confirm(`Are you sure you want to delete ${selectedKeys.length} item(s)?`)) {
+            try {
+                const response = await fetch('https://api.casedb.co/documents.php', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ keys: selectedKeys })
+                });
+    
+                const result = await response.json();
+                if (result.success) {
+                    fetchDocuments();
+                    setSelectedKeys([]);
+                } else {
+                    console.error("Delete error:", result.message);
+                }
+            } catch (error) {
+                console.error("Delete error:", error);
+            }
+        }
+    };
+
+    const normalizeFolderKey = (caseId, folderName, subfolderName = '') => {
+        const base = `cases/${caseId}/{{Name}}`;
+        const cleanedFolderName = folderName.replace(/^{{Name}}\/?|\/?{{Name}}$/g, '').replace(/\/+/g, '');
+        const prefix = cleanedFolderName ? `${base}/${cleanedFolderName}` : base;
+        return `${prefix}/${subfolderName ? `${subfolderName}/` : ''}`;
     };
 
     useEffect(() => {
@@ -150,6 +233,20 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
                     upload={() => handleFileSet(uploadingFile)}
                     uploadWaiting={uploadWaiting}
                 />
+                <button className='action tertiary' onClick={() => setCreateFolder(true)}><FolderPlus /></button>
+                {createFolder && 
+                    <CreateFolder 
+                        folderName={newFolderName} 
+                        setFolderName={setNewFolderName}
+                        onClick={() => {
+                            setCreateFolder(false);
+                            createFolderOnS3({ caseId: case_id, folderName: newFolderName, currentPath: folderName.replace('{{Name}}', '') });
+                        }} 
+                    />
+                }
+                {selectedKeys.length > 0 && <button className="action" onClick={handleBulkDelete}>
+                    Delete
+                </button>}
             </div>
             {showRenameModal && (
                 <Modal
@@ -210,6 +307,26 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
                     <table className="exhibits">
                         <thead style={{ width: '100%' }}>
                             <tr>
+                                <th className='file-select'>
+                                    <Checkbox
+                                        value={
+                                            filteredFiles.length + Object.keys(subfolders).length > 0 &&
+                                            selectedKeys.length === filteredFiles.length + Object.keys(subfolders).length
+                                        }
+                                        onChange={() => {
+                                            const folderKeys = Object.keys(subfolders).map(
+                                                subfolderName => normalizeFolderKey(case_id, folderName, subfolderName)
+                                            );
+
+                                            const fileKeys = filteredFiles.map(file => file.key);
+                                            const allKeys = [...folderKeys, ...fileKeys];
+
+                                            const allSelected = allKeys.every(key => selectedKeys.includes(key));
+                                            setSelectedKeys(allSelected ? [] : allKeys);
+                                        }}
+                                        mini
+                                    />
+                                </th>
                                 <th className='file-name'>Name</th>
                                 <th className='file-date'>Last Modified</th>
                                 <th className='file-size'>Size</th>
@@ -217,33 +334,92 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
                             </tr>
                         </thead>
                         <tbody style={{ width: '100%' }}>
-                            {hasSubfolders && Object.keys(subfolders).map((subfolderName, index) => (
-                                <tr key={`sub-${index}`} onClick={() => setActiveFile(prev => prev !== `${index}sub` ? `${index}sub` : null)} onDoubleClick={() => onFolderClick && onFolderClick(subfolderName)} className={`exhibit ${`${index}sub` === activeFile ? 'active-file' : ''}`}>
-                                    <td className='file-name folder subtext'>
-                                        <FolderOpenIcon size={16} style={{ marginRight: 6 }} />
-                                        {subfolderName}
-                                    </td>
-                                    <td className='file-date folder subtext'>-</td>
-                                    <td className="file-size folder subtext">
-                                        {getItemCount(subfolders[subfolderName])} item{getItemCount(subfolders[subfolderName]) !== 1 ? 's' : ''}
-                                    </td>
-                                    <td className='file-actions subtext'>
-                                        <span className='file-actions-dots' onClick={(e) => { e.stopPropagation(); setMore(more === `${index}sub` ? null : `${index}sub`); }}>...</span>
-                                        {more === `${index}sub` && (
-                                            <div className='file-actions-menu' ref={menuRef}>
-                                                <span className='file-actions-menu-child' onClick={() => handleDownload(subfolderName)}>
-                                                    <span>Download</span><Download />
-                                                </span>
-                                                <span className="file-actions-menu-child" onClick={() => {}}>
-                                                    <span>Delete</span><Trash />
-                                                </span>
-                                            </div>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
+                            {hasSubfolders && Object.keys(subfolders).map((subfolderName, index) => {
+                                const folderKey = normalizeFolderKey(case_id, folderName, subfolderName);
+
+                                return (
+                                    <tr 
+                                        key={`sub-${index}`} 
+                                        onClick={() => {
+                                            const alreadySelected = selectedKeys.includes(folderKey);
+                                            const newKeys = alreadySelected
+                                                ? selectedKeys.filter(k => k !== folderKey)
+                                                : [...selectedKeys, folderKey];
+
+                                            setSelectedKeys(newKeys);
+                                            setActiveFile(prev => prev !== `${index}sub` ? `${index}sub` : null);
+                                        }}
+                                        onDoubleClick={() => onFolderClick && onFolderClick(subfolderName)} 
+                                        className={`exhibit ${`${index}sub` === activeFile ? 'active-file' : ''}`}>
+                                        <td className='file-select'>
+                                            <Checkbox
+                                                value={selectedKeys.includes(folderKey)}
+                                                onChange={(e) => {
+                                                    e.stopPropagation();
+                                                    const alreadySelected = selectedKeys.includes(folderKey);
+                                                    const newKeys = alreadySelected
+                                                        ? selectedKeys.filter(k => k !== folderKey)
+                                                        : [...selectedKeys, folderKey];
+                                                    setSelectedKeys(newKeys);
+                                                }}
+                                                mini
+                                            />
+                                        </td>
+                                        <td className='file-name folder subtext'>
+                                            <FolderOpenIcon size={16} style={{ marginRight: 6 }} />
+                                            {subfolderName}
+                                        </td>
+                                        <td className='file-date folder subtext'>-</td>
+                                        <td className="file-size folder subtext">
+                                            {getItemCount(subfolders[subfolderName])} item{getItemCount(subfolders[subfolderName]) !== 1 ? 's' : ''}
+                                        </td>
+                                        <td className='file-actions subtext'>
+                                            <span className='file-actions-dots' onClick={(e) => { e.stopPropagation(); setMore(more === `${index}sub` ? null : `${index}sub`); }}>...</span>
+                                            {more === `${index}sub` && (
+                                                <div className='file-actions-menu' ref={menuRef}>
+                                                    <span className='file-actions-menu-child' onClick={() => handleDownload(subfolderName)}>
+                                                        <span>Download</span><Download />
+                                                    </span>
+                                                    <span className="file-actions-menu-child" onClick={() => {}}>
+                                                        <span>Rename</span><Pencil />
+                                                    </span>
+                                                    <span className="file-actions-menu-child" onClick={() => {}}>
+                                                        <span>Delete</span><Trash />
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                             {filteredFiles.map((file, index) => (
-                                <tr key={`file-${index}`} onClick={() => setActiveFile(prev => prev !== index ? index : null)} className={`exhibit ${index === activeFile ? 'active-file' : ''}`}>
+                                <tr 
+                                    key={`file-${index}`} 
+                                    onClick={() => {
+                                        const alreadySelected = selectedKeys.includes(file.key);
+                                        const newKeys = alreadySelected
+                                            ? selectedKeys.filter(k => k !== file.key)
+                                            : [...selectedKeys, file.key];
+
+                                        setSelectedKeys(newKeys);
+                                        setActiveFile(prev => prev !== index ? index : null)}
+                                    }
+                                    className={`exhibit ${index === activeFile ? 'active-file' : ''}`}
+                                >
+                                    <td className='file-select'>
+                                    <Checkbox
+                                        value={selectedKeys.includes(file.key)}
+                                        onChange={(e) => {
+                                            e.stopPropagation();
+                                            const alreadySelected = selectedKeys.includes(file.key);
+                                            const newKeys = alreadySelected
+                                                ? selectedKeys.filter(k => k !== file.key)
+                                                : [...selectedKeys, file.key];
+                                            setSelectedKeys(newKeys);
+                                        }}
+                                        mini
+                                    />
+                                    </td>
                                     <td className='file-name subtext'>
                                         <FileSvg size={16} style={{ marginRight: 6 }} />
                                         <a href={file.url} target="_blank" rel="noopener noreferrer" title={file.name} className="subtext">{file.name.length > 35 ? `${String(file.name).split(".")[0].slice(0, 35)}(...).${String(file.name).split(".")[1]}` : file.name}</a>
@@ -257,7 +433,10 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
                                                 <span className='file-actions-menu-child' onClick={() => handleDownload(file)}>
                                                     <span>Download</span><Download />
                                                 </span>
-                                                <span className="file-actions-menu-child" onClick={() => console.log(file)}>
+                                                <span className="file-actions-menu-child" onClick={() => {}}>
+                                                    <span>Rename</span><Pencil />
+                                                </span>
+                                                <span className="file-actions-menu-child" onClick={() => {}}>
                                                     <span>Delete</span><Trash />
                                                 </span>
                                             </div>

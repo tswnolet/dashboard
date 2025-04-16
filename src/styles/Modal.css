@@ -22,7 +22,7 @@
 }
 
 .modal-content:not(.single-view) {
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .modal-content.single-view {
@@ -145,7 +145,7 @@
     justify-content: flex-start;
     align-items: flex-start;
     flex-direction: column;
-    padding: 0 40px 40px 40px;
+    padding: 0 40px 20px 40px;
     width: 100%;
     min-height: 100%;
 }

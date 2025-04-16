@@ -1,22 +1,8 @@
 import { useState, useEffect } from 'react';
 import { BankAccountLink, Dropdown, Instructions, SearchSelect, Subheader, SubtextTitle, Text } from './FieldComponents';
 
-export const BillingSettings = ({ case_id }) => {
+export const BillingSettings = ({ case_id, settings, newSettings, setNewSettings, rateSchedule }) => {
     const [rateSchedules, setRateSchedules] = useState([]);
-    const [rateSchedule, setRateSchedule] = useState(0);
-    const [newSettings, setNewSettings] = useState({});
-    const [settings, setSettings] = useState({});
-    
-    const fetchBillingSettings = async () => {
-        const response = await fetch(`https://api.casedb.co/billing.php?settings=${case_id}`);
-        const data = await response.json();
-
-        if (data.success) {
-            setRateSchedule(data.settings.billing_rates_id);
-            setNewSettings(data.settings);
-            setSettings(data.settings);
-        }
-    };
 
     const fetchBillingRates = async () => {
         const response = await fetch('https://api.casedb.co/billing.php');
@@ -38,9 +24,7 @@ export const BillingSettings = ({ case_id }) => {
         const data = await response.json();
 
         if (data.success) {
-            fetchBillingRates();
-            fetchBillingSettings();
-        }
+            fetchBillingRates();        }
     }
 
     const handleClear = () => {
@@ -49,7 +33,6 @@ export const BillingSettings = ({ case_id }) => {
 
     useEffect(() => {
         fetchBillingRates();
-        fetchBillingSettings();
     }, []);
 
     return (

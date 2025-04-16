@@ -126,7 +126,7 @@ td.case-name {
 .case-vitals {
     display: flex;
     justify-content: flex-start;
-    align-items: center;
+    align-items: flex-start;
     width: 100%;
     gap: 10px;
     margin-left: 65px;

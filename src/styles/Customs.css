@@ -271,6 +271,31 @@
     user-select: none;
 }
 
+.checkbox-group.space {
+    margin: 10px 0;
+}
+
+.checkbox-mini {
+    display: flex;
+    align-items: center;
+    border-radius: 3px;
+    background-color: transparent;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.checkbox-mini:not(.checked) {
+    justify-content: center;
+    border: 2px solid var(--border-color);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.checkbox-mini.checked {
+    justify-content: flex-start;
+    color: var(--fill);
+}
+
 .hint-container {
     display: flex;
     justify-content: center;
@@ -658,6 +683,14 @@
         flex-wrap: wrap !important;
         gap: 2.5px !important;
     }
+}
+
+.contact-display-shortform {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-direction: column;
+    height: 33px;
 }
 
 .selected-row-details {

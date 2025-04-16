@@ -5,15 +5,35 @@ require 'db.php';
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (isset($_GET['settings'])) {
         $case_id = $_GET['settings'];
-    
+
         $sql = 'SELECT * FROM billing_settings WHERE case_id = ?';
         $stmt = $conn->prepare($sql);
         $stmt->bind_param('i', $case_id);
         $stmt->execute();
         $result = $stmt->get_result();
         $settings = $result->fetch_assoc();
-    
-        echo json_encode(['success' => true, 'settings' => $settings]);
+
+        $billing_rates = [];
+
+        if ($settings && isset($settings['billing_rates_id'])) {
+            $billing_rates_id = $settings['billing_rates_id'];
+
+            $sql2 = 'SELECT * FROM billing_rate WHERE billing_rates_id = ?';
+            $stmt2 = $conn->prepare($sql2);
+            $stmt2->bind_param('i', $billing_rates_id);
+            $stmt2->execute();
+            $result2 = $stmt2->get_result();
+
+            while ($row = $result2->fetch_assoc()) {
+                $billing_rates[] = $row;
+            }
+        }
+
+        echo json_encode([
+            'success' => true,
+            'settings' => $settings,
+            'billing_rate_entries' => $billing_rates
+        ]);
         exit;
     }
 

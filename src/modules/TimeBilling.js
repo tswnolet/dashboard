@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react';
 import { CreatePayment } from './CreatePayment';
 import Modal from './Modal';
 import { BillingSettings } from './BillingSettings';
+import { BillingEntries } from './BillingEntries';
 
 export const TimeBilling = ({ case_id }) => {
     const [billingNav, setBillingNav] = useState(0);
@@ -15,13 +16,28 @@ export const TimeBilling = ({ case_id }) => {
     const [invoice, setInvoice] = useState(null);
     const [createPayment, setCreatePayment] = useState(false);
     const [payment, setPayment] = useState(null);
+    const [newSettings, setNewSettings] = useState({});
+    const [settings, setSettings] = useState({});
+    const [rateSchedule, setRateSchedule] = useState(0);
+    const [rateEntries, setRateEntries] = useState([]);
+    
+    const fetchBillingSettings = async () => {
+        const response = await fetch(`https://api.casedb.co/billing.php?settings=${case_id}`);
+        const data = await response.json();
+
+        if (data.success) {
+            setRateSchedule(data.settings.billing_rates_id);
+            setNewSettings(data.settings);
+            setSettings(data.settings);
+            setRateEntries(data.billing_rate_entries);
+        }
+    };
 
     const fetchBillingData = async () => {
         try {
             const response = await fetch(`https://api.casedb.co/payments.php?case_id=${case_id}`);
             const data = await response.json();
             setBillingEntries(data);
-            console.log('Billing Data:', data);
         } catch (error) {
             console.error('Error fetching billing data:', error);
         }
@@ -53,6 +69,7 @@ export const TimeBilling = ({ case_id }) => {
 
     useEffect(() => {
         fetchBillingData();
+        fetchBillingSettings();
     }, []);
 
     return (
@@ -63,7 +80,7 @@ export const TimeBilling = ({ case_id }) => {
                         <option value={0}>Summary</option>
                         <option value={1}>Billing Entries</option>
                         <option value={2}>Project Funds</option>
-                        <option value={2}>Settings</option>
+                        <option value={3}>Settings</option>
                     </select>
                 )  : (
                     <>
@@ -161,24 +178,23 @@ export const TimeBilling = ({ case_id }) => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {billingEntries?.payments?.map((payment, index) => {
-                                        console.log(payment)
-                                        return (
-                                            <tr key={index}>
-                                                <td title={formatDate(payment.date)[3]}>{formatDate(payment.date)[3]}</td>
-                                                <td title={payment.method}>{payment.method.length > 20 ? `${String(payment.method).slice(0, 20)}...` : payment.method}</td>
-                                                <td title={payment.reference}>{payment.reference}</td>
-                                                <td title={payment.total}>{formatValue(payment.total, 'currency')}</td>
-                                            </tr>
-                                        )
-                                    })}
+                                    {billingEntries?.payments?.map((payment, index) => (
+                                        <tr key={index}>
+                                            <td title={formatDate(payment.date)[3]}>{formatDate(payment.date)[3]}</td>
+                                            <td title={payment.method}>{payment.method.length > 20 ? `${String(payment.method).slice(0, 20)}...` : payment.method}</td>
+                                            <td title={payment.reference}>{payment.reference}</td>
+                                            <td title={payment.total}>{formatValue(payment.total, 'currency')}</td>
+                                        </tr>
+                                    ))}
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
+            ) : billingNav === 1 ? (
+                <BillingEntries case_id={case_id} rateEntries={rateEntries} />
             ) : billingNav === 3 ? (
-                <BillingSettings case_id={case_id} />
+                <BillingSettings case_id={case_id} settings={settings} newSettings={newSettings} setNewSettings={setNewSettings} rateSchedule={rateSchedule} />
             ) : (
                 <></>
             )}

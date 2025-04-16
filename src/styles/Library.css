@@ -125,10 +125,18 @@ input[type="file"] {
 
 .exhibit:hover {
     background-color: var(--border-color);
+
+    .checkbox-mini:not(.checked) {
+        border-color: var(--subtext-color);
+    }
 }
 
 .exhibit.active-file {
     background-color: var(--border-color);
+
+    .checkbox-mini:not(.checked) {
+        border-color: var(--subtext-color);
+    }
 }
 
 .file-actions-menu {

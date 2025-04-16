@@ -84,7 +84,7 @@ if ($requestMethod === 'POST') {
             $users[] = $row;
         }
 
-        echo json_encode(['users' => $users]);
+        echo json_encode(['success' => true, 'users' => $users]);
         exit;
     }
 
@@ -152,7 +152,7 @@ if ($requestMethod === 'POST') {
         exit;
     }
 
-    $sql = "SELECT id, name FROM users";
+    $sql = "SELECT id, name, user FROM users";
     $result = $conn->query($sql);
 
     $users = [];
