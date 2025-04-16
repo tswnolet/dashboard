@@ -307,27 +307,29 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
                     <table className="exhibits">
                         <thead style={{ width: '100%' }}>
                             <tr>
-                                <th className='file-select'>
-                                    <Checkbox
-                                        value={
-                                            filteredFiles.length + Object.keys(subfolders).length > 0 &&
-                                            selectedKeys.length === filteredFiles.length + Object.keys(subfolders).length
-                                        }
-                                        onChange={() => {
-                                            const folderKeys = Object.keys(subfolders).map(
-                                                subfolderName => normalizeFolderKey(case_id, folderName, subfolderName)
-                                            );
+                                <th className='file-name'>
+                                    <div className='file-select'>
+                                        <Checkbox
+                                            value={
+                                                filteredFiles.length + Object.keys(subfolders).length > 0 &&
+                                                selectedKeys.length === filteredFiles.length + Object.keys(subfolders).length
+                                            }
+                                            onChange={() => {
+                                                const folderKeys = Object.keys(subfolders).map(
+                                                    subfolderName => normalizeFolderKey(case_id, folderName, subfolderName)
+                                                );
 
-                                            const fileKeys = filteredFiles.map(file => file.key);
-                                            const allKeys = [...folderKeys, ...fileKeys];
+                                                const fileKeys = filteredFiles.map(file => file.key);
+                                                const allKeys = [...folderKeys, ...fileKeys];
 
-                                            const allSelected = allKeys.every(key => selectedKeys.includes(key));
-                                            setSelectedKeys(allSelected ? [] : allKeys);
-                                        }}
-                                        mini
-                                    />
+                                                const allSelected = allKeys.every(key => selectedKeys.includes(key));
+                                                setSelectedKeys(allSelected ? [] : allKeys);
+                                            }}
+                                            mini
+                                        />
+                                    </div>
+                                    Name
                                 </th>
-                                <th className='file-name'>Name</th>
                                 <th className='file-date'>Last Modified</th>
                                 <th className='file-size'>Size</th>
                                 <th className='file-actions'>...</th>
@@ -351,21 +353,21 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
                                         }}
                                         onDoubleClick={() => onFolderClick && onFolderClick(subfolderName)} 
                                         className={`exhibit ${`${index}sub` === activeFile ? 'active-file' : ''}`}>
-                                        <td className='file-select'>
-                                            <Checkbox
-                                                value={selectedKeys.includes(folderKey)}
-                                                onChange={(e) => {
-                                                    e.stopPropagation();
-                                                    const alreadySelected = selectedKeys.includes(folderKey);
-                                                    const newKeys = alreadySelected
-                                                        ? selectedKeys.filter(k => k !== folderKey)
-                                                        : [...selectedKeys, folderKey];
-                                                    setSelectedKeys(newKeys);
-                                                }}
-                                                mini
-                                            />
-                                        </td>
                                         <td className='file-name folder subtext'>
+                                            <div className='file-select'>
+                                                <Checkbox
+                                                    value={selectedKeys.includes(folderKey)}
+                                                    onChange={(e) => {
+                                                        e.stopPropagation();
+                                                        const alreadySelected = selectedKeys.includes(folderKey);
+                                                        const newKeys = alreadySelected
+                                                            ? selectedKeys.filter(k => k !== folderKey)
+                                                            : [...selectedKeys, folderKey];
+                                                        setSelectedKeys(newKeys);
+                                                    }}
+                                                    mini
+                                                />
+                                            </div>
                                             <FolderOpenIcon size={16} style={{ marginRight: 6 }} />
                                             {subfolderName}
                                         </td>
@@ -406,21 +408,21 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
                                     }
                                     className={`exhibit ${index === activeFile ? 'active-file' : ''}`}
                                 >
-                                    <td className='file-select'>
-                                    <Checkbox
-                                        value={selectedKeys.includes(file.key)}
-                                        onChange={(e) => {
-                                            e.stopPropagation();
-                                            const alreadySelected = selectedKeys.includes(file.key);
-                                            const newKeys = alreadySelected
-                                                ? selectedKeys.filter(k => k !== file.key)
-                                                : [...selectedKeys, file.key];
-                                            setSelectedKeys(newKeys);
-                                        }}
-                                        mini
-                                    />
-                                    </td>
                                     <td className='file-name subtext'>
+                                        <div className='file-select'>
+                                            <Checkbox
+                                                value={selectedKeys.includes(file.key)}
+                                                onChange={(e) => {
+                                                    e.stopPropagation();
+                                                    const alreadySelected = selectedKeys.includes(file.key);
+                                                    const newKeys = alreadySelected
+                                                        ? selectedKeys.filter(k => k !== file.key)
+                                                        : [...selectedKeys, file.key];
+                                                    setSelectedKeys(newKeys);
+                                                }}
+                                                mini
+                                            />
+                                        </div>
                                         <FileSvg size={16} style={{ marginRight: 6 }} />
                                         <a href={file.url} target="_blank" rel="noopener noreferrer" title={file.name} className="subtext">{file.name.length > 35 ? `${String(file.name).split(".")[0].slice(0, 35)}(...).${String(file.name).split(".")[1]}` : file.name}</a>
                                     </td>
