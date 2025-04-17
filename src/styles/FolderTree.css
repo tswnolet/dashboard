@@ -16,7 +16,7 @@
     position: sticky;
     top: 0;
     flex-shrink: 0;
-    width: 300px;
+    width: 350px;
     height: 100%;
     margin: 0;
     padding: 15px 0 0 15px;
@@ -24,8 +24,9 @@
     border-right: 1px solid var(--border-color);
     color: var(--text-color);
     cursor: pointer;
-    transition: background-color 0.3s, color 0.3s;
-    overflow: auto;
+    transition: background-color 0.3s, color 0.3s, width 0.3s, padding 0.3s;
+    overflow-y: auto;
+    overflow-x: hidden;
     font-size: 12.8px;
 }
 
@@ -221,6 +222,16 @@
 .folder-node {
     padding: 0 5px;
     transition: background-color 0.3s, color 0.3s;
+
+    span {
+        display: flex;
+        align-items: center;
+        min-height: 24px;
+    }
+}
+
+.file-name svg {
+    width: 16px;
 }
 
 .folder-node svg {

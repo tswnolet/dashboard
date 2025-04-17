@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id'])) {
     $caseId = $_GET['id'];
 
     $caseQuery = $conn->prepare("
-        SELECT cases.id AS case_id, cases.*, users.user AS created_by_name, phases.phase AS phase_name, cases.contact_id, cases.lead_id 
+        SELECT cases.id AS case_id, cases.*, users.user AS created_by_name, phases.phase AS phase_name, phases.id AS phase_id, cases.contact_id, cases.lead_id 
         FROM cases 
         JOIN users ON cases.created_by = users.id 
         JOIN phases ON cases.phase_id = phases.id 

@@ -192,9 +192,9 @@ const Documents = ({ fetchDocuments, folders, caseName, case_id, user_id }) => {
 
     return (
         <>
-            {docNav && <ul className="document-nav">
+            <ul className="document-nav" style={docNav ? { width: '350px', padding: '15px 0 0 15px', borderRight: '1px solid var(--border-color)' } : { width: '0', padding: '15px 0 0 0', border: 'none' }}>
                 {renderTree(folderTree)}
-            </ul>}
+            </ul>
             {currentFolder && (
                 <DocumentSection
                     folderName={currentFolder.path}

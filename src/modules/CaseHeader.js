@@ -2,6 +2,7 @@ import { Badge, Mail, Pen, Pencil, Phone, SquareUser } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { EditDetail } from './EditDetail';
 import { EditableVital } from './CaseSidebar';
+import { Dropdown } from './FieldComponents';
 
 const MetaItem = ({ icon, value, type = null, onClick }) => {
     if (!value) return null;
@@ -23,6 +24,8 @@ export const CaseHeader = ({ caseData = {}, fetchCase, vitals = [], fetchVitals,
     const [tagInput, setTagInput] = useState("");
     const tagRef = useRef(null);
     const [editContact, setEditContact] = useState(false);
+    const [phases, setPhases] = useState([]);
+    const [currentPhase, setCurrentPhase] = useState(null);
 
     useEffect(() => {
         try {
@@ -50,6 +53,39 @@ export const CaseHeader = ({ caseData = {}, fetchCase, vitals = [], fetchVitals,
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, [editingIndex]);
+
+    const fetchPhases = async () => {
+        try {
+            const response = await fetch(`https://api.casedb.co/phases.php`);
+            const data = await response.json();
+            if (data.success) {
+                setPhases(data.phases);
+            } else {
+                console.error("Failed to fetch phases:", data.message);
+            }
+        } catch (error) {
+            console.error("Error fetching phases:", error);
+        }
+    };
+
+    const updatePhase = async () => {
+        try {
+            const response = await fetch(`https://api.casedb.co/phases.php`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ case_id: caseInfo.id, phase_id: currentPhase }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                fetchCase();
+            } else {
+                console.error("Failed to update phase:", data.message);
+            }
+        } catch (error) {
+            console.error("Error updating phase:", error);
+        }
+    };
 
     const handleEditTag = (index) => {
         setEditingIndex(index);
@@ -132,22 +168,43 @@ export const CaseHeader = ({ caseData = {}, fetchCase, vitals = [], fetchVitals,
         ? <img src={`https://api.casedb.co/${contact.profile_picture}`} alt="Profile" />
         : <h2>{contact.first_name?.trim().charAt(0) + contact?.last_name?.trim().charAt(0) || "DB"}</h2>;
 
+    useEffect(() => {
+        fetchPhases();
+    }, []);
+
+    useEffect(() => {
+        if (caseInfo?.phase_id !== currentPhase) {
+            updatePhase();
+        }
+    }, [currentPhase]);
+
+    useEffect(() => {
+        if (caseInfo?.phase_id) {
+            setCurrentPhase(caseInfo.phase_id);
+        }
+    }, [caseData]);
+
     return (
         <div className='case-header'>
-            <div className='case-information'>
-                <div className='case-initials'>
-                    {contactDisplay}
-                </div>
-                <div className='details'>
-                    <h2 className='case-header-title'>
-                        {caseInfo?.case_name || "Loading..."}
-                        <span className='subtext'> ({caseInfo?.id || "N/A"})</span>
-                    </h2>
-                    <div className='case-header-meta subtext'>
-                        <MetaItem icon={<SquareUser size={16} />} value={contact?.full_name} onClick={() => setEditContact(true)} />
-                        <MetaItem icon={<Phone size={16} />} value={contact?.details?.phone ? contact?.details?.phone[0]?.number : ""} type='phone' />
-                        <MetaItem icon={<Mail size={16} />} value={contact?.details?.email ? contact?.details?.email[0]?.email : ""} type='email' />
+            <div className='case-information-container'>
+                <div className='case-information'>
+                    <div className='case-initials'>
+                        {contactDisplay}
                     </div>
+                    <div className='details'>
+                        <h2 className='case-header-title'>
+                            {caseInfo?.case_name || "Loading..."}
+                            <span className='subtext'> ({caseInfo?.id || "N/A"})</span>
+                        </h2>
+                        <div className='case-header-meta subtext'>
+                            <MetaItem icon={<SquareUser size={16} />} value={contact?.full_name} onClick={() => setEditContact(true)} />
+                            <MetaItem icon={<Phone size={16} />} value={contact?.details?.phone ? contact?.details?.phone[0]?.number : ""} type='phone' />
+                            <MetaItem icon={<Mail size={16} />} value={contact?.details?.email ? contact?.details?.email[0]?.email : ""} type='email' />
+                        </div>
+                    </div>
+                </div>
+                <div className='case-phase'>
+                    <Dropdown options={phases.map(phase => phase.phase)} onChange={(val) => setCurrentPhase(val + 1)} value={currentPhase - 1} />
                 </div>
             </div>
             <div className='case-header-data'>

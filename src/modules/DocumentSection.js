@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ArrowRight, ChevronRight, Download, File as FileSvg, FolderOpenIcon, FolderPlus, Pencil, Trash, Upload, X } from "lucide-react";
 import { SearchBar } from "./Nav";
-import { Checkbox, Dropdown, MultiFile } from "./FieldComponents";
+import { Checkbox, Dropdown, FolderUpload, MultiFile } from "./FieldComponents";
 import Modal from "./Modal";
 import { Folder } from "@mynaui/icons-react";
 
@@ -38,7 +38,8 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
     const filteredFiles = files.filter(file => file.name !== "(Folder)");
     const [searchQuery, setSearchQuery] = useState("");
     const [searchType, setSearchType] = useState("");
-    const [uploadingFile, setUploadingFile] = useState(null);
+    const [multiFiles, setMultiFiles] = useState(null);
+    const [folderFiles, setFolderFiles] = useState(null);
     const [uploadWaiting, setUploadWaiting] = useState(false);
     const [activeFile, setActiveFile] = useState(null);
     const [more, setMore] = useState(null);
@@ -102,6 +103,11 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
     const uploadRenamedFiles = async () => {
         setUploadWaiting(true);
     
+        const formData = new FormData();
+        formData.append("case_id", case_id);
+        formData.append("target_path", folderName);
+        formData.append("user_id", user_id);
+    
         for (let item of filesToRename) {
             const renamedFile = new File(
                 [item.file],
@@ -109,25 +115,22 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
                 { type: item.file.type }
             );
     
-            const formData = new FormData();
-            formData.append("case_id", case_id);
-            formData.append("target_path", folderName);
-            formData.append("user_id", user_id);
-            formData.append("file", renamedFile);
+            formData.append("file[]", renamedFile);
+            formData.append("relative_paths[]", item.file.webkitRelativePath || renamedFile.name);
+        }
     
-            try {
-                const response = await fetch("https://api.casedb.co/documents.php", {
-                    method: "POST",
-                    body: formData,
-                });
+        try {
+            const response = await fetch("https://api.casedb.co/documents.php", {
+                method: "POST",
+                body: formData,
+            });
     
-                const result = await response.json();
-                if (!result.success) {
-                    console.warn(`Upload failed for ${item.originalName}: ${result.message}`);
-                }
-            } catch (error) {
-                console.error("Upload error:", error);
+            const result = await response.json();
+            if (!result.success) {
+                console.warn("Some files failed to upload:", result.message);
             }
+        } catch (error) {
+            console.error("Upload error:", error);
         }
     
         fetchDocuments();
@@ -173,6 +176,37 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
         }
     };
 
+    const handleBulkDownload = async () => {
+        if (selectedKeys.length === 0) return;
+    
+        try {
+            const response = await fetch('https://api.casedb.co/documents.php?zip=1', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    keys: selectedKeys, 
+                    case_id: case_id
+                }),
+            });
+    
+            if (!response.ok) {
+                throw new Error(`Server returned ${response.status}`);
+            }
+    
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'documents.zip';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Bulk download error:", error);
+        }
+    };
+
     const handleBulkDelete = async () => {
         if (selectedKeys.length === 0) return;
     
@@ -212,6 +246,12 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    useEffect(() => {
+        setMultiFiles(null);
+        setFolderFiles(null);
+    }, [folderName]);
+    
+
     return (
         <div className="document-section">
             <div className="document-filters">
@@ -227,10 +267,17 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
                     expanded={false}
                 />
                 <MultiFile
-                    value={uploadingFile}
-                    onChange={setUploadingFile}
+                    value={multiFiles}
+                    onChange={setMultiFiles}
                     lead_id={case_id}
-                    upload={() => handleFileSet(uploadingFile)}
+                    upload={() => handleFileSet(multiFiles)}
+                    uploadWaiting={uploadWaiting}
+                />
+                <FolderUpload
+                    value={folderFiles}
+                    onChange={setFolderFiles}
+                    lead_id={case_id}
+                    upload={() => handleFileSet(folderFiles)}
                     uploadWaiting={uploadWaiting}
                 />
                 <button className='action tertiary' onClick={() => setCreateFolder(true)}><FolderPlus /></button>
@@ -244,9 +291,16 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
                         }} 
                     />
                 }
-                {selectedKeys.length > 0 && <button className="action" onClick={handleBulkDelete}>
-                    Delete
-                </button>}
+                {selectedKeys.length > 0 && (
+                    <>
+                        <button className="action" onClick={handleBulkDelete}>
+                            Delete
+                        </button>
+                        <button className="action alt" onClick={handleBulkDownload}>
+                            Download Selected
+                        </button>
+                    </>
+            )}
             </div>
             {showRenameModal && (
                 <Modal
@@ -369,7 +423,7 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
                                                 />
                                             </div>
                                             <FolderOpenIcon size={16} style={{ marginRight: 6 }} />
-                                            {subfolderName}
+                                            {subfolderName.length > 65 ? `${String(subfolderName).split(".")[0].slice(0, 35)}(...)` : subfolderName}
                                         </td>
                                         <td className='file-date folder subtext'>-</td>
                                         <td className="file-size folder subtext">

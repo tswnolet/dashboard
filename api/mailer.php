@@ -1,16 +1,31 @@
 <?php
-require 'headers.php';
-session_start();
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
-function sendEmail($to, $subject, $message) {
-    $headers = "From: noreply@casedb.co\r\n";
-    $headers .= "Reply-To: noreply@casedb.co\r\n";
-    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+require 'vendor/autoload.php';
 
-    if (mail($to, $subject, $message, $headers)) {
-        return 'Message has been sent';
-    } else {
-        return 'Message could not be sent. Mailer Error: mail() function failed';
+function sendEmail($to, $subject, $htmlBody) {
+    $mail = new PHPMailer(true);
+
+    try {
+        $mail->isSMTP();
+        $mail->Host = 'email-smtp.us-east-1.amazonaws.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'AKIAST6S7JQ4UVK7FDIH'; // SES SMTP username
+        $mail->Password = 'BLo4sEPfEHcRAJU4s8TTYCUAm1UqfV7LW/Y3/gFyNAot'; // SES SMTP password
+        $mail->SMTPSecure = 'tls'; // STARTTLS encryption
+        $mail->Port = 587;         // STARTTLS port
+
+        $mail->setFrom('tnolet@dalyblack.com', 'CaseDB');
+        $mail->addAddress($to);
+        $mail->isHTML(true);
+        $mail->Subject = $subject;
+        $mail->Body    = $htmlBody;
+
+        $mail->send();
+        return "Message sent successfully";
+    } catch (Exception $e) {
+        return "Mailer Error: {$mail->ErrorInfo}";
     }
 }
 ?>

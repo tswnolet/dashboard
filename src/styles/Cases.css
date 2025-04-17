@@ -129,9 +129,8 @@ td.case-name {
     align-items: flex-start;
     width: 100%;
     gap: 10px;
-    margin-left: 65px;
     max-width: 100%;
-    overflow: hidden;
+    overflow-x: auto;
 }
 
 .case-container {
@@ -164,6 +163,13 @@ td.case-name {
     display: flex;
     justify-content: flex-start;
     align-items: flex-start;
+}
+
+.case-information-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
 }
 
 .case-information {

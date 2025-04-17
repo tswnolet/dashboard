@@ -98,33 +98,107 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     exit;
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['zip'])) {
+    $body = json_decode(file_get_contents('php://input'), true);
+    $keys = $body['keys'] ?? [];
+    $caseId = $body['case_id'] ?? null;
+
+    if (empty($keys) || !$caseId) {
+        echo json_encode(['success' => false, 'message' => 'Missing keys or case_id']);
+        exit;
+    }
+
+    $zipFile = tempnam(sys_get_temp_dir(), 'zip');
+    $zip = new ZipArchive();
+
+    if ($zip->open($zipFile, ZipArchive::CREATE) !== true) {
+        echo json_encode(['success' => false, 'message' => 'Failed to create zip file']);
+        exit;
+    }
+
+    foreach ($keys as $key) {
+        if (substr($key, -1) === '/') {
+            $objects = $s3->listObjectsV2([
+                'Bucket' => $bucket,
+                'Prefix' => $key
+            ]);
+
+            if (!empty($objects['Contents'])) {
+                foreach ($objects['Contents'] as $object) {
+                    if (substr($object['Key'], -1) === '/') continue;
+
+                    $s3Object = $s3->getObject([
+                        'Bucket' => $bucket,
+                        'Key' => $object['Key']
+                    ]);
+
+                    $relativePath = str_replace("cases/{$caseId}/{{Name}}/", '', $object['Key']);
+                    $zip->addFromString($relativePath, $s3Object['Body']);
+                }
+            }
+        } else {
+            $s3Object = $s3->getObject([
+                'Bucket' => $bucket,
+                'Key' => $key
+            ]);
+
+            $relativePath = str_replace("cases/{$caseId}/{{Name}}/", '', $key);
+            $zip->addFromString($relativePath, $s3Object['Body']);
+        }
+    }
+
+    $zip->close();
+
+    header('Content-Type: application/zip');
+    header('Content-Disposition: attachment; filename=documents.zip');
+    header('Content-Length: ' . filesize($zipFile));
+    readfile($zipFile);
+    unlink($zipFile);
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $caseId = $_POST['case_id'] ?? null;
     $targetPath = $_POST['target_path'] ?? $_POST['section_name'] ?? null;
     $userId = $_POST['user_id'] ?? null;
 
-    if (!$caseId || !$targetPath || !isset($_FILES['file']) || !$userId) {
-        echo json_encode(['success' => false, 'message' => 'Missing required parameters']);
+    $debug = [
+        'case_id' => $_POST['case_id'],
+        'target_path' => $_POST['target_path'] ?? $_POST['section_name'],
+        'user_id' => $_POST['user_id'],
+        'files_present' => isset($_FILES['file']),
+        'file_names' => isset($_FILES['file']['name']) ? $_FILES['file']['name'] : ''
+    ];
+    
+    if (!$debug['case_id'] || !$debug['target_path'] || !$debug['user_id'] || !$debug['files_present']) {
+        echo json_encode(['success' => false, 'message' => 'Missing required parameters', 'debug' => $debug]);
         exit;
     }
 
     $sanitizedPath = trim($targetPath, '/');
     $sanitizedPath = preg_replace('#^\{\{Name\}\}/?#', '', $sanitizedPath);
-    $uploadFolder = $sanitizedPath === '' ? "cases/{$caseId}/{{Name}}/" : "cases/{$caseId}/{{Name}}/{$sanitizedPath}/";
+    $baseFolder = $sanitizedPath === '' ? "cases/{$caseId}/{{Name}}" : "cases/{$caseId}/{{Name}}/{$sanitizedPath}";
 
     try {
         $files = $_FILES['file'];
-
+        $relativePaths = $_POST['relative_paths'] ?? [];
+        if (!is_array($relativePaths)) {
+            $relativePaths = [$relativePaths];
+        }
+        
         if (!is_array($files['tmp_name'])) {
             $files = [
                 'name' => [$files['name']],
                 'tmp_name' => [$files['tmp_name']],
             ];
+            $relativePaths = [$relativePaths];
         }
 
         foreach ($files['tmp_name'] as $index => $tmpFile) {
             $originalName = basename($files['name'][$index]);
-            $key = $uploadFolder . $originalName;
+            $relative = $relativePaths[$index] ?? $originalName;
+            $relative = str_replace('\\', '/', $relative);
+            $key = rtrim($baseFolder, '/') . '/' . ltrim($relative, '/');
 
             $s3->putObject([
                 'Bucket' => $bucket,
@@ -140,15 +214,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         echo json_encode(['success' => true, 'message' => 'Files uploaded']);
     } catch (AwsException $e) {
-        echo json_encode([
-            'success' => false,
-            'message' => $e->getMessage()
-        ]);
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     } catch (Exception $e) {
-        echo json_encode([
-            'success' => false,
-            'message' => 'Database error: ' . $e->getMessage()
-        ]);
+        echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
     }
 
     exit;

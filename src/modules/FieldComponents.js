@@ -600,6 +600,71 @@ export const MultiFile = ({ value, onChange, upload = null, uploadWaiting }) => 
     );
 };
 
+export const FolderUpload = ({ value, onChange, upload = null, uploadWaiting }) => {
+    const [files, setFiles] = useState([]);
+    const [uploading, setUploading] = useState(false);
+    const [startWait, setStartWait] = useState(false);
+    const fileInputRef = useRef(null);
+
+    const handleFileChange = (e) => {
+        const selectedFiles = Array.from(e.target.files);
+        setFiles(selectedFiles);
+        onChange?.(selectedFiles);
+        fileInputRef.current.value = "";
+    };
+
+    useEffect(() => {
+        if (!uploadWaiting && startWait) {
+            setFiles([]);
+            setStartWait(false);
+        }
+    }, [uploadWaiting]);
+
+    const handleClick = (e) => {
+        if (e.target === e.currentTarget) {
+            setUploading(true);
+            fileInputRef.current?.click();
+        }
+    };
+
+    return (
+        <div className={`file-upload${uploading ? ' expanded' : ''}`} onClick={handleClick}>
+            <input
+                type='file'
+                multiple
+                webkitdirectory="true"
+                onChange={handleFileChange}
+                ref={fileInputRef}
+                hidden
+            />
+            {files.length === 0 ? (
+                <span className='subtext' style={{ color: !uploading ? "var(--secondary-color)" : 'var(--text-color)' }}>
+                    {uploading ? 'Select Folder...' : 'Upload Folder'}
+                </span>
+            ) : (
+                upload != null && (
+                    <div className='file-actions'>
+                        <button className='upload' disabled={startWait} onClick={() => { upload(); setStartWait(true); }}>
+                            {!startWait ? <CloudUpload size={18} /> : startWait === 'done' ? <Check /> : <Loader2 className="spinner" />}
+                        </button>
+                        <button className='upload' disabled={startWait} onClick={() => setFiles([])}>
+                            <Eraser size={18} />
+                        </button>
+                    </div>
+                )
+            )}
+            {files.length > 0 && (
+                <div className='file-list subtext'>
+                    {files.slice(0, 5).map((file, index) => (
+                        <span key={index}>{file.webkitRelativePath}</span>
+                    ))}
+                    {files.length > 5 && <span>+ {files.length - 5} more</span>}
+                </div>
+            )}
+        </div>
+    );
+};
+
 export const Calculation = ({
     options,
     fieldUpdates = {},
