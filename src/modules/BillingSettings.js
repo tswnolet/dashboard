@@ -9,7 +9,7 @@ export const BillingSettings = ({ case_id, settings, newSettings, setNewSettings
         const data = await response.json();
 
         if (data.success) {
-            setRateSchedules(data.billing_rates);
+            setRateSchedules(data?.billing_rates);
         }
     };
 
@@ -45,7 +45,7 @@ export const BillingSettings = ({ case_id, settings, newSettings, setNewSettings
                 <label className='subtext'>Rate Schedule</label>
                 <SearchSelect
                     options={Object.fromEntries(rateSchedules.map(rate => [rate?.id, rate?.name]))}
-                    value={newSettings.billing_rates_id ?? rateSchedule}
+                    value={newSettings?.billing_rates_id ?? rateSchedule}
                     onChange={(val) => {
                         setNewSettings({ ...newSettings, billing_rates_id: val });
                     }}
@@ -53,15 +53,15 @@ export const BillingSettings = ({ case_id, settings, newSettings, setNewSettings
             </div>
             <div className='form-group'>
                 <label className='subtext'>Invoice Terms</label>
-                <Dropdown options={['Net 30']} value={newSettings.invoice_terms ?? settings.invoice_terms} onChange={(val) => setNewSettings({ ...newSettings, invoice_terms: val })} />
+                <Dropdown options={['Net 30']} value={newSettings?.invoice_terms ?? settings?.invoice_terms} onChange={(val) => setNewSettings({ ...newSettings, invoice_terms: val })} />
             </div>
             <div className='form-group'>
                 <label className='subtext'>Client Matter ID</label>
-                <Text type='text' value={newSettings.client_matter_id ?? settings.client_matter_id} onChange={(val) => setNewSettings({ ...newSettings, client_matter_id: val })} placeholder='Client Matter ID...' />
+                <Text type='text' value={newSettings?.client_matter_id ?? settings?.client_matter_id} onChange={(val) => setNewSettings({ ...newSettings, client_matter_id: val })} placeholder='Client Matter ID...' />
             </div>
             <Subheader title='Invoice Template' />
             <Instructions instructions="Choose the invoice template to be used for this case's PDFs." />
-            <Dropdown options={['Filevine Base Template']} value={newSettings.invoice_template ?? settings.invoice_template} onChange={(val) => setNewSettings({ ...newSettings, invoice_template: val })} />
+            <Dropdown options={['Filevine Base Template']} value={newSettings?.invoice_template ?? settings?.invoice_template} onChange={(val) => setNewSettings({ ...newSettings, invoice_template: val })} />
             <Subheader title='Deposit Destination' />
             <SubtextTitle title='Invoicing' />
             <Instructions instructions="Payments made via invoice-specific payment links will be deposited into this account." />

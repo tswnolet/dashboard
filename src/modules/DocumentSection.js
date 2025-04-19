@@ -41,7 +41,7 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
     const [multiFiles, setMultiFiles] = useState(null);
     const [folderFiles, setFolderFiles] = useState(null);
     const [uploadWaiting, setUploadWaiting] = useState(false);
-    const [activeFile, setActiveFile] = useState(null);
+    const [activeFile, setActiveFile] = useState([]);
     const [more, setMore] = useState(null);
     const [showRenameModal, setShowRenameModal] = useState(false);
     const [filesToRename, setFilesToRename] = useState([]);
@@ -231,11 +231,20 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
         }
     };
 
-    const normalizeFolderKey = (caseId, folderName, subfolderName = '') => {
+    const normalizeFolderKey = (caseId, folderName = '', subfolderName = '') => {
         const base = `cases/${caseId}/{{Name}}`;
-        const cleanedFolderName = folderName.replace(/^{{Name}}\/?|\/?{{Name}}$/g, '').replace(/\/+/g, '');
-        const prefix = cleanedFolderName ? `${base}/${cleanedFolderName}` : base;
-        return `${prefix}/${subfolderName ? `${subfolderName}/` : ''}`;
+    
+        const cleanedFolderName = folderName
+            .replace(/^{{Name}}\/?/, '')
+            .replace(/\/+$/, '');
+    
+        const cleanedSubfolder = subfolderName.replace(/^\/+|\/+$/g, '');
+    
+        const segments = [base];
+        if (cleanedFolderName) segments.push(cleanedFolderName);
+        if (cleanedSubfolder) segments.push(cleanedSubfolder);
+    
+        return segments.join('/') + '/';
     };
 
     useEffect(() => {
@@ -251,7 +260,6 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
         setFolderFiles(null);
     }, [folderName]);
     
-
     return (
         <div className="document-section">
             <div className="document-filters">
@@ -375,9 +383,11 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
 
                                                 const fileKeys = filteredFiles.map(file => file.key);
                                                 const allKeys = [...folderKeys, ...fileKeys];
-
                                                 const allSelected = allKeys.every(key => selectedKeys.includes(key));
-                                                setSelectedKeys(allSelected ? [] : allKeys);
+                                                const newSelection = allSelected ? [] : allKeys;
+                                                
+                                                setSelectedKeys(newSelection);
+                                                setActiveFile(newSelection);
                                             }}
                                             mini
                                         />
@@ -397,16 +407,21 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
                                     <tr 
                                         key={`sub-${index}`} 
                                         onClick={() => {
+                                            const isActive = activeFile.includes(folderKey);
+                                            const updated = isActive
+                                                ? activeFile.filter(k => k !== folderKey)
+                                                : [...activeFile, folderKey];
+                                            setActiveFile(updated);
+                                            
                                             const alreadySelected = selectedKeys.includes(folderKey);
                                             const newKeys = alreadySelected
                                                 ? selectedKeys.filter(k => k !== folderKey)
                                                 : [...selectedKeys, folderKey];
-
+                                        
                                             setSelectedKeys(newKeys);
-                                            setActiveFile(prev => prev !== `${index}sub` ? `${index}sub` : null);
                                         }}
                                         onDoubleClick={() => onFolderClick && onFolderClick(subfolderName)} 
-                                        className={`exhibit ${`${index}sub` === activeFile ? 'active-file' : ''}`}>
+                                        className={`exhibit ${activeFile.includes(folderKey) ? 'active-file' : ''}`}>
                                         <td className='file-name folder subtext'>
                                             <div className='file-select'>
                                                 <Checkbox
@@ -452,15 +467,19 @@ export const DocumentSection = ({ fetchDocuments, case_id, user_id, folderName, 
                                 <tr 
                                     key={`file-${index}`} 
                                     onClick={() => {
+                                        const isActive = activeFile.includes(file.key);
+                                        const updated = isActive
+                                            ? activeFile.filter(k => k !== file.key)
+                                            : [...activeFile, file.key];
+                                        setActiveFile(updated);
+                                    
                                         const alreadySelected = selectedKeys.includes(file.key);
                                         const newKeys = alreadySelected
                                             ? selectedKeys.filter(k => k !== file.key)
                                             : [...selectedKeys, file.key];
-
                                         setSelectedKeys(newKeys);
-                                        setActiveFile(prev => prev !== index ? index : null)}
-                                    }
-                                    className={`exhibit ${index === activeFile ? 'active-file' : ''}`}
+                                    }}
+                                    className={`exhibit ${activeFile.includes(file.key) ? 'active-file' : ''}`}
                                 >
                                     <td className='file-name subtext'>
                                         <div className='file-select'>

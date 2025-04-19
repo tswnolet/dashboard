@@ -56,17 +56,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
                     'Bucket' => $bucket,
                     'Prefix' => $key,
                 ]);
-        
+
                 if (!empty($results['Contents'])) {
                     foreach ($results['Contents'] as $object) {
                         $allObjectsToDelete[] = ['Key' => $object['Key']];
                     }
+                } else {
+                    $allObjectsToDelete[] = ['Key' => $key];
                 }
             } else {
                 $allObjectsToDelete[] = ['Key' => $key];
             }
         }
-        
+
         if (!empty($allObjectsToDelete)) {
             $s3->deleteObjects([
                 'Bucket' => $bucket,
@@ -75,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
                     'Quiet' => true
                 ]
             ]);
-        
+
             $stmt = $conn->prepare("DELETE FROM files WHERE file_path = ?");
             foreach ($allObjectsToDelete as $object) {
                 $stmt->bind_param("s", $object['Key']);
@@ -83,18 +85,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
             }
         }
 
-        $stmt = $conn->prepare("DELETE FROM files WHERE file_path = ?");
-        foreach ($keys as $key) {
-            $stmt->bind_param("s", $key);
-            $stmt->execute();
-        }
-
-        echo json_encode(['success' => true, 'message' => 'Files deleted']);
+        echo json_encode(['success' => true, 'message' => 'Selected files/folders deleted']);
     } catch (AwsException $e) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
     }
+
     exit;
 }
 
@@ -199,6 +196,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $relative = $relativePaths[$index] ?? $originalName;
             $relative = str_replace('\\', '/', $relative);
             $key = rtrim($baseFolder, '/') . '/' . ltrim($relative, '/');
+            
+            $pathParts = explode('/', ltrim($relative, '/'));
+            $folderAccumulator = rtrim($baseFolder, '/');
+            
+            for ($i = 0; $i < count($pathParts) - 1; $i++) {
+                $folderAccumulator .= '/' . $pathParts[$i];
+                $folderKey = rtrim($folderAccumulator, '/') . '/';
+            
+                static $createdFolders = [];
+                if (!in_array($folderKey, $createdFolders)) {
+                    $s3->putObject([
+                        'Bucket' => $bucket,
+                        'Key' => $folderKey,
+                        'Body' => '',
+                        'ACL' => 'private',
+                    ]);
+                    $createdFolders[] = $folderKey;
+                }
+            }
 
             $s3->putObject([
                 'Bucket' => $bucket,

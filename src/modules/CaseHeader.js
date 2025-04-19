@@ -77,9 +77,7 @@ export const CaseHeader = ({ caseData = {}, fetchCase, vitals = [], fetchVitals,
             });
 
             const data = await response.json();
-            if (data.success) {
-                fetchCase();
-            } else {
+            if (!data.success) {
                 console.error("Failed to update phase:", data.message);
             }
         } catch (error) {
@@ -173,7 +171,7 @@ export const CaseHeader = ({ caseData = {}, fetchCase, vitals = [], fetchVitals,
     }, []);
 
     useEffect(() => {
-        if (caseInfo?.phase_id !== currentPhase) {
+        if (caseInfo?.phase_id !== currentPhase && currentPhase && caseInfo?.phase_id) {
             updatePhase();
         }
     }, [currentPhase]);

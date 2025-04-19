@@ -16,7 +16,7 @@
     position: sticky;
     top: 0;
     flex-shrink: 0;
-    width: 350px;
+    max-width: 350px;
     height: 100%;
     margin: 0;
     padding: 15px 0 0 15px;

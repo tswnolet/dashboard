@@ -26,7 +26,7 @@ export const TimeBilling = ({ case_id }) => {
         const data = await response.json();
 
         if (data.success) {
-            setRateSchedule(data.settings.billing_rates_id);
+            setRateSchedule(data?.settings?.billing_rates_id);
             setNewSettings(data.settings);
             setSettings(data.settings);
             setRateEntries(data.billing_rate_entries);

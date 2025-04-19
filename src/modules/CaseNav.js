@@ -4,7 +4,7 @@ import { useLocation } from "react-router";
 
 export const CaseNav = ({ sections, activeSection, setActiveSection }) => {
     const [minimize, setMinimize] = useState(sections.some(
-        (section) => section.id === activeSection && (section.name === "Documents" || section.name === "Activity Feed")
+        (section) => section.id === activeSection && (String(section.name).trim() === "Documents" || String(section.name).trim() === "Activity Feed")
     ) || window.innerWidth <= 768);
     const hoverTimeout = useRef(null);
     const location = useLocation();
@@ -61,7 +61,7 @@ export const CaseNav = ({ sections, activeSection, setActiveSection }) => {
         } else {
             setMinimize(false);
         }
-    }, [activeSection, sections]);
+    }, [activeSection]);
 
     const handleHover = () => {
         if (window.innerWidth > 768) {
