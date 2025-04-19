@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 function cleanArrayNulls($arr) {
     foreach ($arr as $key => $value) {
-        if (is_string($value) && trim($value) === '') {
+        if (is_string($value) && (trim($value) === '' || strtolower(trim($value)) === 'null')) {
             $arr[$key] = null;
         } elseif (is_array($value)) {
             $arr[$key] = cleanArrayNulls($value);
@@ -20,20 +20,24 @@ function cleanArrayNulls($arr) {
     return $arr;
 }
 
-$contact_id = $_POST['id'] ?? null;
-$first_name = $_POST['first_name'] ?? null;
-$middle_name = $_POST['middle_name'] ?? null;
-$last_name = $_POST['last_name'] ?? null;
-$full_name = ($_POST['first_name'] ? $_POST['first_name'] . ' ' : '') . ($_POST['middle_name']? $_POST['middle_name'] . ' ' : '') . ($_POST['last_name'] ? $_POST['last_name'] : '') ?? null;
-$nickname = $_POST['nickname'] ?? null;
-$prefix = $_POST['prefix'] ?? null;
-$suffix = $_POST['suffix'] ?? null;
-$company_name = $_POST['company_name'] ?? null;
-$job_title = $_POST['job_title'] ?? null;
-$department = $_POST['department'] ?? null;
-$date_of_birth = $_POST['date_of_birth'] ?? null;
-$date_of_death = (!empty($_POST['date_of_death']) && $_POST['date_of_death'] !== "null") ? $_POST['date_of_death'] : null;
-$is_company = isset($_POST['is_company']) && $_POST['is_company'] === 'true' ? 1 : 0;
+function cleanValue($value) {
+    return (is_string($value) && (trim($value) === '' || strtolower(trim($value)) === 'null')) ? null : $value;
+}
+
+$contact_id    = cleanValue($_POST['id'] ?? null);
+$first_name    = cleanValue($_POST['first_name'] ?? null);
+$middle_name   = cleanValue($_POST['middle_name'] ?? null);
+$last_name     = cleanValue($_POST['last_name'] ?? null);
+$full_name     = ($_POST['first_name'] ? $_POST['first_name'] . ' ' : '') . (($_POST['middle_name'] != "null" && $_POST['middle_name']) ? $_POST['middle_name'] . ' ' : '') . ($_POST['last_name'] ? $_POST['last_name'] : '') ?? null;
+$nickname      = cleanValue($_POST['nickname'] ?? null);
+$prefix        = cleanValue($_POST['prefix'] ?? null);
+$suffix        = cleanValue($_POST['suffix'] ?? null);
+$company_name  = cleanValue($_POST['company_name'] ?? null);
+$job_title     = cleanValue($_POST['job_title'] ?? null);
+$department    = cleanValue($_POST['department'] ?? null);
+$date_of_birth = cleanValue($_POST['date_of_birth'] ?? null);
+$date_of_death = cleanValue($_POST['date_of_death'] ?? null);
+
 
 if (!$contact_id) {
     echo json_encode(["success" => false, "message" => "Contact ID is required"]);

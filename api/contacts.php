@@ -115,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $first_name     = $_POST['first_name'] ?? null;
     $middle_name    = $_POST['middle_name'] ?? null;
     $last_name      = $_POST['last_name'] ?? null;
-    $full_name      = $_POST['first_name'] . ' ' . $middle_name ? $middle_name . ' ' : '' . $last_name;
+    $full_name = trim("$first_name " . ($middle_name ? "$middle_name " : "") . $last_name);
     $nickname       = $_POST['nickname'] ?? null;
     $prefix         = $_POST['prefix'] ?? null;
     $suffix         = $_POST['suffix'] ?? null;

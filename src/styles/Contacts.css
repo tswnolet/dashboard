@@ -97,7 +97,7 @@ th.td {
 }
 
 .phone-type, .phone-input, .email-type, .email-input {
-    width: 45%;
+    width: 45% !important;
 }
 
 .phone-input input, .email-input input {

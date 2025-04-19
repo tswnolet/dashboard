@@ -662,9 +662,8 @@
     display: flex;
     justify-content: flex-start;
     flex-direction: column;
-    align-items: flex=start;
+    align-items: flex-start;
     flex-wrap: wrap;
-    width: 100%;
     gap: 2.5px;
 
     span:not(.contact-initials) {
@@ -676,12 +675,11 @@
     }
 
     .contact-divider {
-        display: flex !important;
-        justify-content: flex-start !important;
-        align-items: center !important;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
         flex-shrink: 0;
-        flex-wrap: wrap !important;
-        gap: 2.5px !important;
+        gap: 2.5px;
     }
 }
 

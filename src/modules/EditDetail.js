@@ -29,6 +29,7 @@ export const EditDetail = ({ setEditContact, contactData, fetchContacts }) => {
     useEffect(() => {
         if (contactData) {
             setContactInformation({
+                id: contactData.id,
                 first_name: contactData.first_name || '',
                 middle_name: contactData.middle_name || '',
                 last_name: contactData.last_name || '',
@@ -39,17 +40,29 @@ export const EditDetail = ({ setEditContact, contactData, fetchContacts }) => {
                 company_name: contactData.company_name || '',
                 job_title: contactData.job_title || '',
                 department: contactData.department || '',
-                date_of_birth: contactData.date_of_birth || null,
-                date_of_death: contactData.date_of_death || null,
-                is_company: contactData.is_company === 1
+                date_of_birth: contactData.date_of_birth || '',
+                date_of_death: contactData.date_of_death || '',
+                is_company: contactData.is_company === 1 || contactData.is_company === "1"
             });
-
-            setPhones(Array.isArray(contactData.details?.phone) ? contactData.details.phone : [{ type: "mobile", number: "" }]);
-            setEmails(Array.isArray(contactData.details?.email) ? contactData.details.email : [{ type: "personal", email: "" }]);
-            setAddresses(Array.isArray(contactData.details?.address) ? contactData.details.address : [{
-                type: "home", line1: "", line2: "", city: "", state: "", postal_code: ""
-            }]);            
-
+    
+            setPhones(
+                Array.isArray(contactData.phones) && contactData.phones.length > 0
+                    ? contactData.phones
+                    : [{ type: "mobile", number: "" }]
+            );
+    
+            setEmails(
+                Array.isArray(contactData.emails) && contactData.emails.length > 0
+                    ? contactData.emails
+                    : [{ type: "personal", email: "" }]
+            );
+    
+            setAddresses(
+                Array.isArray(contactData.addresses) && contactData.addresses.length > 0
+                    ? contactData.addresses
+                    : [{ type: "home", line1: "", line2: "", city: "", state: "", postal_code: "" }]
+            );
+    
             setProfilePicture(contactData.profile_picture ? `https://api.casedb.co/${contactData.profile_picture}` : null);
         }
     }, [contactData]);

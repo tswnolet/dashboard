@@ -7,6 +7,7 @@ import { DocumentSection } from './DocumentSection';
 import '../styles/Documents.css';
 import { useLocation } from 'react-router';
 import { TimeBilling } from './TimeBilling';
+import { CreateContact } from './CreateContact';
 
 const normalizeValueToIndex = (field, value) => {
     if (!field.options) return value;
@@ -244,7 +245,7 @@ const Documents = ({ fetchDocuments, folders, caseName, case_id, user_id }) => {
     );
 };
 
-const Field = ({ field, value, handleFieldChange, conditional = false, formData, fieldUpdates, fields, lead_id, refreshAfterCalc, sectionName }) => {
+const Field = ({ field, value, handleFieldChange, conditional = false, formData, fieldUpdates, fields, lead_id, refreshAfterCalc, sectionName, setNewContactFieldId, setCreateContact }) => {
     if (!field) return null;
 
     const renderFieldInput = (field) => {
@@ -263,8 +264,17 @@ const Field = ({ field, value, handleFieldChange, conditional = false, formData,
                 return <DateInput value={String(value)} onChange={(val) => handleFieldChange(field.id, val)}/>;
             case 7:
                 return <TimeInput value={value} onChange={(val) => handleFieldChange(field.id, val)}/>;
-            case 8:
-                return <Contact selectedContact={value} setSelectedContact={(contact) => handleFieldChange(field.id, contact?.id || null)}/>;
+                case 8:
+                    return (
+                        <Contact
+                            selectedContact={value}
+                            setSelectedContact={(contact) => handleFieldChange(field.id, contact?.id || null)}
+                            onCreateNewContact={() => {
+                                setNewContactFieldId(field.id);
+                                setCreateContact(true);
+                            }}
+                        />
+                    );
             case 9:
                 return (
                     <ContactList
@@ -361,6 +371,16 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
     const [groupedData, setGroupedData] = useState([]);
     const [sectionName, setSectionName] = useState('');
     const [selectedRow, setSelectedRow] = useState(null);
+    const [createContact, setCreateContact] = useState(false);
+    const [newContactFieldId, setNewContactFieldId] = useState(null);
+
+    const handleNewContactCreated = (contact) => {
+        if (newContactFieldId !== null && contact?.id) {
+            handleFieldChange(newContactFieldId, contact.id);
+        }
+        setCreateContact(false);
+        setNewContactFieldId(null);
+    };
 
     useEffect(() => {
         setAddItemMode(false);
@@ -632,6 +652,8 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
                     lead_id={lead_id}
                     refreshAfterCalc={refreshAfterCalc}
                     sectionName={sectionName}
+                    setNewContactFieldId={setNewContactFieldId}
+                    setCreateContact={setCreateContact}
                 />
             );
             
@@ -648,6 +670,8 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
                     lead_id={lead_id}
                     refreshAfterCalc={refreshAfterCalc}
                     sectionName={sectionName}
+                    setNewContactFieldId={setNewContactFieldId}
+                    setCreateContact={setCreateContact}
                 />
             ));            
 
@@ -793,6 +817,12 @@ export const Section = ({ folders, fetchDocuments, id, lead_id, caseName, caseTy
                 </>
             )}
             {(sectionName !== "Documents" && sectionName !== "Activity Feed") && output}
+            {createContact && (
+                <CreateContact 
+                    setCreateContact={setCreateContact} 
+                    onContactCreated={handleNewContactCreated} 
+                />
+            )}
         </div>
       );      
 };
